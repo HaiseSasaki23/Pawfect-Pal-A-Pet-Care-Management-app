@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawfect Pal - Sign Up</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="left-side">
+            <div class="header-text">
+                <h1>Pawfect Pal</h1>
+            </div>
+            
+            <div class="image-wrapper">
+                <img src="new-acc.gif" alt="New Account" class="main-img" id="pet-character">
+            </div>
+        </div>
+
+        <div class="right-side">
+            <div class="login-box">
+                <div class="welcome-text">
+                    <h1>Create Account</h1>
+                    <p>Join us and start managing your pets!</p>
+                </div>
+
+                <form class="actual-form">
+                    <div class="input-container">
+                        <input type="text" name="OwnerFName" placeholder="First Name" required>
+                    </div>
+                    <div class="input-container">
+                        <input type="text" name="OwnerLName" placeholder="Last Name" required>
+                    </div>
+                    <div class="input-container">
+                        <input type="text" placeholder="Username" required>
+                    </div>
+                    <div class="input-container">
+                        <input type="tel" name="ContactNum" placeholder="Contact Number" required>
+                    </div>
+
+                    <div class="input-container">
+                        <input type="text" name="Address" placeholder="Address" required>
+                    </div>
+
+                    <div class="input-container password-wrapper">
+                        <input type="password" id="password" name="Password" placeholder="Password" required>
+                        <input type="checkbox" id="toggle-pass" style="display: none;">
+                        <label for="toggle-pass" class="toggle-label">
+                            <img src="eye-closed.png" class="eye-icon closed" alt="Hide">
+                            <img src="eye-open.png" class="eye-icon open" alt="Show">
+                        </label>
+                    </div>
+
+                    <div class="input-container password-wrapper">
+                        <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+                        <input type="checkbox" id="toggle-confirm" style="display: none;">
+                        <label for="toggle-confirm" class="toggle-label">
+                            <img src="eye-closed.png" class="eye-icon closed" alt="Hide">
+                            <img src="eye-open.png" class="eye-icon open" alt="Show">
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Sign Up</button>
+                </form>
+
+                <div class="signup-footer">
+                    Already have an account? <a href="#">Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const passInput = document.getElementById('password');
+        const passToggle = document.getElementById('toggle-pass');
+        passToggle.addEventListener('change', function() {
+            passInput.type = this.checked ? 'text' : 'password';
+        });
+
+        const confirmInput = document.getElementById('confirm-password');
+        const confirmToggle = document.getElementById('toggle-confirm');
+        confirmToggle.addEventListener('change', function() {
+            confirmInput.type = this.checked ? 'text' : 'password';
+        });
+    </script>
+</body>
+</html>
