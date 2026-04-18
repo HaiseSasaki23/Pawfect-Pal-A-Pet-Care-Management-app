@@ -16,18 +16,18 @@ namespace PawfectPal.Api.Repositories
 
         public void InsertPet(Pet pet)
         {
-            string query = @"INSERT INTO pets (UserID, Type, Name, Color, Breed, Age, Gender)
-                             VALUES (@UserID, @Type, @Name, @Color, @Breed, @Age, @Gender)";
+            string query = @"
+                INSERT INTO pet (UserID, Name, Color, Breed, Age, Gender)
+                VALUES (@UserID, @Name, @Color, @Breed, @Age, @Gender)";
 
             var parameters = new List<MySqlParameter>
             {
-                new MySqlParameter("@UserID", pet.UserId),
-                new MySqlParameter("@Type", pet.Type),
-                new MySqlParameter("@Name", pet.Name),
-                new MySqlParameter("@Color", pet.Color),
-                new MySqlParameter("@Breed", pet.Breed),
-                new MySqlParameter("@Age", pet.Age),
-                new MySqlParameter("@Gender", pet.OwnerName) // temporary, fix when schema finalizes
+                new("@UserID", pet.UserId),
+                new("@Name", pet.Name),
+                new("@Color", pet.Color),
+                new("@Breed", pet.Breed),
+                new("@Age", pet.Age),
+                new("@Gender", pet.Gender)
             };
 
             _db.ExecuteNonQuery(query, parameters);
@@ -35,7 +35,7 @@ namespace PawfectPal.Api.Repositories
 
         public List<Pet> GetAllPets()
         {
-            string query = "SELECT * FROM pets";
+            string query = "SELECT * FROM pet";
             DataTable dt = _db.ExecuteQuery(query);
 
             List<Pet> pets = new List<Pet>();
@@ -46,15 +46,81 @@ namespace PawfectPal.Api.Repositories
                 {
                     PetId = Convert.ToInt32(row["PetID"]),
                     UserId = Convert.ToInt32(row["UserID"]),
-                    Type = row["Type"].ToString() ?? "",
-                    Name = row["Name"].ToString() ?? "",
-                    Color = row["Color"].ToString() ?? "",
-                    Breed = row["Breed"].ToString() ?? "",
-                    Age = Convert.ToInt32(row["Age"])
+                    Name = row["Name"].ToString() ?? string.Empty,
+                    Color = row["Color"].ToString() ?? string.Empty,
+                    Breed = row["Breed"].ToString() ?? string.Empty,
+                    Age = Convert.ToInt32(row["Age"]),
+                    Gender = row["Gender"].ToString() ?? string.Empty
                 });
             }
 
             return pets;
+        }
+
+        public Pet? GetPetById(int id)
+        {
+            string query = "SELECT * FROM pet WHERE PetID = @PetID LIMIT 1";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@PetID", id)
+            };
+
+            DataTable dt = _db.ExecuteQuery(query, parameters);
+
+            if (dt.Rows.Count == 0)
+                return null;
+
+            DataRow row = dt.Rows[0];
+
+            return new Pet
+            {
+                PetId = Convert.ToInt32(row["PetID"]),
+                UserId = Convert.ToInt32(row["UserID"]),
+                Name = row["Name"].ToString() ?? string.Empty,
+                Color = row["Color"].ToString() ?? string.Empty,
+                Breed = row["Breed"].ToString() ?? string.Empty,
+                Age = Convert.ToInt32(row["Age"]),
+                Gender = row["Gender"].ToString() ?? string.Empty
+            };
+        }
+
+        public void UpdatePet(Pet pet)
+        {
+            string query = @"
+                UPDATE pet
+                SET UserID = @UserID,
+                    Name = @Name,
+                    Color = @Color,
+                    Breed = @Breed,
+                    Age = @Age,
+                    Gender = @Gender
+                WHERE PetID = @PetID";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@PetID", pet.PetId),
+                new("@UserID", pet.UserId),
+                new("@Name", pet.Name),
+                new("@Color", pet.Color),
+                new("@Breed", pet.Breed),
+                new("@Age", pet.Age),
+                new("@Gender", pet.Gender)
+            };
+
+            _db.ExecuteNonQuery(query, parameters);
+        }
+
+        public void DeletePet(int id)
+        {
+            string query = "DELETE FROM pet WHERE PetID = @PetID";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@PetID", id)
+            };
+
+            _db.ExecuteNonQuery(query, parameters);
         }
     }
 }
