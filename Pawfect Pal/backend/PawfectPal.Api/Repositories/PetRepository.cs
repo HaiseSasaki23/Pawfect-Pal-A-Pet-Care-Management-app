@@ -1,0 +1,126 @@
+using MySql.Data.MySqlClient;
+using PawfectPal.Api.Data;
+using PawfectPal.Api.Models;
+using System.Data;
+
+namespace PawfectPal.Api.Repositories
+{
+    public class PetRepository
+    {
+        private readonly DatabaseHelper _db;
+
+        public PetRepository(DatabaseHelper db)
+        {
+            _db = db;
+        }
+
+        public void InsertPet(Pet pet)
+        {
+            string query = @"
+                INSERT INTO pet (UserID, Name, Color, Breed, Age, Gender)
+                VALUES (@UserID, @Name, @Color, @Breed, @Age, @Gender)";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@UserID", pet.UserId),
+                new("@Name", pet.Name),
+                new("@Color", pet.Color),
+                new("@Breed", pet.Breed),
+                new("@Age", pet.Age),
+                new("@Gender", pet.Gender)
+            };
+
+            _db.ExecuteNonQuery(query, parameters);
+        }
+
+        public List<Pet> GetAllPets()
+        {
+            string query = "SELECT * FROM pet";
+            DataTable dt = _db.ExecuteQuery(query);
+
+            List<Pet> pets = new List<Pet>();
+
+            foreach (DataRow row in dt.Rows)
+            {
+                pets.Add(new Pet
+                {
+                    PetId = Convert.ToInt32(row["PetID"]),
+                    UserId = Convert.ToInt32(row["UserID"]),
+                    Name = row["Name"].ToString() ?? string.Empty,
+                    Color = row["Color"].ToString() ?? string.Empty,
+                    Breed = row["Breed"].ToString() ?? string.Empty,
+                    Age = Convert.ToInt32(row["Age"]),
+                    Gender = row["Gender"].ToString() ?? string.Empty
+                });
+            }
+
+            return pets;
+        }
+
+        public Pet? GetPetById(int id)
+        {
+            string query = "SELECT * FROM pet WHERE PetID = @PetID LIMIT 1";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@PetID", id)
+            };
+
+            DataTable dt = _db.ExecuteQuery(query, parameters);
+
+            if (dt.Rows.Count == 0)
+                return null;
+
+            DataRow row = dt.Rows[0];
+
+            return new Pet
+            {
+                PetId = Convert.ToInt32(row["PetID"]),
+                UserId = Convert.ToInt32(row["UserID"]),
+                Name = row["Name"].ToString() ?? string.Empty,
+                Color = row["Color"].ToString() ?? string.Empty,
+                Breed = row["Breed"].ToString() ?? string.Empty,
+                Age = Convert.ToInt32(row["Age"]),
+                Gender = row["Gender"].ToString() ?? string.Empty
+            };
+        }
+
+        public void UpdatePet(Pet pet)
+        {
+            string query = @"
+                UPDATE pet
+                SET UserID = @UserID,
+                    Name = @Name,
+                    Color = @Color,
+                    Breed = @Breed,
+                    Age = @Age,
+                    Gender = @Gender
+                WHERE PetID = @PetID";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@PetID", pet.PetId),
+                new("@UserID", pet.UserId),
+                new("@Name", pet.Name),
+                new("@Color", pet.Color),
+                new("@Breed", pet.Breed),
+                new("@Age", pet.Age),
+                new("@Gender", pet.Gender)
+            };
+
+            _db.ExecuteNonQuery(query, parameters);
+        }
+
+        public void DeletePet(int id)
+        {
+            string query = "DELETE FROM pet WHERE PetID = @PetID";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@PetID", id)
+            };
+
+            _db.ExecuteNonQuery(query, parameters);
+        }
+    }
+}
