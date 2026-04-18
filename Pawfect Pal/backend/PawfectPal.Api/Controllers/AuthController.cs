@@ -43,12 +43,18 @@ namespace PawfectPal.Api.Controllers
                 if (!_authService.ValidateCredentials(dto))
                     return BadRequest(new { message = "Username and password are required." });
 
-                bool success = _authService.Login(dto);
+                var user = _authService.LoginAndGetUser(dto);
 
-                if (!success)
+                if (user == null)
                     return Unauthorized(new { message = "Invalid username or password." });
 
-                return Ok(new { message = "Login successful." });
+                return Ok(new 
+                { 
+                    message = "Login successful.",
+                    userId = user.UserId,
+                    userName = user.UserName,
+                    role = user.Role
+                });
             }
             catch (Exception ex)
             {

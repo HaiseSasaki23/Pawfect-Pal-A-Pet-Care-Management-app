@@ -13,14 +13,16 @@ namespace PawfectPal.Api.Services
             _userRepository = userRepository;
         }
 
-        public bool Login(LoginDto dto)
+        public User? LoginAndGetUser(LoginDto dto)
         {
             User? existingUser = _userRepository.GetUserByUserName(dto.UserName);
 
             if (existingUser == null)
-                return false;
+                return null;
 
-            return BCrypt.Net.BCrypt.Verify(dto.Password, existingUser.Password);
+            bool isValid = BCrypt.Net.BCrypt.Verify(dto.Password, existingUser.Password);
+
+            return isValid ? existingUser : null;
         }
 
         public void Register(RegisterDto dto)

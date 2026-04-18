@@ -17,8 +17,8 @@ namespace PawfectPal.Api.Repositories
         public void InsertUser(User user)
         {
             string query = @"
-                INSERT INTO user (UserName, OwnerFName, OwnerLName, ContactNum, Address, Password)
-                VALUES (@UserName, @OwnerFName, @OwnerLName, @ContactNum, @Address, @Password)";
+                INSERT INTO user (UserName, OwnerFName, OwnerLName, ContactNum, Address, Password, Role)
+                VALUES (@UserName, @OwnerFName, @OwnerLName, @ContactNum, @Address, @Password, @Role)";
 
             var parameters = new List<MySqlParameter>
             {
@@ -27,7 +27,8 @@ namespace PawfectPal.Api.Repositories
                 new("@OwnerLName", user.OwnerLName),
                 new("@ContactNum", user.ContactNum),
                 new("@Address", user.Address),
-                new("@Password", user.Password)
+                new("@Password", user.Password),
+                new("@Role", user.Role)
             };
 
             _db.ExecuteNonQuery(query, parameters);
@@ -57,7 +58,8 @@ namespace PawfectPal.Api.Repositories
                 OwnerLName = row["OwnerLName"].ToString() ?? string.Empty,
                 ContactNum = row["ContactNum"].ToString() ?? string.Empty,
                 Address = row["Address"].ToString() ?? string.Empty,
-                Password = row["Password"].ToString() ?? string.Empty
+                Password = row["Password"].ToString() ?? string.Empty,
+                Role = row["Role"].ToString() ?? "User"
             };
         }
 
