@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawfect Pal - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Character Toggle Logic */
+        .nav-char {
+            width: 25px;
+            height: 25px;
+            margin-left: auto;
+            object-fit: contain;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .nav-item.active .nav-char {
+            opacity: 1;
+            content: url('active.png');
+        }
+
+        .sidebar:hover .nav-item.active .nav-char {
+            opacity: 0;
+        }
+
+        .sidebar .nav-item:hover .nav-char {
+            opacity: 1 !important;
+            content: url('peek.png') !important;
+        }
+    </style>
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-text"><h2>Pawfect Pal</h2><p>Paws-itively Organized Pet Care</p></div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active">
+                    <img src="dashboard-m.png" class="custom-icon-nav"> Dashboard <img src="active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="pets-m.png" class="custom-icon-nav"> Pets <img src="active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="appointment-m.png" class="custom-icon-nav"> Appointments <img src="active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="health-m.png" class="custom-icon-nav"> Health Records <img src="active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="services-m.png" class="custom-icon-nav"> Services <img src="active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="feeding-m.png" class="custom-icon-nav"> Feeding Schedule <img src="active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="reminders-m.png" class="custom-icon-nav"> Reminders <img src="active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="billing-m.png" class="custom-icon-nav"> Billing History <img src="active.png" class="nav-char">
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info"><strong><span id="OwnerFName">Guest</span> <span id="OwnerLName">User</span></strong><span>Pet Owner</span></div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="content-header">
+                <div class="welcome-section">
+                    <h1>Welcome back, <span id="OwnerFName">User</span>! 🐾</h1>
+                    <p>Here's what's happening with your furry friends today 🐾</p>
+                </div>
+            </header>
+
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon-bg pets-bg"><img src="pets-d.png" class="custom-icon-small"></div>
+                    <div class="stat-info"><p>Total Pets</p><h3 id="TotalPetsCount">0</h3></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-bg apt-bg"><img src="appointment-d.png" class="custom-icon-small"></div>
+                    <div class="stat-info"><p>Appointments</p><h3 id="AptCount">0</h3></div>
+                </div>  
+                <div class="stat-card">
+                    <div class="stat-icon-bg remind-bg"><img src="reminder-d.png" class="custom-icon-small"></div>
+                    <div class="stat-info"><p>Due Reminders</p><h3 id="RemindCount">0</h3></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-bg health-bg"><img src="health-d.png" class="custom-icon-small"></div>
+                    <div class="stat-info"><p>Health Records</p><h3 id="HealthCount">0</h3></div>
+                </div>
+            </section>
+
+            <div class="dashboard-grid">
+                <div class="grid-column">
+                    <div class="card">
+                        <div class="card-header"><h3>My Pets</h3><span class="view-all-link" onclick="openViewModal('Pets')">View All</span></div>
+                        <div class="data-list fixed-height-list" id="pets-list-container">
+                            <div class="no-data-state"><img src="no-pets.png" class="img-30x30"><p>No pets found</p></div>
+                        </div>
+                    </div>
+                    <div class="card align-bottom">
+                        <div class="card-header"><h3>Upcoming Appointments</h3><span class="view-all-link" onclick="openViewModal('Appointments')">View All</span></div>
+                        <div class="data-list fixed-height-list" id="apt-list-container">
+                            <div class="no-data-state"><img src="no-appointments.png" class="img-30x30"><p>No upcoming appointments</p></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid-column">
+                    <div class="card">
+                        <div class="card-header"><h3>Reminders</h3><span class="view-all-link" onclick="openViewModal('Reminders')">View All</span></div>
+                        <div class="data-list fixed-height-list" id="remind-list-container">
+                            <div class="no-data-state"><img src="no-reminders.png" class="img-30x30"><p>No reminders</p></div>
+                        </div>
+                    </div>
+                    <div class="card quick-actions-card align-bottom">
+                        <div class="card-header"><h3>Quick Actions</h3></div>
+                        <div class="actions-grid-mini">
+                            <div class="action-card blue-bg" onclick="openActionModal('Add Pet')"><img src="add-pet.png" class="custom-icon-30"><span>Add Pet</span></div>
+                            <div class="action-card pink-bg" onclick="openActionModal('Appointment')"><img src="appointment.png" class="custom-icon-30"><span>Appointment</span></div>
+                            <div class="action-card teal-bg" onclick="openActionModal('Payment')"><img src="payment.png" class="custom-icon-30"><span>Payment</span></div>
+                            <div class="action-card orange-bg" onclick="openActionModal('Status')"><img src="status.png" class="custom-icon-30"><span>View Status</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="mainModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header"><h2 id="modalTitle">Title</h2><button class="close-btn" onclick="closeModal()">&times;</button></div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('mainModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+
+        function closeModal() { modal.style.display = 'none'; }
+
+        function openViewModal(type) {
+            modalTitle.innerText = "All " + type; 
+            modal.style.display = 'flex';
+            
+            if(type === 'Pets') {
+                //   Updated to: name, species, breed, lasttimevisit
+                modalBody.innerHTML = `
+                    <div class="view-all-grid" id="pets-view-target" style="grid-template-columns: repeat(4, 1fr);">
+                        <strong>Name</strong><strong>Species</strong><strong>Breed</strong><strong>Last Visit</strong>
+                        </div>`;
+            } else if(type === 'Appointments') {
+                // Updated to: pet name, servicename, appointmentdate
+                modalBody.innerHTML = `
+                    <div class="view-all-grid" id="apt-view-target" style="grid-template-columns: repeat(3, 1fr);">
+                        <strong>Pet Name</strong><strong>Service</strong><strong>Date</strong>
+                        </div>`;
+            } else if(type === 'Reminders') {
+                // Updated to: feedingtime/pet name/status, appointment pet name/status, or due balance
+                modalBody.innerHTML = `
+                    <div class="view-all-grid" id="remind-view-target" style="grid-template-columns: 1.5fr 1fr 1fr;">
+                        <strong>Pet</strong><strong>Description</strong><strong>Status</strong>
+                        </div>`;
+            }
+        }
+
+        function openActionModal(action) {
+            modalTitle.innerText = action; modal.style.display = 'flex';
+            if(action==='Add Pet') {
+                modalBody.innerHTML = `<form class="modal-form"><input type="text" placeholder="Pet Name" required><select onchange="document.getElementById('otherSpec').style.display=(this.value=='Others'?'block':'none')"><option>Dog</option><option>Cat</option><option>Rabbit</option><option>Bird</option><option>Hamster</option><option value="Others">Others</option></select><input type="text" id="otherSpec" style="display:none" placeholder="Specify Species"><input type="text" placeholder="Breed"><input type="text" placeholder="Color"><input type="number" placeholder="Age"><select><option>Male</option><option>Female</option></select><button type="submit" class="submit-btn">Register Pet</button></form>`;
+            } else if(action==='Appointment') {
+                modalBody.innerHTML = `<form class="modal-form"><select><option>Select Pet</option></select><select><option value="1">Grooming</option><option value="2">Vaccination</option><option value="3">Check-up</option><option value="4">Deworming</option><option value="5">Feeding Service / Meal Planning</option></select><input type="datetime-local" onfocus="this.max='9999-12-31T23:59'"><textarea placeholder="Notes (max 50 chars)"></textarea><button type="submit" class="submit-btn">Book Appointment</button></form>`;
+            } else if(action==='Payment') {
+                modalBody.innerHTML = `
+                    <form class="modal-form">
+                        <p style="margin-bottom: 10px;">Current Balance: ₱<span id="CurrentBalance">0.00</span></p>
+                        
+                        <select required><option value="">Select Appointment to Pay</option></select>
+                        <input type="number" placeholder="₱ Amount to Pay" required>
+                        
+                        <select id="PaymentMethod" onchange="togglePaymentFields(this.value)" required>
+                            <option value="">Select Payment Method</option>
+                            <option value="Gcash">GCash</option>
+                            <option value="Maya">Maya</option>
+                            <option value="Card">Credit/Debit Card</option>
+                        </select>
+
+                        <div id="dynamic-payment-fields" style="display: flex; flex-direction: column; gap: 12px;"></div>
+
+                        <button type="submit" class="submit-btn">Confirm Payment</button>
+                    </form>`;
+            } else if(action==='Status') {
+                if(action === 'Add Pet') {
+                    modalBody.innerHTML = `<form class="modal-form"><input type="text" placeholder="Pet Name" required><select onchange="document.getElementById('otherSpec').style.display=(this.value=='Others'?'block':'none')"><option>Dog</option><option>Cat</option><option>Rabbit</option><option>Bird</option><option>Hamster</option><option value="Others">Others</option></select><input type="text" id="otherSpec" style="display:none" placeholder="Specify Species"><input type="text" placeholder="Breed"><input type="text" placeholder="Color"><input type="number" placeholder="Age"><select><option>Male</option><option>Female</option></select><button type="submit" class="submit-btn">Register Pet</button></form>`;
+                } else if(action === 'Appointment') {
+                    modalBody.innerHTML = `<form class="modal-form"><select><option>Select Pet</option></select><select><option value="1">Grooming</option><option value="2">Vaccination</option><option value="3">Check-up</option><option value="4">Deworming</option><option value="5">Feeding Service / Meal Planning</option></select><input type="datetime-local" onfocus="this.max='9999-12-31T23:59'"><textarea placeholder="Notes (max 50 chars)"></textarea><button type="submit" class="submit-btn">Book Appointment</button></form>`;
+                } else if(action === 'Payment') {
+                    modalBody.innerHTML = `<form class="modal-form"><p>Current Balance: ₱<span id="CurrentBalance">0.00</span></p><select><option>Select Appointment to Pay</option></select><input type="number" placeholder="₱ Amount to Pay"><select id="PaymentMethod"><option value="Gcash">GCash</option><option value="Maya">Maya</option><option value="Card">Credit/Debit Card</option></select><button type="submit" class="submit-btn">Proceed to Online Payment</button></form>`;
+                } else if(action === 'Status') {
+                    // Simple 2-column layout for Description and Status
+                    modalBody.innerHTML = `
+                        <div class="view-all-grid" style="grid-template-columns: 2fr 1fr; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                            <strong>Request / Bill Description</strong>
+                            <strong>Status</strong>
+                        </div>
+                        <div id="status-row-target" class="status-list">
+                            </div>`;
+                }
+            }
+        }
+
+        function togglePaymentFields(method) {
+            const container = document.getElementById('dynamic-payment-fields');
+            if (!container) return;
+            
+            if (method === 'Gcash' || method === 'Maya') {
+                container.innerHTML = `
+                    <input type="text" placeholder="${method} Registered Mobile Number" pattern="[0-9]*" maxlength="11" required>
+                    <input type="text" placeholder="Account Name" required>`;
+            } else if (method === 'Card') {
+                container.innerHTML = `
+                    <input type="text" placeholder="Cardholder Name" required>
+                    <input type="text" placeholder="Card Number (0000 0000 0000 0000)" maxlength="16" required>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" placeholder="MM/YY" style="flex: 1;" maxlength="5" required>
+                        <input type="password" placeholder="CVV" style="flex: 1;" maxlength="3" required>
+                    </div>`;
+            } else {
+                container.innerHTML = '';
+            }
+        }
+    </script>
+</body>
+</html>
