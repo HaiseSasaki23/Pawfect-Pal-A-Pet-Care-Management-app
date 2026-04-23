@@ -11,21 +11,45 @@
     <div class="dashboard-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <img src="user-dashboard/logo.png" alt="Pawfect Pal" class="sidebar-logo-landscape">
+                <img src="../../sidebar/logo.png" alt="Pawfect Pal" class="sidebar-logo-landscape">
             </div>
             <nav class="sidebar-nav">
-                <a href="#" class="nav-item active"><img src="user-dashboard/dashboard-m.png" class="custom-icon-nav"> Dashboard <img src="user-dashboard/active.png" class="nav-char"></a>
-                <a href="pets.html" class="nav-item"><img src="user-dashboard/pets-m.png" class="custom-icon-nav"> Pets <img src="user-dashboard/active.png" class="nav-char"></a>
-                <a href="#" class="nav-item"><img src="user-dashboard/appointment-m.png" class="custom-icon-nav"> Appointments <img src="user-dashboard/active.png" class="nav-char"></a>
-                <a href="#" class="nav-item"><img src="user-dashboard/health-m.png" class="custom-icon-nav"> Health Records <img src="user-dashboard/active.png" class="nav-char"></a>
-                <a href="#" class="nav-item"><img src="user-dashboard/services-m.png" class="custom-icon-nav"> Services <img src="user-dashboard/active.png" class="nav-char"></a>
-                <a href="#" class="nav-item"><img src="user-dashboard/feeding-m.png" class="custom-icon-nav"> Feeding Schedule <img src="user-dashboard/active.png" class="nav-char"></a>
-                <a href="#" class="nav-item"><img src="user-dashboard/reminders-m.png" class="custom-icon-nav"> Reminders <img src="user-dashboard/active.png" class="nav-char"></a>
-                <a href="#" class="nav-item"><img src="user-dashboard/billing-m.png" class="custom-icon-nav"> Billing History <img src="user-dashboard/active.png" class="nav-char"></a>
+                <a href="#" class="nav-item active">
+                    <img src="../../sidebar/dashboard-m.png" class="custom-icon-nav"> 
+                    Dashboard 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="pets.html" class="nav-item">
+                    <img src="../../sidebar/pets-m.png" class="custom-icon-nav"> 
+                    Pets 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/appointment-m.png" class="custom-icon-nav"> 
+                    Appointments 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/health-m.png" class="custom-icon-nav"> 
+                    Health Records 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/services-m.png" class="custom-icon-nav"> 
+                    Services 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/billing-m.png" class="custom-icon-nav"> 
+                    Billing History 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
             </nav>
             <div class="sidebar-footer">
                 <div class="user-info">
-                    <strong class="user-name"><span id="OwnerFName">Guest</span> User</strong>
+                    <strong class="user-name">
+                        <span id="OwnerFName">Danielle</span>
+                    </strong>
                     <span class="user-role">Pet Owner</span>
                 </div>
             </div>
@@ -34,171 +58,268 @@
         <main class="main-content">
             <header class="content-header">
                 <div class="welcome-section">
-                    <h1>Welcome back, <span id="WelcomeName">User</span>! 🐾</h1>
-                    <p>Here's what's happening with your furry friends today 🐾</p>
+                    <h1>Good morning, Danielle! 🐾</h1>
+                    <p class="welcome-subtitle">Here's what's happening with your furry friends today 🐾</p>
+                </div>
+                <div class="header-right">
+                    <div class="notif-bell" onclick="openActionModal('Reminders')">
+                        <img src="../../sidebar/reminders-m.png" class="custom-icon-nav">
+                        <span class="notif-dot" id="RemindDot"></span>
+                    </div>
                 </div>
             </header>
 
-            <section class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon-bg pets-bg"><img src="user-dashboard/pets-d.png" class="custom-icon-small"></div>
-                    <div class="stat-info"><p>Total Pets</p><h3 id="TotalPetsCount">0</h3></div>
+            <section class="stats-row">
+                <div class="stat-pill purple-soft">
+                    <div class="pill-icon-circle">
+                        <img src="user-dashboard/pets-d.png" class="img-30x30">
+                    </div>
+                    <div class="pill-data">
+                        <p>Total Pets</p>
+                        <h3 id="TotalPetsCount">3</h3>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon-bg apt-bg"><img src="user-dashboard/appointment-d.png" class="custom-icon-small"></div>
-                    <div class="stat-info"><p>Appointments</p><h3 id="AptCount">0</h3></div>
-                </div>  
-                <div class="stat-card">
-                    <div class="stat-icon-bg remind-bg"><img src="user-dashboard/reminder-d.png" class="custom-icon-small"></div>
-                    <div class="stat-info"><p>Due Reminders</p><h3 id="RemindCount">0</h3></div>
+                <div class="stat-pill green-soft">
+                    <div class="pill-icon-circle">
+                        <img src="user-dashboard/appointment-d.png" class="img-30x30">
+                    </div>
+                    <div class="pill-data">
+                        <p>Upcoming Appointments</p>
+                        <h3 id="AptCount">2</h3>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon-bg health-bg"><img src="user-dashboard/health-d.png" class="custom-icon-small"></div>
-                    <div class="stat-info"><p>Health Records</p><h3 id="HealthCount">0</h3></div>
+                <div class="stat-pill orange-soft">
+                    <div class="pill-icon-circle">
+                        <img src="user-dashboard/reminder-d.png" class="img-30x30">
+                    </div>
+                    <div class="pill-data">
+                        <p>Due Reminders</p>
+                        <h3 id="RemindCount">0</h3>
+                    </div>
+                </div>
+                <div class="stat-pill blue-soft">
+                    <div class="pill-icon-circle">
+                        <img src="user-dashboard/health-d.png" class="img-30x30">
+                    </div>
+                    <div class="pill-data">
+                        <p>Health Records</p>
+                        <h3 id="HealthCount">0</h3>
+                    </div>
                 </div>
             </section>
 
-            <div class="dashboard-grid">
-                <div class="grid-column">
-                    <div class="card">
-                        <div class="card-header"><h3>My Pets</h3><span class="view-all-link" onclick="openViewModal('Pets')">View All</span></div>
-                        <div id="pets-list-container" class="data-list fixed-height-list">
-                            <div class="no-data-state"><img src="user-dashboard/no-pets.png" class="img-30x30"><p>You haven’t added any pets. Click ‘Add Pet’ to get started.</p></div>
+            <div class="main-grid-layout">
+                <div class="display-card">
+                    <div class="display-card-header">
+                        <span>My Pets</span>
+                        <button class="add-small-btn" onclick="openActionModal('Add Pet')">
+                            + Add Pet
+                        </button>
+                    </div>
+                    
+                    <div class="data-list">
+                        <div class="pet-list-item">
+                            <img src="user-dashboard/buddy.png" class="pet-avatar-list">
+                            <div class="pet-details-list">
+                                <div class="pet-name-row">
+                                    <strong>Buddy</strong>
+                                    <span class="species-tag dog">Dog</span>
+                                </div>
+                                <p class="breed-text">Golden Retriever</p>
+                                <div class="pet-alive-meta">
+                                    <span>Age: 4 years old</span>
+                                    <span>Born: Apr 10, 2021</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="card align-bottom">
-                        <div class="card-header"><h3>Upcoming Appointments</h3><span class="view-all-link" onclick="openViewModal('Appointments')">View All</span></div>
-                        <div id="apt-list-container" class="data-list fixed-height-list">
-                            <div class="no-data-state"><img src="user-dashboard/no-appointments.png" class="img-30x30"><p>Nothing scheduled yet. Book an appointment to get started.</p></div>
-                        </div>
-                    </div>
+                    <a href="pets.html" class="view-all-link">View all pets →</a>
                 </div>
-                <div class="grid-column">
-                    <div class="card">
-                        <div class="card-header"><h3>Reminders</h3><span class="view-all-link" onclick="openViewModal('Reminders')">View All</span></div>
-                        <div id="remind-list-container" class="data-list fixed-height-list">
-                            <div class="no-data-state"><img src="user-dashboard/no-reminders.png" class="img-30x30"><p>You’re all caught up! Add a reminder so you never miss an important task.</p></div>
+
+                <div class="display-card">
+                    <div class="display-card-header">
+                        <span>Upcoming Appointments</span>
+                        <button class="add-small-btn" onclick="openActionModal('Appointment')">
+                            + Book Appointment
+                        </button>
+                    </div>
+                    
+                    <div class="data-list">
+                        <div class="appointment-list-item clean-apt">
+                            <div class="apt-details-list">
+                                <div class="apt-header-row">
+                                    <strong>Grooming</strong>
+                                    <span class="status-badge pending">Pending</span>
+                                </div>
+                                <p class="apt-pet-info">Buddy (Golden Retriever)</p>
+                                <div class="apt-time-row">
+                                    <img src="user-dashboard/clock.png" class="mini-icon">
+                                    <span>May 15, 2026 • 10:00 AM</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="card quick-actions-card align-bottom">
-                        <div class="card-header"><h3>Quick Actions</h3></div>
-                        <div class="actions-grid-mini">
-                            <div class="action-card blue-bg" onclick="openActionModal('Add Pet')"><img src="user-dashboard/add-pet.png" class="custom-icon-30"><span>Add Pet</span></div>
-                            <div class="action-card pink-bg" onclick="openActionModal('Appointment')"><img src="user-dashboard/appointment.png" class="custom-icon-30"><span>Appointment</span></div>
-                            <div class="action-card teal-bg" onclick="openActionModal('Payment')"><img src="user-dashboard/payment.png" class="custom-icon-30"><span>Payment</span></div>
-                            <div class="action-card orange-bg" onclick="openActionModal('Status')"><img src="user-dashboard/status.png" class="custom-icon-30"><span>View Status</span></div>
-                        </div>
-                    </div>
+                    <a href="#" class="view-all-link">View all appointments →</a>
                 </div>
             </div>
         </main>
     </div>
 
-    <div id="mainModal" class="modal-overlay">
+    <div id="addPetModal" class="modal-overlay">
         <div class="modal-content">
-            <div class="modal-header"><h2 id="modalTitle">Title</h2><button class="close-btn" onclick="closeModal()">&times;</button></div>
-            <div id="modalBody" class="modal-body"></div>
+            <span class="close-modal" onclick="closeActionModal('Add Pet')">&times;</span>
+            <h2 class="modal-title">Register Your Pet</h2>
+            <form id="addPetForm" class="pet-form">
+                <div class="input-group">
+                    <label>Pet Photo</label>
+                    <input type="file" id="petPhoto" accept="image/*">
+                </div>
+                <div class="input-group">
+                    <input type="text" id="petName" placeholder="Pet Name" required>
+                    <small class="error-msg" id="nameError">Letters only.</small>
+                </div>
+                <div class="input-group">
+                    <label>Birthday</label>
+                    <input type="date" id="petBirthday" required>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="petAge" placeholder="Age" readonly>
+                </div>
+                <div class="input-group">
+                    <select id="petSpecies" required onchange="toggleOtherSpecies()">
+                        <option value="" disabled selected>Select Species</option>
+                        <option value="Dog">Dog</option>
+                        <option value="Cat">Cat</option>
+                        <option value="Rabbit">Rabbit</option>
+                        <option value="Bird">Bird</option>
+                        <option value="Hamster">Hamster</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+                <div class="input-group" id="otherSpeciesGroup" style="display: none;">
+                    <input type="text" id="otherSpeciesInput" placeholder="Please specify species">
+                    <small class="error-msg" id="otherError">Letters only.</small>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="petBreed" placeholder="Breed" required>
+                    <small class="error-msg" id="breedError">Letters only.</small>
+                </div>
+                <div class="input-group">
+                    <select id="petGender" required>
+                        <option value="" disabled selected>Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <button type="submit" class="register-btn">Register</button>
+            </form>
         </div>
     </div>
 
-    <script>
-        const modal = document.getElementById('mainModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalBody = document.getElementById('modalBody');
-
-        function closeModal() { modal.style.display = 'none'; }
-
-        function calculateAge(birthDateString) {
-            const birthday = new Date(birthDateString);
-            const today = new Date();
-            let years = today.getFullYear() - birthday.getFullYear();
-            let months = today.getMonth() - birthday.getMonth();
-            if (months < 0 || (months === 0 && today.getDate() < birthday.getDate())) {
-                years--;
-                months += 12;
-            }
-            const display = document.getElementsByName('AgeDisplay')[0];
-            const hidden = document.getElementsByName('Age')[0];
-            if (display) {
-                if (years > 0) { display.value = `${years} yrs`; hidden.value = years; }
-                else { display.value = `${months} months`; hidden.value = 0; }
-            }
-        }
-
-        function validateInput(input) {
-            const error = input.nextElementSibling;
-            if (error && error.classList.contains('validation-error')) {
-                error.style.display = (!input.checkValidity() && input.value !== "") ? 'block' : 'none';
-                error.innerText = input.title;
-            }
-        }
-
-        function openActionModal(action) {
-            modalTitle.innerText = action; modal.style.display = 'flex';
-            if(action === 'Add Pet') {
-                modalBody.innerHTML = `
-                    <form class="modal-form" id="petForm" novalidate>
-                        <div class="image-upload-wrapper"><label>Pet Photo</label><input type="file" name="PetImage" accept="image/*"></div>
-                        <input type="text" name="Name" placeholder="Pet Name" pattern="[A-Za-z\\s]+" title="Letters only." required oninput="validateInput(this)">
-                        <div class="validation-error"></div>
-                        <div class="date-group"><label>Birthday</label><input type="date" name="Birthday" onchange="calculateAge(this.value)" required></div>
-                        <input type="text" name="AgeDisplay" placeholder="Age" readonly>
-                        <input type="hidden" name="Age">
-                        <select name="Species" onchange="document.getElementById('otherSpec').style.display=(this.value=='Others'?'block':'none')">
-                            <option value="">Select Species</option>
-                            <option>Dog</option><option>Cat</option><option>Rabbit</option><option>Bird</option><option>Hamster</option><option value="Others">Others</option>
-                        </select>
-                        <input type="text" id="otherSpec" style="display:none" placeholder="Specify Species" pattern="[A-Za-z\\s]+" title="Letters only." oninput="validateInput(this)">
-                        <div class="validation-error"></div>
-                        <input type="text" name="Breed" placeholder="Breed" pattern="[A-Za-z\\s]+" title="Letters only." oninput="validateInput(this)">
-                        <div class="validation-error"></div>
-                        <select name="Gender"><option value="">Select Gender</option><option>Male</option><option>Female</option></select>
-                        <button type="submit" class="submit-btn">Register Pet</button>
-                    </form>`;
-            } else if(action==='Appointment') {
-                modalBody.innerHTML = `<form class="modal-form"><select><option>Select Pet</option></select><select><option value="1">Grooming</option><option value="2">Vaccination</option><option value="3">Check-up</option><option value="4">Deworming</option><option value="5">Feeding Service / Meal Planning</option></select><input type="datetime-local" onfocus="this.max='9999-12-31T23:59'"><textarea placeholder="Notes (max 50 chars)"></textarea><button type="submit" class="submit-btn">Book Appointment</button></form>`;
-            } else if(action==='Payment') {
-                modalBody.innerHTML = `
-                    <form class="modal-form">
-                        <p style="margin-bottom: 10px;">Current Balance: ₱<span id="CurrentBalance">0.00</span></p>
-                        <select required><option value="">Select Appointment to Pay</option></select>
-                        <input type="number" placeholder="₱ Amount to Pay" required>
-                        <select id="PaymentMethod" onchange="togglePaymentFields(this.value)" required>
-                            <option value="">Select Payment Method</option>
-                            <option value="Cash">Cash</option>
-                            <option value="Gcash">GCash</option>
-                        </select>
-                        <div id="dynamic-payment-fields" style="display: flex; flex-direction: column; gap: 12px;"></div>
-                        <button type="submit" class="submit-btn">Confirm Payment</button>
-                    </form>`;
-            } else if(action==='Status') {
-                modalBody.innerHTML = `
-                    <div class="view-all-grid" style="grid-template-columns: 2fr 1fr; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
-                        <strong>Request / Bill Description</strong><strong>Status</strong>
+    <div id="bookAppointmentModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeActionModal('Appointment')">&times;</span>
+            <h2 class="modal-title">Book an Appointment</h2>
+            <form id="bookAppointmentForm" class="pet-form">
+                <div class="input-group">
+                    <select id="bookingPetName" name="Name" required>
+                        <option value="" disabled selected>Select Pet</option>
+                        <option value="Pet1">Buddy</option>
+                        <option value="Pet2">Whiskers</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Date</label>
+                    <input type="date" id="bookingDate" required>
+                </div>
+                <div class="input-group">
+                    <label>Time</label>
+                    <select id="bookingTime" required>
+                        <option value="" disabled selected>Select Time</option>
+                        <option value="07:00">07:00 AM</option><option value="07:30">07:30 AM</option>
+                        <option value="08:00">08:00 AM</option><option value="08:30">08:30 AM</option>
+                        <option value="09:00">09:00 AM</option><option value="09:30">09:30 AM</option>
+                        <option value="10:00">10:00 AM</option><option value="10:30">10:30 AM</option>
+                        <option value="11:00">11:00 AM</option><option value="11:30">11:30 AM</option>
+                        <option value="12:00">12:00 PM</option><option value="12:30">12:30 PM</option>
+                        <option value="13:00">01:00 PM</option><option value="13:30">01:30 PM</option>
+                        <option value="14:00">02:00 PM</option><option value="14:30">02:30 PM</option>
+                        <option value="15:00">03:00 PM</option><option value="15:30">03:30 PM</option>
+                        <option value="16:00">04:00 PM</option><option value="16:30">04:30 PM</option>
+                        <option value="17:00">05:00 PM</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Services (₱ Estimate)</label>
+                    <div class="beck-box">
+                        <div class="beck-option">
+                            <input type="checkbox" id="s1" name="services" data-price="500" value="checkup">
+                            <label for="s1">Check-up <span>₱500</span></label>
+                        </div>
+                        <div class="beck-option">
+                            <input type="checkbox" id="s2" name="services" data-price="1200" value="vaccination">
+                            <label for="s2">Vaccination <span>₱1,200</span></label>
+                        </div>
+                        <div class="beck-option">
+                            <input type="checkbox" id="s3" name="services" data-price="350" value="deworming">
+                            <label for="s3">Deworming <span>₱350</span></label>
+                        </div>
+                        <div class="beck-option">
+                            <input type="checkbox" id="s4" name="services" data-price="1500" value="grooming">
+                            <label for="s4">Grooming <span>₱1,500</span></label>
+                        </div>
                     </div>
-                    <div id="status-row-target" class="status-list"></div>`;
-            }
-        }
+                </div>
+                <div class="input-group total-box purple-soft">
+                    <p>Total Est:</p>
+                    <h3 id="bookingTotal">₱0</h3>
+                </div>
+                <div class="input-group">
+                    <select id="bookingPayment" required onchange="toggleGcashDetails()">
+                        <option value="" disabled selected>Payment Mode</option>
+                        <option value="Cash">Cash</option>
+                        <option value="GCash">GCash</option>
+                    </select>
+                </div>
+                <div id="gcashDetails" style="display: none;">
+                    <div class="input-group">
+                        <input type="text" id="gcashName" placeholder="GCash Account Name">
+                        <small class="error-msg" id="gcashNameError">Letters only.</small>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="gcashRef" placeholder="Reference Number (13 digits)">
+                        <small class="error-msg" id="gcashRefError">Numbers only.</small>
+                    </div>
+                </div>
+                <button type="submit" class="register-btn">Request Booking</button>
+            </form>
+        </div>
+    </div>
 
-        function togglePaymentFields(method) {
-            const container = document.getElementById('dynamic-payment-fields');
-            if (!container) return;
-            if (method === 'Gcash') {
-                container.innerHTML = `<input type="text" placeholder="GCash Registered Mobile Number" pattern="[0-9]*" maxlength="11" required><input type="text" placeholder="Account Name" required>`;
-            } else { container.innerHTML = ''; }
-        }
+    <div id="remindersModal" class="modal-overlay">
+        <div class="modal-content modal-content-reminders">
+            <span class="close-modal" onclick="closeActionModal('Reminders')">&times;</span>
+            <h2 class="modal-title">Activity Feed</h2>
+            <div class="reminders-container">
+                <div class="empty-state-reminders">
+                    <img src="user-dashboard/no-reminders.png" class="img-30x30-reminders" alt="No updates">
+                    <p>No recent updates or notifications at the moment.</p>
+                </div>
+            </div>
+            <button class="primary-action-btn full-width" onclick="closeActionModal('Reminders')">
+                Back to Dashboard
+            </button>
+        </div>
+    </div>
 
-        function openViewModal(type) {
-            modalTitle.innerText = "All " + type; 
-            modal.style.display = 'flex';
-            if(type === 'Pets') {
-                modalBody.innerHTML = `<div class="view-all-grid" id="pets-view-target" style="grid-template-columns: repeat(4, 1fr);"><strong>Name</strong><strong>Species</strong><strong>Breed</strong><strong>Last Visit</strong></div>`;
-            } else if(type === 'Appointments') {
-                modalBody.innerHTML = `<div class="view-all-grid" id="apt-view-target" style="grid-template-columns: repeat(3, 1fr);"><strong>Pet Name</strong><strong>Service</strong><strong>Date</strong></div>`;
-            } else if(type === 'Reminders') {
-                modalBody.innerHTML = `<div class="view-all-grid" id="remind-view-target" style="grid-template-columns: 1.5fr 1fr 1fr;"><strong>Pet</strong><strong>Description</strong><strong>Status</strong></div>`;
-            }
-        }
-    </script>
+    <div id="successModal" class="modal-overlay">
+        <div class="modal-content success-box">
+            <h2 id="successTitle" class="modal-title">Request Sent</h2>
+            <p id="successMessage" class="welcome-subtitle">Your request is now pending admin confirmation.</p>
+            <button class="primary-action-btn full-width" onclick="closeSuccessModal()">Got it!</button>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
 </body>
 </html>
