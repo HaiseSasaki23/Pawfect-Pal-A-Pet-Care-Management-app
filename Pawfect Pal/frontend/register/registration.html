@@ -27,22 +27,22 @@
                     <p>Join us and start managing your pets!</p>
                 </div>
 
-                <form class="actual-form">
+                <form class="actual-form" id="registerForm">
                     <div class="input-container">
-                        <input type="text" name="OwnerFName" placeholder="First Name" required>
+                        <input type="text" id="ownerFName" name="OwnerFName" placeholder="First Name" required>
                     </div>
                     <div class="input-container">
-                        <input type="text" name="OwnerLName" placeholder="Last Name" required>
+                        <input type="text" id="ownerLName" name="OwnerLName" placeholder="Last Name" required>
                     </div>
                     <div class="input-container">
-                        <input type="text" placeholder="Username" required>
+                        <input type="text" id="userName" name="UserName" placeholder="Username" required>
                     </div>
                     <div class="input-container">
-                        <input type="tel" name="ContactNum" placeholder="Contact Number" required>
+                        <input type="tel" id="contactNum" name="ContactNum" placeholder="Contact Number" required>
                     </div>
 
                     <div class="input-container">
-                        <input type="text" name="Address" placeholder="Address" required>
+                        <input type="text" id="address" name="Address" placeholder="Address" required>
                     </div>
 
                     <div class="input-container password-wrapper">
@@ -55,7 +55,7 @@
                     </div>
 
                     <div class="input-container password-wrapper">
-                        <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+                        <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
                         <input type="checkbox" id="toggle-confirm" style="display: none;">
                         <label for="toggle-confirm" class="toggle-label">
                             <img src="eye-closed.png" class="eye-icon closed" alt="Hide">
@@ -67,7 +67,7 @@
                 </form>
 
                 <div class="signup-footer">
-                    Already have an account? <a href="#">Login</a>
+                    Already have an account? <a href="../login/login.html">Login</a>
                 </div>
             </div>
         </div>
@@ -80,11 +80,13 @@
             passInput.type = this.checked ? 'text' : 'password';
         });
 
-        const confirmInput = document.getElementById('confirm-password');
+        const confirmInput = document.getElementById('confirmPassword');
         const confirmToggle = document.getElementById('toggle-confirm');
         confirmToggle.addEventListener('change', function() {
             confirmInput.type = this.checked ? 'text' : 'password';
         });
     </script>
+
+    <script src="register.js"></script>
 </body>
 </html>

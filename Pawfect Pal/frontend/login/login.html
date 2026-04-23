@@ -27,13 +27,13 @@
         <div class="right-side">
             <div class="login-box">
                 <div class="welcome-text">
-                    <h1>Welcome Back! </h1>
-                    <p>Login to continue to Pawfect Pal </p>
+                    <h1>Welcome Back!</h1>
+                    <p>Login to continue to Pawfect Pal</p>
                 </div>
 
-                <form class="actual-form">
+                <form class="actual-form" id="loginForm">
                     <div class="input-container">
-                        <input type="text" placeholder="Username or Email" required>
+                        <input type="text" id="userName" placeholder="Username" required>
                     </div>
 
                     <div class="input-container password-wrapper">
@@ -58,7 +58,7 @@
                 </form>
 
                 <div class="signup-footer">
-                    Don't have an account? <a href="#">Sign Up</a>
+                    Don't have an account? <a href="../register/registration.html">Sign Up</a>
                 </div>
             </div>
         </div>
@@ -69,12 +69,10 @@
         const toggleBtn = document.getElementById('toggle-check');
 
         toggleBtn.addEventListener('change', function() {
-            if (this.checked) {
-                passInput.type = 'text';
-            } else {
-                passInput.type = 'password';
-            }
+            passInput.type = this.checked ? 'text' : 'password';
         });
-</script>
+    </script>
+
+    <script src="login.js"></script>
 </body>
 </html>
