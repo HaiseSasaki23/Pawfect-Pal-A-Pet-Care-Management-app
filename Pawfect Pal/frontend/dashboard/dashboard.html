@@ -48,7 +48,7 @@
             <div class="sidebar-footer">
                 <div class="user-info">
                     <strong class="user-name">
-                        <span id="OwnerFName">Danielle</span>
+                        <span id="OwnerFName">Guest</span> <span id="OwnerLName">User</span>
                     </strong>
                     <span class="user-role">Pet Owner</span>
                 </div>
@@ -58,12 +58,12 @@
         <main class="main-content">
             <header class="content-header">
                 <div class="welcome-section">
-                    <h1>Good morning, Danielle! 🐾</h1>
+                    <h1>Good morning, <span id="OwnerFName">User</span>! 🐾</h1>
                     <p class="welcome-subtitle">Here's what's happening with your furry friends today 🐾</p>
                 </div>
                 <div class="header-right">
                     <div class="notif-bell" onclick="openActionModal('Reminders')">
-                        <img src="../../sidebar/reminders-m.png" class="custom-icon-nav">
+                        <img src="user-dashboard/reminders-m.png" class="custom-icon-nav">
                         <span class="notif-dot" id="RemindDot"></span>
                     </div>
                 </div>
@@ -76,7 +76,7 @@
                     </div>
                     <div class="pill-data">
                         <p>Total Pets</p>
-                        <h3 id="TotalPetsCount">3</h3>
+                        <h3 id="TotalPetsCount">0</h3>
                     </div>
                 </div>
                 <div class="stat-pill green-soft">
@@ -85,7 +85,7 @@
                     </div>
                     <div class="pill-data">
                         <p>Upcoming Appointments</p>
-                        <h3 id="AptCount">2</h3>
+                        <h3 id="AptCount">0</h3>
                     </div>
                 </div>
                 <div class="stat-pill orange-soft">
@@ -117,23 +117,16 @@
                         </button>
                     </div>
                     
-                    <div class="data-list">
-                        <div class="pet-list-item">
-                            <img src="user-dashboard/buddy.png" class="pet-avatar-list">
-                            <div class="pet-details-list">
-                                <div class="pet-name-row">
-                                    <strong>Buddy</strong>
-                                    <span class="species-tag dog">Dog</span>
-                                </div>
-                                <p class="breed-text">Golden Retriever</p>
-                                <div class="pet-alive-meta">
-                                    <span>Age: 4 years old</span>
-                                    <span>Born: Apr 10, 2021</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="data-list" id="PetsList"></div>
+
+                    <div class="empty-state" id="EmptyPets">
+                        <img src="user-dashboard/no-pets.png" class="empty-img">
+                        <h3>No pets yet</h3>
+                        <p>Add your first furry friend to start managing their care.</p>
+                        <button class="primary-action-btn" onclick="openActionModal('Add Pet')">+ Add Your First Pet</button>
                     </div>
-                    <a href="pets.html" class="view-all-link">View all pets →</a>
+                    
+                    <a href="#" class="view-all-link">View all pets →</a>
                 </div>
 
                 <div class="display-card">
@@ -144,21 +137,15 @@
                         </button>
                     </div>
                     
-                    <div class="data-list">
-                        <div class="appointment-list-item clean-apt">
-                            <div class="apt-details-list">
-                                <div class="apt-header-row">
-                                    <strong>Grooming</strong>
-                                    <span class="status-badge pending">Pending</span>
-                                </div>
-                                <p class="apt-pet-info">Buddy (Golden Retriever)</p>
-                                <div class="apt-time-row">
-                                    <img src="user-dashboard/clock.png" class="mini-icon">
-                                    <span>May 15, 2026 • 10:00 AM</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="data-list" id="AptList"></div>
+
+                    <div class="empty-state" id="EmptyApt">
+                        <img src="user-dashboard/no-appointments.png" class="empty-img">
+                        <h3>No appointments scheduled</h3>
+                        <p>Book an appointment to keep your pet healthy and happy.</p>
+                        <button class="primary-action-btn" onclick="openActionModal('Appointment')">+ Book an Appointment</button>
                     </div>
+                    
                     <a href="#" class="view-all-link">View all appointments →</a>
                 </div>
             </div>
@@ -183,6 +170,7 @@
                     <input type="date" id="petBirthday" required>
                 </div>
                 <div class="input-group">
+                    <label>Age</label>
                     <input type="text" id="petAge" placeholder="Age" readonly>
                 </div>
                 <div class="input-group">
@@ -222,18 +210,17 @@
             <h2 class="modal-title">Book an Appointment</h2>
             <form id="bookAppointmentForm" class="pet-form">
                 <div class="input-group">
+                    <label>Select Pet</label>
                     <select id="bookingPetName" name="Name" required>
                         <option value="" disabled selected>Select Pet</option>
-                        <option value="Pet1">Buddy</option>
-                        <option value="Pet2">Whiskers</option>
-                    </select>
+                        </select>
                 </div>
                 <div class="input-group">
                     <label>Date</label>
                     <input type="date" id="bookingDate" required>
                 </div>
                 <div class="input-group">
-                    <label>Time</label>
+                    <label>Time Slot</label>
                     <select id="bookingTime" required>
                         <option value="" disabled selected>Select Time</option>
                         <option value="07:00">07:00 AM</option><option value="07:30">07:30 AM</option>
@@ -275,8 +262,9 @@
                     <h3 id="bookingTotal">₱0</h3>
                 </div>
                 <div class="input-group">
+                    <label>Payment Mode</label>
                     <select id="bookingPayment" required onchange="toggleGcashDetails()">
-                        <option value="" disabled selected>Payment Mode</option>
+                        <option value="" disabled selected>Select Payment</option>
                         <option value="Cash">Cash</option>
                         <option value="GCash">GCash</option>
                     </select>
