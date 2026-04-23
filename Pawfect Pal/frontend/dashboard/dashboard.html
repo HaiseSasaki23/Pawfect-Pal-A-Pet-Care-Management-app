@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawfect Pal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* this logic handles the cute character peek-a-boo effect in the nav */
+        .nav-char {
+            width: 25px;
+            height: 25px;
+            margin-left: auto;
+            object-fit: contain;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        /* show the 'active' pet icon when a link is clicked */
+        .nav-item.active .nav-char {
+            opacity: 1;
+            content: url('user-dashboard/active.png');
+        }
+
+        /* hide active icons when you're just hovering over the sidebar generally */
+        .sidebar:hover .nav-item.active .nav-char {
+            opacity: 0;
+        }
+
+        /* show the 'peek' icon specifically when hovering over a nav link */
+        .sidebar .nav-item:hover .nav-char {
+            opacity: 1 !important;
+            content: url('user-dashboard/peek.png') !important;
+        }
+    </style>
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-text"><h2>Pawfect Pal</h2><p>Paws-itively Organized Pet Care</p></div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active">
+                    <img src="user-dashboard/dashboard-m.png" class="custom-icon-nav"> Dashboard <img src="user-dashboard/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="user-dashboard/pets-m.png" class="custom-icon-nav"> Pets <img src="user-dashboard/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="user-dashboard/appointment-m.png" class="custom-icon-nav"> Appointments <img src="user-dashboard/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="user-dashboard/health-m.png" class="custom-icon-nav"> Health Records <img src="user-dashboard/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="user-dashboard/services-m.png" class="custom-icon-nav"> Services <img src="user-dashboard/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="user-dashboard/feeding-m.png" class="custom-icon-nav"> Feeding Schedule <img src="user-dashboard/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="user-dashboard/reminders-m.png" class="custom-icon-nav"> Reminders <img src="user-dashboard/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="user-dashboard/billing-m.png" class="custom-icon-nav"> Billing History <img src="user-dashboard/active.png" class="nav-char">
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info"><strong class="user-name"><span id="OwnerFName">Guest</span><span id="OwnerLName"> User</span></strong><span class="user-role">Pet Owner</span></div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="content-header">
+                <div class="welcome-section">
+                    <h1>Welcome back, <span id="OwnerFName">User</span>! 🐾</h1>
+                    <p>Here's what's happening with your furry friends today 🐾</p>
+                </div>
+            </header>
+
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon-bg pets-bg"><img src="user-dashboard/pets-d.png" class="custom-icon-small"></div>
+                    <div class="stat-info"><p>Total Pets</p><h3 id="TotalPetsCount">0</h3></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-bg apt-bg"><img src="user-dashboard/appointment-d.png" class="custom-icon-small"></div>
+                    <div class="stat-info"><p>Appointments</p><h3 id="AptCount">0</h3></div>
+                </div>  
+                <div class="stat-card">
+                    <div class="stat-icon-bg remind-bg"><img src="user-dashboard/reminder-d.png" class="custom-icon-small"></div>
+                    <div class="stat-info"><p>Due Reminders</p><h3 id="RemindCount">0</h3></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-bg health-bg"><img src="user-dashboard/health-d.png" class="custom-icon-small"></div>
+                    <div class="stat-info"><p>Health Records</p><h3 id="HealthCount">0</h3></div>
+                </div>
+            </section>
+
+            <div class="dashboard-grid">
+                <div class="grid-column">
+                    <div class="card">
+                        <div class="card-header"><h3>My Pets</h3><span class="view-all-link" onclick="openViewModal('Pets')">View All</span></div>
+                        <div class="data-list fixed-height-list" id="pets-list-container">
+                            <div class="no-data-state"><img src="user-dashboard/no-pets.png" class="img-30x30"><p>You haven’t added any pets. Click ‘Add Pet’ to get started.</p></div>
+                        </div>
+                    </div>
+                    <div class="card align-bottom">
+                        <div class="card-header"><h3>Upcoming Appointments</h3><span class="view-all-link" onclick="openViewModal('Appointments')">View All</span></div>
+                        <div class="data-list fixed-height-list" id="apt-list-container">
+                            <div class="no-data-state"><img src="user-dashboard/no-appointments.png" class="img-30x30"><p>Nothing scheduled yet. Book an appointment to get started.</p></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid-column">
+                    <div class="card">
+                        <div class="card-header"><h3>Reminders</h3><span class="view-all-link" onclick="openViewModal('Reminders')">View All</span></div>
+                        <div class="data-list fixed-height-list" id="remind-list-container">
+                            <div class="no-data-state"><img src="user-dashboard/no-reminders.png" class="img-30x30"><p>You’re all caught up! Add a reminder so you never miss an important task.</p></div>
+                        </div>
+                    </div>
+                    <div class="card quick-actions-card align-bottom">
+                        <div class="card-header"><h3>Quick Actions</h3></div>
+                        <div class="actions-grid-mini">
+                            <div class="action-card blue-bg" onclick="openActionModal('Add Pet')"><img src="user-dashboard/add-pet.png" class="custom-icon-30"><span>Add Pet</span></div>
+                            <div class="action-card pink-bg" onclick="openActionModal('Appointment')"><img src="user-dashboard/appointment.png" class="custom-icon-30"><span>Appointment</span></div>
+                            <div class="action-card teal-bg" onclick="openActionModal('Payment')"><img src="user-dashboard/payment.png" class="custom-icon-30"><span>Payment</span></div>
+                            <div class="action-card orange-bg" onclick="openActionModal('Status')"><img src="user-dashboard/status.png" class="custom-icon-30"><span>View Status</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="mainModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header"><h2 id="modalTitle">Title</h2><button class="close-btn" onclick="closeModal()">&times;</button></div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('mainModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+
+        // close the popup
+        function closeModal() { modal.style.display = 'none'; }
+
+        // opens a table view based on which card header was clicked
+        function openViewModal(type) {
+            modalTitle.innerText = "All " + type; 
+            modal.style.display = 'flex';
+            
+            if(type === 'Pets') {
+                // setup columns for pets: name, species, breed, last visit
+                modalBody.innerHTML = `
+                    <div class="view-all-grid" id="pets-view-target" style="grid-template-columns: repeat(4, 1fr);">
+                        <strong>Name</strong><strong>Species</strong><strong>Breed</strong><strong>Last Visit</strong>
+                        </div>`;
+            } else if(type === 'Appointments') {
+                // setup columns for appointments: pet, service, date
+                modalBody.innerHTML = `
+                    <div class="view-all-grid" id="apt-view-target" style="grid-template-columns: repeat(3, 1fr);">
+                        <strong>Pet Name</strong><strong>Service</strong><strong>Date</strong>
+                        </div>`;
+            } else if(type === 'Reminders') {
+                // setup columns for reminders: pet, description, status
+                modalBody.innerHTML = `
+                    <div class="view-all-grid" id="remind-view-target" style="grid-template-columns: 1.5fr 1fr 1fr;">
+                        <strong>Pet</strong><strong>Description</strong><strong>Status</strong>
+                        </div>`;
+            }
+        }
+
+        // opens forms or status lists for the quick actions
+        function openActionModal(action) {
+            modalTitle.innerText = action; modal.style.display = 'flex';
+            if(action==='Add Pet') {
+                // dynamic species input if 'Others' is selected
+                modalBody.innerHTML = `<form class="modal-form"><input type="text" placeholder="Pet Name" required><select onchange="document.getElementById('otherSpec').style.display=(this.value=='Others'?'block':'none')"><option>Dog</option><option>Cat</option><option>Rabbit</option><option>Bird</option><option>Hamster</option><option value="Others">Others</option></select><input type="text" id="otherSpec" style="display:none" placeholder="Specify Species"><input type="text" placeholder="Breed"><input type="text" placeholder="Color"><input type="number" placeholder="Age"><select><option>Male</option><option>Female</option></select><button type="submit" class="submit-btn">Register Pet</button></form>`;
+            } else if(action==='Appointment') {
+                modalBody.innerHTML = `<form class="modal-form"><select><option>Select Pet</option></select><select><option value="1">Grooming</option><option value="2">Vaccination</option><option value="3">Check-up</option><option value="4">Deworming</option><option value="5">Feeding Service / Meal Planning</option></select><input type="datetime-local" onfocus="this.max='9999-12-31T23:59'"><textarea placeholder="Notes (max 50 chars)"></textarea><button type="submit" class="submit-btn">Book Appointment</button></form>`;
+            } else if(action==='Payment') {
+                // built-in payment UI with toggleable methods
+                modalBody.innerHTML = `
+                    <form class="modal-form">
+                        <p style="margin-bottom: 10px;">Current Balance: ₱<span id="CurrentBalance">0.00</span></p>
+                        
+                        <select required><option value="">Select Appointment to Pay</option></select>
+                        <input type="number" placeholder="₱ Amount to Pay" required>
+                        
+                        <select id="PaymentMethod" onchange="togglePaymentFields(this.value)" required>
+                            <option value="">Select Payment Method</option>
+                            <option value="Gcash">GCash</option>
+                            <option value="Maya">Maya</option>
+                            <option value="Card">Credit/Debit Card</option>
+                        </select>
+
+                        <div id="dynamic-payment-fields" style="display: flex; flex-direction: column; gap: 12px;"></div>
+
+                        <button type="submit" class="submit-btn">Confirm Payment</button>
+                    </form>`;
+            } else if(action==='Status') {
+                // simple 2-column layout for checking status of bills or requests
+                modalBody.innerHTML = `
+                    <div class="view-all-grid" style="grid-template-columns: 2fr 1fr; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                        <strong>Request / Bill Description</strong>
+                        <strong>Status</strong>
+                    </div>
+                    <div id="status-row-target" class="status-list">
+                    </div>`;
+            }
+        }
+
+        // adds specific input fields depending on whether you pick gcash or card
+        function togglePaymentFields(method) {
+            const container = document.getElementById('dynamic-payment-fields');
+            if (!container) return;
+            
+            if (method === 'Gcash' || method === 'Maya') {
+                container.innerHTML = `
+                    <input type="text" placeholder="${method} Registered Mobile Number" pattern="[0-9]*" maxlength="11" required>
+                    <input type="text" placeholder="Account Name" required>`;
+            } else if (method === 'Card') {
+                container.innerHTML = `
+                    <input type="text" placeholder="Cardholder Name" required>
+                    <input type="text" placeholder="Card Number (0000 0000 0000 0000)" maxlength="16" required>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" placeholder="MM/YY" style="flex: 1;" maxlength="5" required>
+                        <input type="password" placeholder="CVV" style="flex: 1;" maxlength="3" required>
+                    </div>`;
+            } else {
+                container.innerHTML = '';
+            }
+        }
+    </script>
+</body>
+</html>
