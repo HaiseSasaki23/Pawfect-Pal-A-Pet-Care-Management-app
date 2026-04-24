@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pawfect Pal - Login</title>
+    <title>Pawfect Pal</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
 </head>
@@ -13,27 +13,27 @@
         <div class="left-side">
             <div class="header-text">
                 <h1>Pawfect Pal</h1>
-            </div>
-            
-            <div class="image-wrapper">
-                <img src="login.gif" alt="Pet Clinic" class="main-img">
-            </div>
-
-            <div class="quote-box">
-                Paws-itively Organized Pet Care 
-            </div>
         </div>
+    
+        <div class="image-wrapper">
+            <img src="login-img/sit.png" alt="Pet Character" class="main-img" id="main-pet-img">
+        </div>
+
+        <div class="quote-box" id="speech-bubble">
+            Paws-itively Organized Pet Care 
+        </div>
+    </div>
 
         <div class="right-side">
             <div class="login-box">
                 <div class="welcome-text">
-                    <h1>Welcome Back!</h1>
-                    <p>Login to continue to Pawfect Pal</p>
+                    <h1>Welcome Back! </h1>
+                    <p>Login to continue to Pawfect Pal </p>
                 </div>
 
-                <form class="actual-form" id="loginForm">
+                <form class="actual-form">
                     <div class="input-container">
-                        <input type="text" id="userName" placeholder="Username" required>
+                        <input type="text" placeholder="Username or Email" required>
                     </div>
 
                     <div class="input-container password-wrapper">
@@ -42,8 +42,8 @@
                         <input type="checkbox" id="toggle-check" style="display: none;">
     
                         <label for="toggle-check" class="toggle-label">
-                            <img src="eye-closed.png" class="eye-icon closed" alt="Hide Password">
-                            <img src="eye-open.png" class="eye-icon open" alt="Show Password">
+                            <img src="login-img/eye-closed.png" class="eye-icon closed" alt="Hide Password">
+                            <img src="login-img/eye-open.png" class="eye-icon open" alt="Show Password">
                         </label>
                     </div>
 
@@ -58,20 +58,11 @@
                 </form>
 
                 <div class="signup-footer">
-                    Don't have an account? <a href="../register/registration.html">Sign Up</a>
+                    Don't have an account? <a href="#">Sign Up</a>
                 </div>
             </div>
         </div>
     </div>
-
-    <script>
-        const passInput = document.getElementById('password');
-        const toggleBtn = document.getElementById('toggle-check');
-
-        toggleBtn.addEventListener('change', function() {
-            passInput.type = this.checked ? 'text' : 'password';
-        });
-    </script>
 
     <script src="login.js"></script>
 </body>
