@@ -1,5 +1,4 @@
 :root {
-    /* defining our brand colors so we don't have to re-type hex codes */
     --primary-purple: #9d72d6;
     --primary-hover: #8a5bc9;
     --soft-pink: #fdf5f7;
@@ -7,10 +6,9 @@
     --text-dark: #4a4a4a;
     --text-muted: #999;
     --sidebar-width: 280px;
-    --card-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
 }
 
-/* general resets and global font settings */
 * {
     margin: 0;
     padding: 0;
@@ -29,11 +27,11 @@ body {
     width: 100%;
 }
 
-/* sidebar setup - fixed to the left so it stays while you scroll */
+/* --- SIDEBAR --- */
 .sidebar {
     width: var(--sidebar-width);
     background: white;
-    padding: 30px 20px;
+    padding: 10px 20px 30px;
     display: flex;
     flex-direction: column;
     border-right: 1px solid #f0f0f0;
@@ -44,54 +42,28 @@ body {
     z-index: 100;
 }
 
-/* the cute peek-a-boo icons in the menu */
-.nav-char {
-    width: 35px;
-    height: 35px;
-    margin-left: auto;
-    object-fit: contain;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.nav-item.active .nav-char {
-    width: 40px; 
-    height: 40px;
-    opacity: 1;
-    content: url('active.png');
-}
-
-.sidebar:hover .nav-item.active .nav-char {
-    opacity: 0;
-}
-
-.sidebar .nav-item:hover .nav-char {
-    width: 45px; 
-    height: 45px;
-    opacity: 1 !important;
-    content: url('peek.png') !important;
-}
-
 .sidebar-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
+    justify-content: flex-start;
 }
 
-.custom-icon-nav {
-    width: 24px;
-    height: 24px;
+.sidebar-logo-landscape {
+    width: 100%;
+    max-width: 220px;
+    height: auto;
     object-fit: contain;
+    margin-left: -5px;
 }
 
 .sidebar-nav {
     flex-grow: 1;
-    overflow-y: auto; 
+    overflow-y: auto;
     margin-bottom: 20px;
 }
 
-/* styling each nav link */
 .nav-item {
     display: flex;
     align-items: center;
@@ -104,198 +76,145 @@ body {
     margin-bottom: 5px;
     transition: 0.2s;
     position: relative;
+    height: 50px;
 }
 
-.nav-item.active, .nav-item:hover {
+.nav-item.active,
+.nav-item:hover {
     background: var(--bg-lavender);
     color: var(--primary-purple);
+}
+
+.nav-char {
+    width: 40px;
+    height: 40px;
+    margin-left: auto;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.nav-item.active .nav-char {
+    opacity: 1;
+}
+
+.sidebar:hover .nav-item.active .nav-char {
+    opacity: 0;
+}
+
+.sidebar .nav-item:hover .nav-char {
+    width: 40px;
+    opacity: 1 !important;
+    content: url('../../sidebar/peek.png') !important;
+}
+
+.custom-icon-nav {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    object-fit: contain;
 }
 
 .sidebar-footer {
     padding-top: 20px;
     border-top: 1px solid #f5f5f5;
-    margin-top: auto; 
+    margin-top: auto;
 }
 
 .user-name {
-    display: block;        /* Forces the name to take its own line */
-    font-size:25px;       /* Big and bold */
-    line-height: 1; 
+    display: block;
+    font-size: 25px;
+    font-weight: 700;
     margin-bottom: 5px;
 }
 
 .user-role {
-    display: block;        /* Forces 'Pet Owner' to the next line */
-    font-size: 14px !important;
+    display: block;
+    font-size: 14px;
     color: var(--primary-purple);
 }
 
-/* pushing main content to the right of the sidebar */
+/* --- MAIN CONTENT AREA --- */
 .main-content {
     margin-left: var(--sidebar-width);
     flex: 1;
-    padding: 40px;
-    min-height: 100vh;
+    padding: 25px;
 }
 
 .content-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
+    align-items: flex-start;
+    margin-bottom: 5px;
 }
 
-/* top row grid layout */
-.stats-grid {
+.welcome-subtitle {
+    margin-bottom: 10px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* --- NOTIFICATION DOT --- */
+.notif-bell {
+    position: relative;
+    cursor: pointer;
+}
+
+.notif-dot {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 10px;
+    height: 10px;
+    background-color: #ff5e78;
+    border-radius: 50%;
+    border: 2px solid white;
+    display: none;
+}
+
+.notif-dot.active {
+    display: block;
+}
+
+/* --- STATS OVERVIEW --- */
+.stats-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    margin-bottom: 30px;
+    gap: 18px;
+    margin-bottom: 40px;
 }
 
-.stat-card {
-    background: white;
-    padding: 20px;
+.stat-pill {
+    padding: 22px;
     border-radius: 24px;
     display: flex;
     align-items: center;
     gap: 15px;
     box-shadow: var(--card-shadow);
-}
-
-/* colorful circles behind the small icons */
-.stat-icon-bg {
-    width: 50px;
-    height: 50px;
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.pets-bg { background-color: #eef7ff; }
-.apt-bg { background-color: #edfff4; }
-.remind-bg { background-color: #fffaf0; }
-.health-bg { background-color: #e6fffa; }
-
-.custom-icon-small {
-    width: 24px;
-    height: 24px;
-}
-
-/* split layout for the main data blocks */
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 25px;
-}
-
-.grid-column {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-}
-
-.card {
     background: white;
-    border-radius: 24px;
-    padding: 25px;
-    box-shadow: var(--card-shadow);
 }
 
-.card-header {
+.pill-icon-circle {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.view-all-link {
-    font-size: 13px;
-    color: var(--primary-purple);
-    font-weight: 700;
-    cursor: pointer;
-}
-
-/* list styling for empty states */
-.fixed-height-list {
-    min-height: 220px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    justify-content: center;
-}
-
-.no-data-state {
-    display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: center;
 }
 
 .img-30x30 {
     width: 30px;
     height: 30px;
     object-fit: contain;
-    margin-bottom: 8px;
-    opacity: 0.5;
 }
 
-.no-data-state p {
-    font-size: 13px;
-    color: #bbb;
-    font-weight: 700;
-}
+.purple-soft .pill-icon-circle { background: #ede3ff; }
+.green-soft .pill-icon-circle { background: #dbfce8; }
+.orange-soft .pill-icon-circle { background: #ffefe0; }
+.blue-soft .pill-icon-circle { background: #e0f0ff; }
 
-.align-bottom {
-    min-height: 310px;
-    display: flex;
-    flex-direction: column;
-}
-
-/* 2x2 grid for quick buttons */
-.actions-grid-mini {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    flex-grow: 1;
-}
-
-.action-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 15px;
-    border-radius: 20px;
-    transition: 0.3s;
-    cursor: pointer;
-}
-
-.action-card:hover {
-    transform: translateY(-3px);
-}
-
-.action-card span {
-    font-weight: 700;
-    font-size: 13px;
-    color: var(--text-dark);
-    margin-top: 8px;
-}
-
-/* shortcut background colors */
-.blue-bg { background: #eef7ff; }
-.pink-bg { background: #fff0f3; }
-.teal-bg { background: #e6fffa; }
-.orange-bg { background: #fffaf0; }
-
-.custom-icon-30 {
-    width: 40px;
-    height: 40px;
-}
-
-/* centering popups and blurring the background */
+/* --- MODAL SYSTEM --- */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -303,8 +222,8 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.3);
-    backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(2px);
     z-index: 1000;
     justify-content: center;
     align-items: center;
@@ -312,50 +231,220 @@ body {
 
 .modal-content {
     background: white;
-    width: 90%;
-    max-width: 500px;
-    padding: 30px;
+    padding: 25px;
     border-radius: 24px;
+    width: 90%;
+    max-width: 380px;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(157, 114, 214, 0.1);
 }
 
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.modal-title {
+    color: var(--text-dark);
+    font-weight: 700;
+    font-size: 22px;
+    margin-bottom: 15px;
+}
+
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--text-muted);
+}
+
+/* Success Box Centering */
+.success-box {
+    text-align: center;
+    max-width: 320px;
+}
+
+.success-box p {
     margin-bottom: 20px;
 }
 
-.close-btn {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #bbb;
+/* Form Elements */
+.input-group {
+    margin-bottom: 12px;
 }
 
-/* vertical stacks for form elements */
-.modal-form {
+.input-group label {
+    font-size: 13px;
+    color: var(--primary-purple);
+    font-weight: 700;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.pet-form input:not([type="checkbox"]),
+.pet-form select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #f8f0ff;
+    border-radius: 12px;
+    background: #faf8ff;
+    font-size: 14px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.pet-form input:focus {
+    border-color: var(--primary-purple);
+    background: white;
+}
+
+.beck-box {
+    background: #faf8ff;
+    border: 2px solid #f8f0ff;
+    border-radius: 12px;
+    padding: 10px;
+}
+
+.beck-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+}
+
+.beck-option label {
+    margin-bottom: 0 !important;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.total-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px !important;
+    border-radius: 12px;
+}
+
+/* --- ACTIVITY FEED & REMINDERS --- */
+.modal-content-reminders {
+    max-width: 350px;
+    padding: 20px;
+}
+
+.reminders-container {
+    margin: 15px 0;
+    max-height: 450px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.empty-state-reminders {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 10px;
 }
 
-.modal-form input, .modal-form select, .modal-form textarea {
-    padding: 12px;
-    border: 1px solid #f0f0f0;
+.img-30x30-reminders {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    margin-bottom: 15px;
+    opacity: 0.6;
+}
+
+.empty-state-reminders p {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+/* --- DASHBOARD GRID & EMPTY STATE --- */
+.main-grid-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.display-card {
+    background: white;
+    border-radius: 28px;
+    padding: 30px;
+    box-shadow: var(--card-shadow);
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+}
+
+.display-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.display-card-header div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* This targets the main grid container as requested */
+.main-grid-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.empty-img {
+    width: 200px;
+    margin-bottom: 20px;
+}
+
+/* Feedback & Buttons */
+.input-error {
+    border-color: #ff5e78 !important;
+    background: #fffafa !important;
+}
+
+.error-msg {
+    color: #ff5e78;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 3px;
+    display: none;
+}
+
+.primary-action-btn {
+    margin-top: 25px;
+    background: #8e6adb;
+    color: white;
+    border: none;
+    padding: 12px 28px;
     border-radius: 12px;
-    background: #fafafa;
-    outline: none;
-    font-size: 14px;
-    color: var(--text-dark);
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
-.modal-form textarea {
-    height: 80px;
-    resize: none;
-}
-
-.submit-btn {
+.register-btn {
+    width: 100%;
     background: var(--primary-purple);
     color: white;
     border: none;
@@ -363,53 +452,148 @@ body {
     border-radius: 12px;
     font-weight: 700;
     cursor: pointer;
-    margin-top: 10px;
-    transition: 0.3s;
+    transition: 0.2s;
 }
 
-.submit-btn:hover {
-    background: var(--primary-hover);
+.full-width {
+    width: 100%;
 }
 
-/* list layout inside modals */
-.view-all-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    font-size: 12px;
-    border-top: 1px solid #eee;
-    padding-top: 15px;
+/* --- NEW STYLES FOR UPDATED GRID LAYOUT (SAMPLE DATA STATE) ---
+    These are added at the bottom so your previous code is preserved.
+*/
+
+.data-list {
+    flex: 1;
 }
 
-.status-list {
-    max-height: 300px;
-    overflow-y: auto;
-    margin-top: 10px;
-}
-
-.status-row {
-    display: grid;
-    grid-template-columns: 2.5fr 1fr;
-    padding: 15px 10px;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 14px;
-    align-items: center;
-    transition: background 0.2s;
-}
-
-.status-row:hover {
-    background-color: #fafafa;
-}
-
-/* pretty pills for status tags */
-.status-badge {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 6px 12px;
-    border-radius: 20px;
-    text-align: center;
-    background: #f3efff;
+.view-all-link {
+    display: block;
+    margin-top: 15px;
     color: var(--primary-purple);
-    width: fit-content;
-    justify-self: end;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.add-small-btn {
+    background: var(--soft-pink);
+    color: var(--primary-purple);
+    border: 1px solid #f0e6ff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+/* Pet Row Styling */
+.pet-list-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #f8f0ff;
+    gap: 15px;
+}
+
+.pet-avatar-list {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--bg-lavender);
+}
+
+.pet-details-list {
+    flex: 1;
+}
+
+.pet-name-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+
+.species-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.breed-text {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.pet-info-right {
+    text-align: right;
+    font-size: 12px;
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+/* Upcoming Appointments Row Styling */
+.appointment-list-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 15px;
+    background: #faf8ff;
+    border-radius: 18px;
+    margin-bottom: 12px;
+    gap: 15px;
+}
+
+.calendar-mini {
+    background: white;
+    border-radius: 12px;
+    width: 50px;
+    height: 55px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid #eee;
+    overflow: hidden;
+}
+
+.cal-month {
+    background: #ff5e78;
+    color: white;
+    width: 100%;
+    font-size: 9px;
+    text-align: center;
+    padding: 2px 0;
+    font-weight: 700;
+}
+
+.cal-day {
+    font-size: 18px;
+    font-weight: 700;
+    padding: 4px 0;
+}
+
+.cal-paw-icon {
+    width: 12px;
+    height: 12px;
+    margin-top: auto;
+    padding-bottom: 2px;
+    opacity: 0.7;
+}
+
+.apt-details-list {
+    flex: 1;
+}
+
+.apt-time-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.mini-icon {
+    width: 12px;
+    height: 12px;
 }

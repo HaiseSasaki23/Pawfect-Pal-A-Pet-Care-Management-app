@@ -6,142 +6,308 @@
     <title>Pawfect Pal</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* this logic handles the cute character peek-a-boo effect in the nav */
-        .nav-char {
-            width: 25px;
-            height: 25px;
-            margin-left: auto;
-            object-fit: contain;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-
-        /* show the 'active' pet icon when a link is clicked */
-        .nav-item.active .nav-char {
-            opacity: 1;
-            content: url('user-dashboard/active.png');
-        }
-
-        /* hide active icons when you're just hovering over the sidebar generally */
-        .sidebar:hover .nav-item.active .nav-char {
-            opacity: 0;
-        }
-
-        /* show the 'peek' icon specifically when hovering over a nav link */
-        .sidebar .nav-item:hover .nav-char {
-            opacity: 1 !important;
-            content: url('user-dashboard/peek.png') !important;
-        }
-    </style>
 </head>
 <body class="dashboard-body">
     <div class="dashboard-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <div class="logo-text"><h2>Pawfect Pal</h2><p>Paws-itively Organized Pet Care</p></div>
+                <img src="../../sidebar/logo.png" alt="Pawfect Pal" class="sidebar-logo-landscape">
             </div>
             <nav class="sidebar-nav">
                 <a href="#" class="nav-item active">
-                    <img src="user-dashboard/dashboard-m.png" class="custom-icon-nav"> Dashboard <img src="user-dashboard/active.png" class="nav-char">
+                    <img src="../../sidebar/dashboard-m.png" class="custom-icon-nav"> 
+                    Dashboard 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="pets.html" class="nav-item">
+                    <img src="../../sidebar/pets-m.png" class="custom-icon-nav"> 
+                    Pets 
+                    <img src="../../sidebar/active.png" class="nav-char">
                 </a>
                 <a href="#" class="nav-item">
-                    <img src="user-dashboard/pets-m.png" class="custom-icon-nav"> Pets <img src="user-dashboard/active.png" class="nav-char">
+                    <img src="../../sidebar/appointment-m.png" class="custom-icon-nav"> 
+                    Appointments 
+                    <img src="../../sidebar/active.png" class="nav-char">
                 </a>
                 <a href="#" class="nav-item">
-                    <img src="user-dashboard/appointment-m.png" class="custom-icon-nav"> Appointments <img src="user-dashboard/active.png" class="nav-char">
+                    <img src="../../sidebar/health-m.png" class="custom-icon-nav"> 
+                    Health Records 
+                    <img src="../../sidebar/active.png" class="nav-char">
                 </a>
                 <a href="#" class="nav-item">
-                    <img src="user-dashboard/health-m.png" class="custom-icon-nav"> Health Records <img src="user-dashboard/active.png" class="nav-char">
+                    <img src="../../sidebar/services-m.png" class="custom-icon-nav"> 
+                    Services 
+                    <img src="../../sidebar/active.png" class="nav-char">
                 </a>
                 <a href="#" class="nav-item">
-                    <img src="user-dashboard/services-m.png" class="custom-icon-nav"> Services <img src="user-dashboard/active.png" class="nav-char">
-                </a>
-                <a href="#" class="nav-item">
-                    <img src="user-dashboard/feeding-m.png" class="custom-icon-nav"> Feeding Schedule <img src="user-dashboard/active.png" class="nav-char">
-                </a>
-                <a href="#" class="nav-item">
-                    <img src="user-dashboard/reminders-m.png" class="custom-icon-nav"> Reminders <img src="user-dashboard/active.png" class="nav-char">
-                </a>
-                <a href="#" class="nav-item">
-                    <img src="user-dashboard/billing-m.png" class="custom-icon-nav"> Billing History <img src="user-dashboard/active.png" class="nav-char">
+                    <img src="../../sidebar/billing-m.png" class="custom-icon-nav"> 
+                    Billing History 
+                    <img src="../../sidebar/active.png" class="nav-char">
                 </a>
             </nav>
             <div class="sidebar-footer">
-                <div class="user-info"><strong class="user-name"><span id="sidebarOwnerFName">Guest</span><span id="sidebarOwnerLName"> User</span></strong><span class="user-role">Pet Owner</span></div>
+                <div class="user-info">
+                    <strong class="user-name">
+                        <span id="OwnerFName">Guest</span> <span id="OwnerLName">User</span>
+                    </strong>
+                    <span class="user-role">Pet Owner</span>
+                </div>
             </div>
         </aside>
 
         <main class="main-content">
             <header class="content-header">
                 <div class="welcome-section">
-                    <h1>Welcome back, <span id="welcomeOwnerFName">User</span>! 🐾</h1>
-                    <p>Here's what's happening with your furry friends today 🐾</p>
+                    <h1>Good morning, <span id="OwnerFName">User</span>! 🐾</h1>
+                    <p class="welcome-subtitle">Here's what's happening with your furry friends today 🐾</p>
+                </div>
+                <div class="header-right">
+                    <div class="notif-bell" onclick="openActionModal('Reminders')">
+                        <img src="user-dashboard/reminders-m.png" class="custom-icon-nav">
+                        <span class="notif-dot" id="RemindDot"></span>
+                    </div>
                 </div>
             </header>
 
-            <section class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon-bg pets-bg"><img src="user-dashboard/pets-d.png" class="custom-icon-small"></div>
-                    <div class="stat-info"><p>Total Pets</p><h3 id="TotalPetsCount">0</h3></div>
+            <section class="stats-row">
+                <div class="stat-pill purple-soft">
+                    <div class="pill-icon-circle">
+                        <img src="user-dashboard/pets-d.png" class="img-30x30">
+                    </div>
+                    <div class="pill-data">
+                        <p>Total Pets</p>
+                        <h3 id="TotalPetsCount">0</h3>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon-bg apt-bg"><img src="user-dashboard/appointment-d.png" class="custom-icon-small"></div>
-                    <div class="stat-info"><p>Appointments</p><h3 id="AptCount">0</h3></div>
-                </div>  
-                <div class="stat-card">
-                    <div class="stat-icon-bg remind-bg"><img src="user-dashboard/reminder-d.png" class="custom-icon-small"></div>
-                    <div class="stat-info"><p>Due Reminders</p><h3 id="RemindCount">0</h3></div>
+                <div class="stat-pill green-soft">
+                    <div class="pill-icon-circle">
+                        <img src="user-dashboard/appointment-d.png" class="img-30x30">
+                    </div>
+                    <div class="pill-data">
+                        <p>Upcoming Appointments</p>
+                        <h3 id="AptCount">0</h3>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon-bg health-bg"><img src="user-dashboard/health-d.png" class="custom-icon-small"></div>
-                    <div class="stat-info"><p>Health Records</p><h3 id="HealthCount">0</h3></div>
+                <div class="stat-pill orange-soft">
+                    <div class="pill-icon-circle">
+                        <img src="user-dashboard/reminder-d.png" class="img-30x30">
+                    </div>
+                    <div class="pill-data">
+                        <p>Due Reminders</p>
+                        <h3 id="RemindCount">0</h3>
+                    </div>
+                </div>
+                <div class="stat-pill blue-soft">
+                    <div class="pill-icon-circle">
+                        <img src="user-dashboard/health-d.png" class="img-30x30">
+                    </div>
+                    <div class="pill-data">
+                        <p>Health Records</p>
+                        <h3 id="HealthCount">0</h3>
+                    </div>
                 </div>
             </section>
 
-            <div class="dashboard-grid">
-                <div class="grid-column">
-                    <div class="card">
-                        <div class="card-header"><h3>My Pets</h3><span class="view-all-link" onclick="openViewModal('Pets')">View All</span></div>
-                        <div class="data-list fixed-height-list" id="pets-list-container">
-                            <div class="no-data-state"><img src="user-dashboard/no-pets.png" class="img-30x30"><p>You haven’t added any pets. Click ‘Add Pet’ to get started.</p></div>
-                        </div>
+            <div class="main-grid-layout">
+                <div class="display-card">
+                    <div class="display-card-header">
+                        <span>My Pets</span>
+                        <button class="add-small-btn" onclick="openActionModal('Add Pet')">
+                            + Add Pet
+                        </button>
                     </div>
-                    <div class="card align-bottom">
-                        <div class="card-header"><h3>Upcoming Appointments</h3><span class="view-all-link" onclick="openViewModal('Appointments')">View All</span></div>
-                        <div class="data-list fixed-height-list" id="apt-list-container">
-                            <div class="no-data-state"><img src="user-dashboard/no-appointments.png" class="img-30x30"><p>Nothing scheduled yet. Book an appointment to get started.</p></div>
-                        </div>
+                    
+                    <div class="data-list" id="PetsList"></div>
+
+                    <div class="empty-state" id="EmptyPets">
+                        <img src="user-dashboard/no-pets.png" class="empty-img">
+                        <h3>No pets yet</h3>
+                        <p>Add your first furry friend to start managing their care.</p>
+                        <button class="primary-action-btn" onclick="openActionModal('Add Pet')">+ Add Your First Pet</button>
                     </div>
+                    
+                    <a href="#" class="view-all-link">View all pets →</a>
                 </div>
-                <div class="grid-column">
-                    <div class="card">
-                        <div class="card-header"><h3>Reminders</h3><span class="view-all-link" onclick="openViewModal('Reminders')">View All</span></div>
-                        <div class="data-list fixed-height-list" id="remind-list-container">
-                            <div class="no-data-state"><img src="user-dashboard/no-reminders.png" class="img-30x30"><p>You’re all caught up! Add a reminder so you never miss an important task.</p></div>
-                        </div>
+
+                <div class="display-card">
+                    <div class="display-card-header">
+                        <span>Upcoming Appointments</span>
+                        <button class="add-small-btn" onclick="openActionModal('Appointment')">
+                            + Book Appointment
+                        </button>
                     </div>
-                    <div class="card quick-actions-card align-bottom">
-                        <div class="card-header"><h3>Quick Actions</h3></div>
-                        <div class="actions-grid-mini">
-                            <div class="action-card blue-bg" onclick="openActionModal('Add Pet')"><img src="user-dashboard/add-pet.png" class="custom-icon-30"><span>Add Pet</span></div>
-                            <div class="action-card pink-bg" onclick="openActionModal('Appointment')"><img src="user-dashboard/appointment.png" class="custom-icon-30"><span>Appointment</span></div>
-                            <div class="action-card teal-bg" onclick="openActionModal('Payment')"><img src="user-dashboard/payment.png" class="custom-icon-30"><span>Payment</span></div>
-                            <div class="action-card orange-bg" onclick="openActionModal('Status')"><img src="user-dashboard/status.png" class="custom-icon-30"><span>View Status</span></div>
-                        </div>
+                    
+                    <div class="data-list" id="AptList"></div>
+
+                    <div class="empty-state" id="EmptyApt">
+                        <img src="user-dashboard/no-appointments.png" class="empty-img">
+                        <h3>No appointments scheduled</h3>
+                        <p>Book an appointment to keep your pet healthy and happy.</p>
+                        <button class="primary-action-btn" onclick="openActionModal('Appointment')">+ Book an Appointment</button>
                     </div>
+                    
+                    <a href="#" class="view-all-link">View all appointments →</a>
                 </div>
             </div>
         </main>
     </div>
 
-    <div id="mainModal" class="modal-overlay">
+    <div id="addPetModal" class="modal-overlay">
         <div class="modal-content">
-            <div class="modal-header"><h2 id="modalTitle">Title</h2><button class="close-btn" onclick="closeModal()">&times;</button></div>
-            <div class="modal-body" id="modalBody"></div>
+            <span class="close-modal" onclick="closeActionModal('Add Pet')">&times;</span>
+            <h2 class="modal-title">Register Your Pet</h2>
+            <form id="addPetForm" class="pet-form">
+                <div class="input-group">
+                    <label>Pet Photo</label>
+                    <input type="file" id="petPhoto" accept="image/*">
+                </div>
+                <div class="input-group">
+                    <input type="text" id="petName" placeholder="Pet Name" required>
+                    <small class="error-msg" id="nameError">Letters only.</small>
+                </div>
+                <div class="input-group">
+                    <label>Birthday</label>
+                    <input type="date" id="petBirthday" required>
+                </div>
+                <div class="input-group">
+                    <label>Age</label>
+                    <input type="text" id="petAge" placeholder="Age" readonly>
+                </div>
+                <div class="input-group">
+                    <select id="petSpecies" required onchange="toggleOtherSpecies()">
+                        <option value="" disabled selected>Select Species</option>
+                        <option value="Dog">Dog</option>
+                        <option value="Cat">Cat</option>
+                        <option value="Rabbit">Rabbit</option>
+                        <option value="Bird">Bird</option>
+                        <option value="Hamster">Hamster</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+                <div class="input-group" id="otherSpeciesGroup" style="display: none;">
+                    <input type="text" id="otherSpeciesInput" placeholder="Please specify species">
+                    <small class="error-msg" id="otherError">Letters only.</small>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="petBreed" placeholder="Breed" required>
+                    <small class="error-msg" id="breedError">Letters only.</small>
+                </div>
+                <div class="input-group">
+                    <select id="petGender" required>
+                        <option value="" disabled selected>Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <button type="submit" class="register-btn">Register</button>
+            </form>
         </div>
     </div>
 
-<script src="dashboard.js"></script>
+    <div id="bookAppointmentModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeActionModal('Appointment')">&times;</span>
+            <h2 class="modal-title">Book an Appointment</h2>
+            <form id="bookAppointmentForm" class="pet-form">
+                <div class="input-group">
+                    <label>Select Pet</label>
+                    <select id="bookingPetName" name="Name" required>
+                        <option value="" disabled selected>Select Pet</option>
+                        </select>
+                </div>
+                <div class="input-group">
+                    <label>Date</label>
+                    <input type="date" id="bookingDate" required>
+                </div>
+                <div class="input-group">
+                    <label>Time Slot</label>
+                    <select id="bookingTime" required>
+                        <option value="" disabled selected>Select Time</option>
+                        <option value="07:00">07:00 AM</option><option value="07:30">07:30 AM</option>
+                        <option value="08:00">08:00 AM</option><option value="08:30">08:30 AM</option>
+                        <option value="09:00">09:00 AM</option><option value="09:30">09:30 AM</option>
+                        <option value="10:00">10:00 AM</option><option value="10:30">10:30 AM</option>
+                        <option value="11:00">11:00 AM</option><option value="11:30">11:30 AM</option>
+                        <option value="12:00">12:00 PM</option><option value="12:30">12:30 PM</option>
+                        <option value="13:00">01:00 PM</option><option value="13:30">01:30 PM</option>
+                        <option value="14:00">02:00 PM</option><option value="14:30">02:30 PM</option>
+                        <option value="15:00">03:00 PM</option><option value="15:30">03:30 PM</option>
+                        <option value="16:00">04:00 PM</option><option value="16:30">04:30 PM</option>
+                        <option value="17:00">05:00 PM</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Services (₱ Estimate)</label>
+                    <div class="beck-box">
+                        <div class="beck-option">
+                            <input type="checkbox" id="s1" name="services" data-price="500" value="checkup">
+                            <label for="s1">Check-up <span>₱500</span></label>
+                        </div>
+                        <div class="beck-option">
+                            <input type="checkbox" id="s2" name="services" data-price="1200" value="vaccination">
+                            <label for="s2">Vaccination <span>₱1,200</span></label>
+                        </div>
+                        <div class="beck-option">
+                            <input type="checkbox" id="s3" name="services" data-price="350" value="deworming">
+                            <label for="s3">Deworming <span>₱350</span></label>
+                        </div>
+                        <div class="beck-option">
+                            <input type="checkbox" id="s4" name="services" data-price="1500" value="grooming">
+                            <label for="s4">Grooming <span>₱1,500</span></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group total-box purple-soft">
+                    <p>Total Est:</p>
+                    <h3 id="bookingTotal">₱0</h3>
+                </div>
+                <div class="input-group">
+                    <label>Payment Mode</label>
+                    <select id="bookingPayment" required onchange="toggleGcashDetails()">
+                        <option value="" disabled selected>Select Payment</option>
+                        <option value="Cash">Cash</option>
+                        <option value="GCash">GCash</option>
+                    </select>
+                </div>
+                <div id="gcashDetails" style="display: none;">
+                    <div class="input-group">
+                        <input type="text" id="gcashName" placeholder="GCash Account Name">
+                        <small class="error-msg" id="gcashNameError">Letters only.</small>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="gcashRef" placeholder="Reference Number (13 digits)">
+                        <small class="error-msg" id="gcashRefError">Numbers only.</small>
+                    </div>
+                </div>
+                <button type="submit" class="register-btn">Request Booking</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="remindersModal" class="modal-overlay">
+        <div class="modal-content modal-content-reminders">
+            <span class="close-modal" onclick="closeActionModal('Reminders')">&times;</span>
+            <h2 class="modal-title">Activity Feed</h2>
+            <div class="reminders-container">
+                <div class="empty-state-reminders">
+                    <img src="user-dashboard/no-reminders.png" class="img-30x30-reminders" alt="No updates">
+                    <p>No recent updates or notifications at the moment.</p>
+                </div>
+            </div>
+            <button class="primary-action-btn full-width" onclick="closeActionModal('Reminders')">
+                Back to Dashboard
+            </button>
+        </div>
+    </div>
+
+    <div id="successModal" class="modal-overlay">
+        <div class="modal-content success-box">
+            <h2 id="successTitle" class="modal-title">Request Sent</h2>
+            <p id="successMessage" class="welcome-subtitle">Your request is now pending admin confirmation.</p>
+            <button class="primary-action-btn full-width" onclick="closeSuccessModal()">Got it!</button>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
 </body>
 </html>
