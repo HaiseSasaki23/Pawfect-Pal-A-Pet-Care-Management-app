@@ -459,10 +459,6 @@ body {
     width: 100%;
 }
 
-/* --- NEW STYLES FOR UPDATED GRID LAYOUT (SAMPLE DATA STATE) ---
-    These are added at the bottom so your previous code is preserved.
-*/
-
 .data-list {
     flex: 1;
 }
@@ -596,4 +592,14 @@ body {
 .mini-icon {
     width: 12px;
     height: 12px;
+}
+
+.display-card:has(.empty-state:not([style*="display: none"])) .add-small-btn,
+.display-card:has(.empty-state[style*="display: flex"]) .add-small-btn {
+    display: none;
+}
+
+.display-card:has(.empty-state:not([style*="display: none"])) .view-all-link,
+.display-card:has(.empty-state[style*="display: flex"]) .view-all-link {
+    display: none;
 }
