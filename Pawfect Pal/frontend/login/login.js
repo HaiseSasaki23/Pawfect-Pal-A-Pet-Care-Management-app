@@ -1,45 +1,33 @@
-const loginForm = document.getElementById("loginForm");
+const passInput = document.getElementById('password');
+const toggleBtn = document.getElementById('toggle-check');
+const petImg = document.getElementById('main-pet-img');
+const bubble = document.getElementById('speech-bubble');
+const usernameInput = document.querySelector('input[type="text"]');
 
-loginForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const userName = document.getElementById("userName").value.trim();
-    const password = document.getElementById("password").value.trim();
-
-    if (!userName || !password) {
-        alert("Username and password are required.");
-        return;
+function updatePasswordState() {
+    if (toggleBtn.checked) {
+        passInput.type = 'text';
+        petImg.src = 'login-img/peeking.png';
+        bubble.innerText = "I'm watching!";
+    } else {
+        passInput.type = 'password';
+        petImg.src = 'login-img/covered-eyes.png';
+        bubble.innerText = "I'm not looking!";
     }
+}
 
-    try {
-        const response = await fetch("http://localhost:5182/api/Auth/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                userName,
-                password
-            })
-        });
+toggleBtn.addEventListener('change', updatePasswordState);
 
-        const data = await response.json();
+passInput.addEventListener('focus', updatePasswordState);
 
-        if (response.ok) {
-            alert(data.message || "Login successful.");
+usernameInput.addEventListener('focus', () => {
+    petImg.src = 'login-img/sit.png';
+    bubble.innerText = "Paws-itively Organized Pet Care";
+});
 
-            // save for future use
-            if (data.userId) localStorage.setItem("userId", data.userId);
-            if (data.userName) localStorage.setItem("userName", data.userName);
-            if (data.role) localStorage.setItem("role", data.role);
-
-            // temporary redirect
-            window.location.href = "../dashboard/dashboard.html";
-        } else {
-            alert(data.message || "Login failed.");
-        }
-    } catch (error) {
-        console.error("Login error:", error);
-        alert("Could not connect to the server.");
+document.addEventListener('click', (e) => {
+    if (!passInput.contains(e.target) && !usernameInput.contains(e.target) && !toggleBtn.contains(e.target) && !document.querySelector('.toggle-label').contains(e.target)) {
+        petImg.src = 'login-img/sit.png';
+        bubble.innerText = "Paws-itively Organized Pet Care";
     }
 });
