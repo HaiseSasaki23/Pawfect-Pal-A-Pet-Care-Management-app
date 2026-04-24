@@ -201,11 +201,49 @@ function calculateAge() {
 
 document.getElementById('petBirthday').addEventListener('change', calculateAge);
 
-document.getElementById('addPetForm').addEventListener('submit', (e) => {
+document.getElementById("addPetForm").addEventListener("submit", async function (e) {
     e.preventDefault();
-    if (!e.target.querySelector('.input-error')) { 
-        closeActionModal('Add Pet'); 
-        showSuccessMessage("Request Sent", "Your pet registration is now pending admin confirmation."); 
+
+    const userId = localStorage.getItem("userId");
+
+    const speciesSelect = document.getElementById("petSpecies").value;
+    const otherSpecies = document.getElementById("otherSpeciesInput").value.trim();
+
+    const pet = {
+        userId: parseInt(userId),
+        name: document.getElementById("petName").value.trim(),
+        species: speciesSelect === "Others" ? otherSpecies : speciesSelect,
+        color: document.getElementById("petColor").value.trim(),
+        breed: document.getElementById("petBreed").value.trim(),
+        gender: document.getElementById("petGender").value,
+        birthdate: document.getElementById("petBirthday").value
+    };
+
+    try {
+        const response = await fetch("http://localhost:5182/api/Pet", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(pet)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(data.message || "Failed to add pet.");
+            return;
+        }
+
+        closeActionModal("Add Pet");
+        showSuccessMessage("Pet Added", "Your pet has been added successfully.");
+
+        loadDashboardSummary(userId, localStorage.getItem("role"));
+        loadPets(userId);
+
+    } catch (error) {
+        console.error("Add pet error:", error);
+        alert("Could not connect to the server.");
     }
 });
 

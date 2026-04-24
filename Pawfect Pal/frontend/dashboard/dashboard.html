@@ -19,7 +19,7 @@
                     Dashboard 
                     <img src="../sidebar/active.png" class="nav-char">
                 </a>
-                <a href="..\pets\pets.html" class="nav-item">
+                <a href="../pets/pets.html" class="nav-item">
                     <img src="../sidebar/pets-m.png" class="custom-icon-nav"> 
                     Pets 
                     <img src="../sidebar/active.png" class="nav-char">
@@ -51,6 +51,11 @@
                         <span id="sidebarOwnerFName">Guest</span> <span id="sidebarOwnerLName">User</span>
                     </strong>
                     <span class="user-role">Pet Owner</span>
+                </div>
+                    <a href="#" class="nav-item logout-item" onclick="triggerLogout()">
+                        <img src="../sidebar/logout-m.png" class="custom-icon-nav logout-icon" alt="Logout"> 
+                        Logout
+                    </a>
                 </div>
             </div>
         </aside>
@@ -189,6 +194,9 @@
                     <small class="error-msg" id="otherError">Letters only.</small>
                 </div>
                 <div class="input-group">
+                    <input type="text" id="petColor" placeholder="Color" required>
+                </div>         
+                <div class="input-group">
                     <input type="text" id="petBreed" placeholder="Breed" required>
                     <small class="error-msg" id="breedError">Letters only.</small>
                 </div>
@@ -308,6 +316,32 @@
         </div>
     </div>
 
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-header" style="justify-content: center; border: none;">
+                <h2 style="color: var(--primary-purple); font-size: 20px;">Confirm Action</h2>
+            </div>
+
+            <div class="modal-body">
+                <p id="confirmMessage" style="margin-bottom: 25px; color: var(--text-dark);">
+                    Are you sure?
+                </p>
+
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button id="btnConfirmDelete" class="submit-btn" style="margin: 0; background-color: #ff5e78; flex: 1;">
+                        Confirm
+                    </button>
+
+                    <button onclick="document.getElementById('confirmModal').style.display='none'" class="action-btn view-btn" style="flex: 1; border-radius: 12px; height: 48px;">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="../data/auth.js"></script>
     <script src="dashboard.js"></script>
 </body>
 </html>

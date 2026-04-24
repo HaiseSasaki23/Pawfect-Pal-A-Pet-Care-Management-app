@@ -17,19 +17,18 @@ namespace PawfectPal.Api.Repositories
         public void InsertPet(Pet pet)
         {
             string query = @"
-                INSERT INTO pet (UserID, Name, Species, Color, Breed, Age, Gender)
-                VALUES (@UserID, @Name, @Species, @Color, @Breed, @Age, @Gender)";
+                INSERT INTO pet (UserID, Name, Species, Color, Breed, Gender, Birthdate)
+                VALUES (@UserID, @Name, @Species, @Color, @Breed, @Gender, @Birthdate)";
 
             var parameters = new List<MySqlParameter>
             {
                 new("@UserID", pet.UserId),
                 new("@Name", pet.Name),
                 new("@Species", pet.Species),
-
                 new("@Color", pet.Color),
                 new("@Breed", pet.Breed),
-                new("@Age", pet.Age),
-                new("@Gender", pet.Gender)
+                new("@Gender", pet.Gender),
+                new("@Birthdate", pet.Birthdate.HasValue ? pet.Birthdate.Value : DBNull.Value)
             };
 
             _db.ExecuteNonQuery(query, parameters);
@@ -44,17 +43,7 @@ namespace PawfectPal.Api.Repositories
 
             foreach (DataRow row in dt.Rows)
             {
-                pets.Add(new Pet
-                {
-                    PetId = Convert.ToInt32(row["PetID"]),
-                    UserId = Convert.ToInt32(row["UserID"]),
-                    Name = row["Name"].ToString() ?? string.Empty,
-                    Species = row["Species"].ToString() ?? string.Empty,
-                    Color = row["Color"].ToString() ?? string.Empty,
-                    Breed = row["Breed"].ToString() ?? string.Empty,
-                    Age = Convert.ToInt32(row["Age"]),
-                    Gender = row["Gender"].ToString() ?? string.Empty
-                });
+                pets.Add(MapPet(row));
             }
 
             return pets;
@@ -74,19 +63,9 @@ namespace PawfectPal.Api.Repositories
             if (dt.Rows.Count == 0)
                 return null;
 
-            DataRow row = dt.Rows[0];
-
-            return new Pet
-            {
-                PetId = Convert.ToInt32(row["PetID"]),
-                UserId = Convert.ToInt32(row["UserID"]),
-                Name = row["Name"].ToString() ?? string.Empty,
-                Color = row["Color"].ToString() ?? string.Empty,
-                Breed = row["Breed"].ToString() ?? string.Empty,
-                Age = Convert.ToInt32(row["Age"]),
-                Gender = row["Gender"].ToString() ?? string.Empty
-            };
+            return MapPet(dt.Rows[0]);
         }
+
         public List<Pet> GetPetsByUserId(int userId)
         {
             string query = "SELECT * FROM pet WHERE UserID = @UserID";
@@ -102,21 +81,12 @@ namespace PawfectPal.Api.Repositories
 
             foreach (DataRow row in dt.Rows)
             {
-                pets.Add(new Pet
-                {
-                    PetId = Convert.ToInt32(row["PetID"]),
-                    UserId = Convert.ToInt32(row["UserID"]),
-                    Name = row["Name"].ToString() ?? "",
-                    Species = row["Species"].ToString() ?? "",
-                    Color = row["Color"].ToString() ?? "",
-                    Breed = row["Breed"].ToString() ?? "",
-                    Age = Convert.ToInt32(row["Age"]),
-                    Gender = row["Gender"].ToString() ?? ""
-                });
+                pets.Add(MapPet(row));
             }
 
             return pets;
         }
+
         public void UpdatePet(Pet pet)
         {
             string query = @"
@@ -126,8 +96,8 @@ namespace PawfectPal.Api.Repositories
                     Species = @Species,
                     Color = @Color,
                     Breed = @Breed,
-                    Age = @Age,
-                    Gender = @Gender
+                    Gender = @Gender,
+                    Birthdate = @Birthdate
                 WHERE PetID = @PetID";
 
             var parameters = new List<MySqlParameter>
@@ -135,10 +105,11 @@ namespace PawfectPal.Api.Repositories
                 new("@PetID", pet.PetId),
                 new("@UserID", pet.UserId),
                 new("@Name", pet.Name),
+                new("@Species", pet.Species),
                 new("@Color", pet.Color),
                 new("@Breed", pet.Breed),
-                new("@Age", pet.Age),
-                new("@Gender", pet.Gender)
+                new("@Gender", pet.Gender),
+                new("@Birthdate", pet.Birthdate.HasValue ? pet.Birthdate.Value : DBNull.Value)
             };
 
             _db.ExecuteNonQuery(query, parameters);
@@ -154,6 +125,21 @@ namespace PawfectPal.Api.Repositories
             };
 
             _db.ExecuteNonQuery(query, parameters);
+        }
+
+        private Pet MapPet(DataRow row)
+        {
+            return new Pet
+            {
+                PetId = Convert.ToInt32(row["PetID"]),
+                UserId = Convert.ToInt32(row["UserID"]),
+                Name = row["Name"].ToString() ?? string.Empty,
+                Species = row["Species"].ToString() ?? string.Empty,
+                Color = row["Color"].ToString() ?? string.Empty,
+                Breed = row["Breed"].ToString() ?? string.Empty,
+                Gender = row["Gender"].ToString() ?? string.Empty,
+                Birthdate = row["Birthdate"] == DBNull.Value ? null : Convert.ToDateTime(row["Birthdate"])
+            };
         }
     }
 }

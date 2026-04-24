@@ -11,51 +11,51 @@
     <div class="dashboard-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <img src="../../sidebar/logo.png" alt="Pawfect Pal" class="sidebar-logo-landscape">
+                <img src="../sidebar/logo.png" alt="Pawfect Pal" class="sidebar-logo-landscape">
             </div>
             <nav class="sidebar-nav">
-                <a href="dashboard.html" class="nav-item">
-                    <img src="../../sidebar/dashboard-m.png" class="custom-icon-nav"> 
+                <a href="../dashboard/dashboard.html" class="nav-item">
+                    <img src="../sidebar/dashboard-m.png" class="custom-icon-nav"> 
                     Dashboard 
-                    <img src="../../sidebar/active.png" class="nav-char">
+                    <img src="../sidebar/active.png" class="nav-char">
                 </a>
                 <a href="#" class="nav-item active">
-                    <img src="../../sidebar/pets-m.png" class="custom-icon-nav"> 
+                    <img src="../sidebar/pets-m.png" class="custom-icon-nav"> 
                     Pets 
-                    <img src="../../sidebar/active.png" class="nav-char">
+                    <img src="../sidebar/active.png" class="nav-char">
                 </a>
                 <a href="#" class="nav-item">
-                    <img src="../../sidebar/appointment-m.png" class="custom-icon-nav"> 
+                    <img src="../sidebar/appointment-m.png" class="custom-icon-nav"> 
                     Appointments 
-                    <img src="../../sidebar/active.png" class="nav-char">
+                    <img src="../sidebar/active.png" class="nav-char">
                 </a>
                 <a href="#" class="nav-item">
-                    <img src="../../sidebar/health-m.png" class="custom-icon-nav"> 
+                    <img src="../sidebar/health-m.png" class="custom-icon-nav"> 
                     Health Records
-                    <img src="../../sidebar/active.png" class="nav-char">
+                    <img src="../sidebar/active.png" class="nav-char">
                 </a>
                 <a href="#" class="nav-item">
-                    <img src="../../sidebar/services-m.png" class="custom-icon-nav"> 
+                    <img src="../sidebar/services-m.png" class="custom-icon-nav"> 
                     Services 
-                    <img src="../../sidebar/active.png" class="nav-char">
+                    <img src="../sidebar/active.png" class="nav-char">
                 </a>
                 <a href="#" class="nav-item">
-                    <img src="../../sidebar/billing-m.png" class="custom-icon-nav"> 
+                    <img src="../sidebar/billing-m.png" class="custom-icon-nav"> 
                     Billing History 
-                    <img src="../../sidebar/active.png" class="nav-char">
+                    <img src="../sidebar/active.png" class="nav-char">
                 </a>
             </nav>
             <div class="sidebar-footer">
                 <div class="user-info">
                     <strong class="user-name">
-                        <span id="OwnerFName">Guest</span> <span id="OwnerLName">User</span>
+                        <span id="sidebarOwnerFName">Guest</span> <span id="sidebarOwnerLName">User</span>
                     </strong>
                     <span class="user-role">Pet Owner</span>
                 </div>
-                <a href="#" class="nav-item logout-item" onclick="triggerLogout()">
-                    <img src="../../sidebar/logout-m.png" class="custom-icon-nav logout-icon" alt="Logout"> 
-                    Logout 
-                </a>
+                    <a href="#" class="nav-item logout-item" onclick="triggerLogout()">
+                        <img src="../sidebar/logout-m.png" class="custom-icon-nav logout-icon" alt="Logout"> 
+                        Logout 
+                    </a>
             </div>
         </aside>
 
@@ -113,18 +113,28 @@
     <div id="confirmModal" class="modal-overlay">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
             <div class="modal-header" style="justify-content: center; border: none;">
-                <h2 style="color: var(--primary-purple); font-size: 20px;">Confirm Log out</h2>
+                <h2 style="color: var(--primary-purple); font-size: 20px;">Confirm Action</h2>
             </div>
+
             <div class="modal-body">
-                <p id="confirmMessage" style="margin-bottom: 25px; color: var(--text-dark);"></p>
+                <p id="confirmMessage" style="margin-bottom: 25px; color: var(--text-dark);">
+                    Are you sure?
+                </p>
+
                 <div style="display: flex; gap: 10px; justify-content: center;">
-                    <button id="btnConfirmDelete" class="submit-btn" style="margin: 0; background-color: #ff5e78; flex: 1;">Remove</button>
-                    <button onclick="closeModal('confirmModal')" class="action-btn view-btn" style="flex: 1; border-radius: 12px; height: 48px;">Cancel</button>
+                    <button id="btnConfirmDelete" class="submit-btn" style="margin: 0; background-color: #ff5e78; flex: 1;">
+                        Confirm
+                    </button>
+
+                    <button onclick="closeModal('confirmModal')" class="action-btn view-btn" style="flex: 1; border-radius: 12px; height: 48px;">
+                        Cancel
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="../data/auth.js"></script> 
     <script src="pets.js"></script>
 </body>
 </html>

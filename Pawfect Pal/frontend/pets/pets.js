@@ -1,3 +1,82 @@
+document.addEventListener("DOMContentLoaded", function () {
+    const userId = localStorage.getItem("userId");
+    const userName = localStorage.getItem("userName");
+    const role = localStorage.getItem("role");
+
+    if (!userId || !role) {
+        alert("You are not logged in.");
+        window.location.href = "../login/login.html";
+        return;
+    }
+
+    document.getElementById("sidebarOwnerFName").textContent = userName || "Guest";
+    document.getElementById("sidebarOwnerLName").textContent = "";
+
+    loadPetsPage(userId);
+});
+
+async function loadPetsPage(userId) {
+    try {
+        const response = await fetch(`http://localhost:5182/api/Pet/user/${userId}`);
+
+        if (!response.ok) {
+            throw new Error(`Failed to load pets. Status: ${response.status}`);
+        }
+
+        const pets = await response.json();
+
+        if (!Array.isArray(pets) || pets.length === 0) {
+            petsGrid.innerHTML = `<p>No pets found.</p>`;
+            return;
+        }
+
+        petsGrid.innerHTML = pets.map(pet => {
+            const ageText = getAgeText(pet.birthdate);
+            const birthdate = pet.birthdate ? pet.birthdate.split("T")[0] : "";
+
+            return `
+                <div class="pet-card" data-id="${pet.petId}" data-species="${pet.species}" data-birthday="${birthdate}">
+                    <img src="user-pets/default-pet.png" alt="Pet">
+                    <h3>${pet.name}</h3>
+                    <p>${pet.species} • ${pet.breed} • ${ageText}</p>
+                    <span class="pet-gender">🐾 ${pet.gender}</span>
+
+                    <div class="card-actions">
+                        <button class="action-btn view-btn">View</button>
+                        <button class="action-btn edit-btn">Edit</button>
+                        <button class="action-btn delete-btn">Delete</button>
+                    </div>
+                </div>
+            `;
+        }).join("");
+
+    } catch (error) {
+        console.error("Load pets page error:", error);
+        petsGrid.innerHTML = `<p>Could not load pets.</p>`;
+    }
+}
+
+function getAgeText(birthdateString) {
+    if (!birthdateString) return "Unknown age";
+
+    const birthdate = new Date(birthdateString);
+    const today = new Date();
+
+    let years = today.getFullYear() - birthdate.getFullYear();
+    let months = today.getMonth() - birthdate.getMonth();
+
+    if (months < 0 || (months === 0 && today.getDate() < birthdate.getDate())) {
+        years--;
+        months += 12;
+    }
+
+    if (years > 0) {
+        return years === 1 ? "1 yr" : `${years} yrs`;
+    }
+
+    return months <= 1 ? "1 month" : `${months} months`;
+}
+
 /* global gui elements */
 const modal = document.getElementById('mainModal');
 const confirmModal = document.getElementById('confirmModal');
@@ -221,18 +300,3 @@ function openActionModal(action, id = null) {
     };
 }
 
-/* logout feature */
-function triggerLogout() {
-    const confirmMessage = document.getElementById('confirmMessage');
-    const confirmBtn = document.getElementById('btnConfirmDelete');
-
-    confirmMessage.innerText = "Are you sure you want to log out of Pawfect Pal?";
-    confirmBtn.innerText = "Logout";
-    confirmBtn.style.backgroundColor = "#ff5e78";
-
-    confirmBtn.onclick = function() {
-        window.location.href = "login.html"; 
-    };
-
-    confirmModal.style.display = 'flex';
-}

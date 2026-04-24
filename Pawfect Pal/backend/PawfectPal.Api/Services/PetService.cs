@@ -27,8 +27,12 @@ namespace PawfectPal.Api.Services
         {
             return _petRepository.GetPetById(id);
         }
+
         public List<Pet> GetPetsByUserId(int userId)
         {
+            if (userId <= 0)
+                throw new Exception("Invalid user ID.");
+
             return _petRepository.GetPetsByUserId(userId);
         }
 
@@ -58,7 +62,7 @@ namespace PawfectPal.Api.Services
                 throw new Exception("Pet name is required.");
 
             if (string.IsNullOrWhiteSpace(pet.Species))
-                throw new Exception("Pet species is required.");    
+                throw new Exception("Pet species is required.");
 
             if (string.IsNullOrWhiteSpace(pet.Color))
                 throw new Exception("Pet color is required.");
@@ -66,11 +70,11 @@ namespace PawfectPal.Api.Services
             if (string.IsNullOrWhiteSpace(pet.Breed))
                 throw new Exception("Pet breed is required.");
 
-            if (pet.Age < 0)
-                throw new Exception("Age cannot be negative.");
-
             if (string.IsNullOrWhiteSpace(pet.Gender))
                 throw new Exception("Pet gender is required.");
+
+            if (pet.Birthdate.HasValue && pet.Birthdate.Value.Date > DateTime.Today)
+                throw new Exception("Birthdate cannot be in the future.");
         }
     }
 }
