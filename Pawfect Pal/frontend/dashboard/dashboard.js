@@ -1,4 +1,81 @@
 /* Pawfect Pal - Dashboard Logic */
+document.addEventListener("DOMContentLoaded", function () {
+    const userId = localStorage.getItem("userId");
+    const userName = localStorage.getItem("userName");
+    const role = localStorage.getItem("role");
+
+    if (!role || !userId) {
+        alert("You are not logged in.");
+        window.location.href = "../login/login.html";
+        return;
+    }
+
+    document.getElementById("sidebarOwnerFName").textContent = userName || "Guest";
+    document.getElementById("sidebarOwnerLName").textContent = "";
+    document.getElementById("welcomeOwnerFName").textContent = userName || "User";
+
+    loadDashboardSummary(userId, role);
+    loadPets(userId);
+});
+
+async function loadDashboardSummary(userId, role) {
+    const url = role.toLowerCase() === "admin"
+        ? "http://localhost:5182/api/Dashboard/admin-summary"
+        : `http://localhost:5182/api/Dashboard/user-summary/${userId}`;
+
+    try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error("Failed to load dashboard summary.");
+        }
+
+        const data = await response.json();
+
+        document.getElementById("TotalPetsCount").textContent = data.totalPets ?? 0;
+        document.getElementById("AptCount").textContent = data.totalAppointments ?? 0;
+        document.getElementById("RemindCount").textContent = data.totalReminders ?? 0;
+        document.getElementById("HealthCount").textContent = data.totalHealthRecords ?? 0;
+
+    } catch (error) {
+        console.error("Dashboard summary error:", error);
+        alert("Could not load dashboard data.");
+    }
+}
+
+async function loadPets(userId) {
+    try {
+        const response = await fetch(`http://localhost:5182/api/Pet/user/${userId}`);
+
+        if (!response.ok) {
+            throw new Error(`Failed to load pets. Status: ${response.status}`);
+        }
+
+        const pets = await response.json();
+
+        const container = document.getElementById("PetsList");
+        const empty = document.getElementById("EmptyPets");
+
+        if (!Array.isArray(pets) || pets.length === 0) {
+            container.innerHTML = "";
+            empty.style.display = "block";
+            return;
+        }
+
+        empty.style.display = "none";
+
+        container.innerHTML = pets.map(pet => `
+            <div class="status-row" style="grid-template-columns: 1.5fr 1fr 1fr;">
+                <span>${pet.name}</span>
+                <span>${pet.species}</span>
+                <span>${pet.breed}</span>
+            </div>
+        `).join("");
+
+    } catch (err) {
+        console.error("Load pets error:", err);
+    }
+}
 
 window.onload = function() {
     const today = new Date().toISOString().split('T')[0];

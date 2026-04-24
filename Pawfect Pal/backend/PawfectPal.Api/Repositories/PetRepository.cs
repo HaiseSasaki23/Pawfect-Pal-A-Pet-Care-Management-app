@@ -87,7 +87,36 @@ namespace PawfectPal.Api.Repositories
                 Gender = row["Gender"].ToString() ?? string.Empty
             };
         }
+        public List<Pet> GetPetsByUserId(int userId)
+        {
+            string query = "SELECT * FROM pet WHERE UserID = @UserID";
 
+            var parameters = new List<MySqlParameter>
+            {
+                new("@UserID", userId)
+            };
+
+            DataTable dt = _db.ExecuteQuery(query, parameters);
+
+            List<Pet> pets = new List<Pet>();
+
+            foreach (DataRow row in dt.Rows)
+            {
+                pets.Add(new Pet
+                {
+                    PetId = Convert.ToInt32(row["PetID"]),
+                    UserId = Convert.ToInt32(row["UserID"]),
+                    Name = row["Name"].ToString() ?? "",
+                    Species = row["Species"].ToString() ?? "",
+                    Color = row["Color"].ToString() ?? "",
+                    Breed = row["Breed"].ToString() ?? "",
+                    Age = Convert.ToInt32(row["Age"]),
+                    Gender = row["Gender"].ToString() ?? ""
+                });
+            }
+
+            return pets;
+        }
         public void UpdatePet(Pet pet)
         {
             string query = @"

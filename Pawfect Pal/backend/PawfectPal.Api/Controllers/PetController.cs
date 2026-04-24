@@ -45,6 +45,20 @@ namespace PawfectPal.Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+        
+        [HttpGet("user/{userId}")]
+        public IActionResult GetPetsByUserId(int userId)
+        {
+            try
+            {
+                var pets = _petService.GetPetsByUserId(userId);
+                return Ok(pets);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }        
 
         [HttpPost]
         public IActionResult AddPet([FromBody] Pet pet)

@@ -27,6 +27,10 @@ namespace PawfectPal.Api.Services
         {
             return _petRepository.GetPetById(id);
         }
+        public List<Pet> GetPetsByUserId(int userId)
+        {
+            return _petRepository.GetPetsByUserId(userId);
+        }
 
         public void UpdatePet(Pet pet)
         {
