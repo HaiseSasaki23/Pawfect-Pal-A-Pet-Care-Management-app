@@ -17,13 +17,15 @@ namespace PawfectPal.Api.Repositories
         public void InsertPet(Pet pet)
         {
             string query = @"
-                INSERT INTO pet (UserID, Name, Color, Breed, Age, Gender)
-                VALUES (@UserID, @Name, @Color, @Breed, @Age, @Gender)";
+                INSERT INTO pet (UserID, Name, Species, Color, Breed, Age, Gender)
+                VALUES (@UserID, @Name, @Species, @Color, @Breed, @Age, @Gender)";
 
             var parameters = new List<MySqlParameter>
             {
                 new("@UserID", pet.UserId),
                 new("@Name", pet.Name),
+                new("@Species", pet.Species),
+
                 new("@Color", pet.Color),
                 new("@Breed", pet.Breed),
                 new("@Age", pet.Age),
@@ -47,6 +49,7 @@ namespace PawfectPal.Api.Repositories
                     PetId = Convert.ToInt32(row["PetID"]),
                     UserId = Convert.ToInt32(row["UserID"]),
                     Name = row["Name"].ToString() ?? string.Empty,
+                    Species = row["Species"].ToString() ?? string.Empty,
                     Color = row["Color"].ToString() ?? string.Empty,
                     Breed = row["Breed"].ToString() ?? string.Empty,
                     Age = Convert.ToInt32(row["Age"]),
@@ -91,6 +94,7 @@ namespace PawfectPal.Api.Repositories
                 UPDATE pet
                 SET UserID = @UserID,
                     Name = @Name,
+                    Species = @Species,
                     Color = @Color,
                     Breed = @Breed,
                     Age = @Age,

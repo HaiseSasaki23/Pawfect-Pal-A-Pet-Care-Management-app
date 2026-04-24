@@ -53,6 +53,9 @@ namespace PawfectPal.Api.Services
             if (string.IsNullOrWhiteSpace(pet.Name))
                 throw new Exception("Pet name is required.");
 
+            if (string.IsNullOrWhiteSpace(pet.Species))
+                throw new Exception("Pet species is required.");    
+
             if (string.IsNullOrWhiteSpace(pet.Color))
                 throw new Exception("Pet color is required.");
 
