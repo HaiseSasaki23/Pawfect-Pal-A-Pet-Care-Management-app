@@ -1,3 +1,4 @@
+/* . variables & root  */
 :root {
     --primary-purple: #9d72d6;
     --primary-hover: #8a5bc9;
@@ -9,6 +10,7 @@
     --card-shadow: 0 4px 15px rgba(0,0,0,0.02);
 }
 
+/* global resets  */
 * {
     margin: 0;
     padding: 0;
@@ -27,7 +29,7 @@ body {
     width: 100%;
 }
 
-/* --- Sidebar --- */
+/* sidebar (layout & header) */
 .sidebar {
     width: var(--sidebar-width);
     background: white;
@@ -58,12 +60,7 @@ body {
     margin-left: -5px;
 }
 
-.custom-icon-nav {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
-}
-
+/* sidebar navigation */
 .sidebar-nav {
     flex-grow: 1;
     overflow-y: auto; 
@@ -89,70 +86,45 @@ body {
     background: var(--bg-lavender);
     color: var(--primary-purple);
 }
-/* Character peek-a-boo effect logic */
-        .nav-char {
-            width: 40px;
-            height: 40px;
-            margin-left: auto;
-            object-fit: contain;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
 
-        .nav-item.active .nav-char {
-            opacity: 1;
-        }
+.custom-icon-nav {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
 
-        .sidebar:hover .nav-item.active .nav-char {
-            opacity: 0;
-        }
+/* character peek-a-boo effect logic */
+.nav-char {
+    width: 40px;
+    height: 40px;
+    margin-left: auto;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
 
-        .sidebar .nav-item:hover .nav-char {
-            width: 40px;
-            opacity: 1 !important;
-            content: url('../../sidebar/peek.png') !important;
-        }
+.nav-item.active .nav-char {
+    opacity: 1;
+}
 
-        /* GUI Search Box Layout */
-        .search-container {
-            position: relative;
-            flex: 2.5;
-        }
+.sidebar:hover .nav-item.active .nav-char {
+    opacity: 0;
+}
 
-        .search-box {
-            display: flex;
-            align-items: center;
-            position: relative;
-        }
+.sidebar .nav-item:hover .nav-char {
+    width: 40px;
+    opacity: 1 !important;
+    content: url('../../sidebar/peek.png') !important;
+}
 
-        .search-box input {
-            width: 100%;
-            padding: 12px 50px 12px 20px;
-            border-radius: 12px;
-            border: 1px solid #eee;
-            background: #fafafa;
-            outline: none;
-        }
-
-        .search-icon-btn {
-            position: absolute;
-            right: 10px;
-            width: 30px; 
-            height: 30px; 
-            cursor: pointer;
-            object-fit: contain;
-            transition: transform 0.2s;
-            padding: 5px; 
-        }
-
-        .search-icon-btn:hover {
-            transform: scale(1.1);
-        }
-
+/* sidebar footer & logout  */
 .sidebar-footer {
     padding-top: 20px;
     border-top: 1px solid #f5f5f5;
     margin-top: auto; 
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; 
 }
 
 .user-name {
@@ -168,7 +140,29 @@ body {
     color: var(--primary-purple);
 }
 
-/* --- Main Content --- */
+.logout-item {
+    padding-left: 5px !important; 
+    margin-top: 10px;
+    color: #ff5e78 !important;   
+    width: 100%;                 
+}
+
+.logout-item {
+    margin-top: 10px;
+    color: #ff5e78 !important;
+    margin-left: -10px; 
+    padding-left: 10px !important; 
+    width: calc(100% + 10px);
+    transition: 0.2s;
+}
+
+.logout-icon {
+    width: 40px;  
+    height: 40px; 
+    object-fit: contain; 
+}
+
+/* main content area  */
 .main-content {
     margin-left: var(--sidebar-width);
     flex: 1;
@@ -191,12 +185,48 @@ body {
     border: 1px solid #f5f5f5;
 }
 
+/* browser controls & filters  */
 .browser-controls { 
     display: flex; 
     gap: 10px; 
     margin-bottom: 30px; 
     align-items: center;
     flex-wrap: nowrap;
+}
+
+.search-container {
+    position: relative;
+    flex: 2.5;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 12px 50px 12px 20px;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    background: #fafafa;
+    outline: none;
+}
+
+.search-icon-btn {
+    position: absolute;
+    right: 10px;
+    width: 30px; 
+    height: 30px; 
+    cursor: pointer;
+    object-fit: contain;
+    transition: transform 0.2s;
+    padding: 5px; 
+}
+
+.search-icon-btn:hover {
+    transform: scale(1.1);
 }
 
 .add-pet-btn-inline {
@@ -242,7 +272,7 @@ body {
     flex: 0 0 auto;
 }
 
-/* --- Grid --- */
+/* pet cards grid  */
 .pets-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -305,7 +335,7 @@ body {
 .edit-btn { background: #edfff4; color: #2ecc71; }
 .delete-btn { background: #fff0f3; color: #ff5e78; }
 
-/* --- Modals --- */
+/*  modals & overlays */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -341,6 +371,7 @@ body {
     color: #bbb; 
 }
 
+/* forms & inputs  */
 .modal-form {
     display: flex;
     flex-direction: column;
