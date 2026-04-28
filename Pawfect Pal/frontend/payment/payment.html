@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawfect Pal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="../../sidebar/logo.png" alt="Pawfect Pal" class="sidebar-logo-landscape">
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <img src="../../sidebar/dashboard-m.png" class="custom-icon-nav"> 
+                    Dashboard 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/pets-m.png" class="custom-icon-nav"> 
+                    Pets 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/appointment-m.png" class="custom-icon-nav"> 
+                    Appointments 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/health-m.png" class="custom-icon-nav"> 
+                    Health Records
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/services-m.png" class="custom-icon-nav"> 
+                    Services 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item active">
+                    <img src="../../sidebar/billing-m.png" class="custom-icon-nav"> 
+                    Payment
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <strong class="user-name">
+                        <span id="OwnerFName">Guest</span> <span id="OwnerLName">User</span>
+                    </strong>
+                    <span class="user-role">Pet Owner</span>
+                </div>
+                <a href="#" class="nav-item logout-item" onclick="triggerLogout()">
+                    <img src="../../sidebar/logout-m.png" class="custom-icon-nav logout-icon" alt="Logout"> 
+                    Logout 
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="payment-banner-row">
+                <img src="user-payment/balance.png" class="banner-icon-30" alt="Payment Icon">
+            <div class="balance-text-group">
+                <span class="balance-label">Due Balance</span>
+                <div class="balance-value-row">
+                    <h1 class="amount-text" id="totalBalance">₱ ---</h1>.
+                    <span class="outstanding-label" id="balanceStatus">No balance due</span>.
+                </div>
+            </div>
+                <button class="submit-btn pay-now-btn" onclick="toggleTransactions()">Pay Now</button>
+            </div>
+
+        <div class="payment-grid">
+            <section class="payment-section">
+                <div class="section-header">
+                    <h3>Recent Transactions</h3>
+                    <div class="search-wrapper">
+                        <input type="text" placeholder="Search transactions..." class="search-input">
+                        <img src="user-payment/search.png" class="search-icon-30" alt="Search">
+                    </div>
+                </div>
+                
+                <table class="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Pet Name</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    </table> 
+                
+                    <div id="emptyState" class="empty-state-container" style="display: none;">
+                        <div class="empty-icon-wrapper">
+                            <img src="user-payment/no-recent.png" alt="No Transactions" class="empty-img">
+                        </div>
+                        <h4>No Transactions Yet</h4>
+                        <p>When you make a payment, your history will appear here.</p>
+                    </div>
+            </section>
+
+            <section id="upcomingSection" style="display: none;">
+                <div class="payment-modal-container">
+                    <div id="upcomingEmptyState" class="empty-state-container" style="display: none;">
+                        <img src="user-payment/confirm.png" style="width: 80px; height: 80px; opacity: 0.5;" alt="All Clear">
+                        <h4>You're all caught up!</h4>
+                        <p>No upcoming appointments need payment right now.</p>
+                    </div>
+                    <p class="modal-instruction">Select appointments to pay:</p>
+                    
+                    <div class="selection-list">
+                    </div>
+
+                    <div class="gcash-details-section">
+                        <p class="modal-instruction">GCash Information:</p>
+                        
+                        <div class="input-group">
+                            <input type="text" id="gcashName" placeholder="GCash Account Name" 
+                                class="modal-input" pattern="[A-Za-z\s.,]+" required>
+                            <span class="error-msg">Letters and spaces only</span>
+                        </div>
+                        
+                        <div class="input-group">
+                            <input type="text" id="gcashRef" placeholder="Reference Number (13 digits)" 
+                                class="modal-input" maxlength="13" pattern="\d{13}" required>
+                            <span class="error-msg">Numbers only</span>
+                        </div>
+                    </div>
+
+                    <div class="total-pay-row">
+                        <span>Total to Pay: <strong id="totalDisplay">₱ 0.00</strong></span>
+                        <button class="submit-btn" onclick="processPayment()">Confirm Payment</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+        </main>
+
+         <div id="mainModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header"><h2 id="modalTitle">Title</h2><button class="close-btn" onclick="closeModal('mainModal')">&times;</button></div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-header" style="justify-content: center; border: none;">
+                <h2 style="color: var(--primary-purple); font-size: 20px;">Confirm Log out</h2>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage" style="margin-bottom: 25px; color: var(--text-dark);"></p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button id="btnConfirmDelete" class="submit-btn" style="margin: 0; background-color: #ff5e78; flex: 1;">Remove</button>
+                    <button onclick="closeModal('confirmModal')" class="action-btn view-btn" style="flex: 1; border-radius: 12px; height: 48px;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="payment.js"></script>
+
+</body>
+</html>
