@@ -1,82 +1,3 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const userId = localStorage.getItem("userId");
-    const userName = localStorage.getItem("userName");
-    const role = localStorage.getItem("role");
-
-    if (!userId || !role) {
-        alert("You are not logged in.");
-        window.location.href = "../login/login.html";
-        return;
-    }
-
-    document.getElementById("sidebarOwnerFName").textContent = userName || "Guest";
-    document.getElementById("sidebarOwnerLName").textContent = "";
-
-    loadPetsPage(userId);
-});
-
-async function loadPetsPage(userId) {
-    try {
-        const response = await fetch(`http://localhost:5182/api/Pet/user/${userId}`);
-
-        if (!response.ok) {
-            throw new Error(`Failed to load pets. Status: ${response.status}`);
-        }
-
-        const pets = await response.json();
-
-        if (!Array.isArray(pets) || pets.length === 0) {
-            petsGrid.innerHTML = `<p>No pets found.</p>`;
-            return;
-        }
-
-        petsGrid.innerHTML = pets.map(pet => {
-            const ageText = getAgeText(pet.birthdate);
-            const birthdate = pet.birthdate ? pet.birthdate.split("T")[0] : "";
-
-            return `
-                <div class="pet-card" data-id="${pet.petId}" data-species="${pet.species}" data-birthday="${birthdate}">
-                    <img src="user-pets/default-pet.png" alt="Pet">
-                    <h3>${pet.name}</h3>
-                    <p>${pet.species} • ${pet.breed} • ${ageText}</p>
-                    <span class="pet-gender">🐾 ${pet.gender}</span>
-
-                    <div class="card-actions">
-                        <button class="action-btn view-btn">View</button>
-                        <button class="action-btn edit-btn">Edit</button>
-                        <button class="action-btn delete-btn">Delete</button>
-                    </div>
-                </div>
-            `;
-        }).join("");
-
-    } catch (error) {
-        console.error("Load pets page error:", error);
-        petsGrid.innerHTML = `<p>Could not load pets.</p>`;
-    }
-}
-
-function getAgeText(birthdateString) {
-    if (!birthdateString) return "Unknown age";
-
-    const birthdate = new Date(birthdateString);
-    const today = new Date();
-
-    let years = today.getFullYear() - birthdate.getFullYear();
-    let months = today.getMonth() - birthdate.getMonth();
-
-    if (months < 0 || (months === 0 && today.getDate() < birthdate.getDate())) {
-        years--;
-        months += 12;
-    }
-
-    if (years > 0) {
-        return years === 1 ? "1 yr" : `${years} yrs`;
-    }
-
-    return months <= 1 ? "1 month" : `${months} months`;
-}
-
 /* global gui elements */
 const modal = document.getElementById('mainModal');
 const confirmModal = document.getElementById('confirmModal');
@@ -101,6 +22,8 @@ function handleFilter() {
     const genderSel = document.getElementById('genderFilter').value;
     const ageSel = document.getElementById('ageFilter').value;
 
+    let visibleCount = 0;
+
     document.querySelectorAll('.pet-card').forEach(card => {
         const name = card.querySelector('h3').innerText.toLowerCase();
         const species = card.getAttribute('data-species');
@@ -119,13 +42,33 @@ function handleFilter() {
         else if (ageSel === "2-5") ageMatch = (ageInYears >= 2 && ageInYears <= 5);
         else if (ageSel === "6+") ageMatch = (ageInYears >= 6);
 
-        const visible = name.includes(searchTerm) && 
-                        (speciesSel === "All" || species === speciesSel) && 
-                        (genderSel === "All" || gender === genderSel) && 
-                        (ageSel === "All" || ageMatch);
+        const isVisible = name.includes(searchTerm) && 
+                          (speciesSel === "All" || species === speciesSel) && 
+                          (genderSel === "All" || gender === genderSel) && 
+                          (ageSel === "All" || ageMatch);
 
-        card.style.display = visible ? "block" : "none";
+        card.style.display = isVisible ? "block" : "none";
+        if (isVisible) visibleCount++;
     });
+
+    // empty State Logic
+    const existingEmpty = document.getElementById('emptyState');
+    if (visibleCount === 0) {
+        if (!existingEmpty) {
+            const emptyHTML = `
+                <div id="emptyState" class="empty-state-container">
+                    <img src="user-pets/no-pets.png" alt="No pets found" class="empty-state-img">
+                    <p>No furry friends found matching those filters!</p>
+                </div>`;
+            petsGrid.insertAdjacentHTML('afterend', emptyHTML);
+            petsGrid.style.display = 'none';
+            }
+        } else {
+            if (existingEmpty) {
+            existingEmpty.remove();
+            petsGrid.style.display = 'grid';
+        }
+    }
 }
 
 function clearFilters() {
@@ -300,3 +243,8 @@ function openActionModal(action, id = null) {
     };
 }
 
+function closeModal(modalId) { 
+    document.getElementById(modalId).style.display = 'none'; 
+}
+
+handleFilter();
