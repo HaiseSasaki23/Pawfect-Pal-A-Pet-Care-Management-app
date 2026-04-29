@@ -6,7 +6,7 @@
     --bg-lavender: #f8f0ff;
     --text-dark: #4a4a4a;
     --text-muted: #999;
-    --sidebar-width: 280px;
+    --sidebar-width: 285px;
     --card-shadow: 0 4px 15px rgba(0,0,0,0.02);
 }
 
@@ -331,9 +331,18 @@ body {
     cursor: pointer;
 }
 
-.view-btn { background: #f3efff; color: var(--primary-purple); }
-.edit-btn { background: #edfff4; color: #2ecc71; }
-.delete-btn { background: #fff0f3; color: #ff5e78; }
+.view-btn { 
+    background: #f3efff; 
+    color: var(--primary-purple); 
+}
+.edit-btn { 
+    background: #edfff4; 
+    color: #2ecc71; 
+}
+.delete-btn { 
+    background: #fff0f3; 
+    color: #ff5e78; 
+}
 
 /*  modals & overlays */
 .modal-overlay {
@@ -400,9 +409,14 @@ body {
     transition: 0.3s;
 }
 
-.submit-btn:hover { background: var(--primary-hover); }
+.submit-btn:hover { 
+    background: var(--primary-hover); 
+}
 
-.custom-select-wrapper { position: relative; }
+.custom-select-wrapper { 
+    position: relative; 
+}
+
 .select-box {
     padding: 12px;
     border: 1px solid #f0f0f0;
@@ -424,12 +438,24 @@ body {
     box-shadow: var(--card-shadow);
 }
 
-.select-options.show { display: block; }
-.opt { padding: 10px; cursor: pointer; border-radius: 8px; }
-.opt:hover { background: #3b82f6; color: white; }
+.select-options.show { 
+    display: block; 
+}
+.opt { 
+    padding: 10px; 
+    cursor: pointer; 
+    border-radius: 8px; 
+}
+.opt:hover { 
+    background: #3b82f6; 
+    color: white; 
+}
 
 .image-upload-wrapper label, .date-group label {
-    font-size: 12px; font-weight: 700; color: var(--primary-purple); display: block; margin-bottom: 5px;
+    font-size: 12px; 
+    font-weight: 700; 
+    color: var(--primary-purple); 
+    display: block; margin-bottom: 5px;
 }
 
 .validation-error {
@@ -446,4 +472,21 @@ body {
     border-color: #ff5e78;
 }
 
+.empty-state-container {
+    display: flex !important; 
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    width: 100%;
+    min-height: 400px; 
+}
 
+.empty-state-img {
+    width: 30cm; 
+    height: 30cm;
+    max-width: 80%; 
+    max-height: 400px; 
+    object-fit: contain;
+    margin-bottom: -90px;
+}
