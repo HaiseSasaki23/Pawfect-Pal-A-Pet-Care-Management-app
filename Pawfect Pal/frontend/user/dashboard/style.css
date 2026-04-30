@@ -20,11 +20,51 @@ body {
     background-color: #faf8ff;
     min-height: 100vh;
     color: var(--text-dark);
+    opacity: 0;
+    animation: pageFadeIn 0.25s ease-in forwards;
+}
+
+@keyframes pageFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .dashboard-container {
     display: flex;
     width: 100%;
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #f3efff 25%, #faf8ff 50%, #f3efff 75%);
+    background-size: 200% 100%;
+    animation: skeletonLoading 1.2s infinite;
+    border-radius: 12px;
+}
+
+@keyframes skeletonLoading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.skeleton-card {
+    height: 80px;
+    width: 100%;
+}
+
+.skeleton-row {
+    height: 55px;
+    width: 100%;
+    margin-bottom: 12px;
 }
 
 /* --- SIDEBAR --- */
@@ -105,7 +145,7 @@ body {
 .sidebar .nav-item:hover .nav-char {
     width: 40px;
     opacity: 1 !important;
-    content: url('../../sidebar/peek.png') !important;
+    content: url('../sidebar/peek.png') !important;
 }
 
 .custom-icon-nav {
@@ -662,4 +702,12 @@ body {
 .view-btn { 
     background: #f3efff; 
     color: var(--primary-purple); 
+}
+
+#PetsList,
+#TotalPetsCount,
+#AptCount,
+#RemindCount,
+#HealthCount {
+    transition: opacity 0.2s ease;
 }

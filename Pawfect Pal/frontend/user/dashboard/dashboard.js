@@ -1,23 +1,13 @@
-/* Pawfect Pal - Dashboard Logic */
 document.addEventListener("DOMContentLoaded", function () {
-    const userId = localStorage.getItem("userId");
-    const userName = localStorage.getItem("userName");
-    const role = localStorage.getItem("role");
+    const user = requireLogin("User");
+    if (!user) return;
 
-    if (!role || !userId) {
-        alert("You are not logged in.");
-        window.location.href = "../login/login.html";
-        return;
-    }
+    showDashboardSkeletons();
+    showPetsSkeleton();
 
-    document.getElementById("sidebarOwnerFName").textContent = userName || "Guest";
-    document.getElementById("sidebarOwnerLName").textContent = "";
-    document.getElementById("welcomeOwnerFName").textContent = userName || "User";
-
-    loadDashboardSummary(userId, role);
-    loadPets(userId);
+    loadDashboardSummary(user.userId, user.role);
+    loadPets(user.userId);
 });
-
 async function loadDashboardSummary(userId, role) {
     const url = role.toLowerCase() === "admin"
         ? "http://localhost:5182/api/Dashboard/admin-summary"
@@ -32,10 +22,21 @@ async function loadDashboardSummary(userId, role) {
 
         const data = await response.json();
 
-        document.getElementById("TotalPetsCount").textContent = data.totalPets ?? 0;
-        document.getElementById("AptCount").textContent = data.totalAppointments ?? 0;
-        document.getElementById("RemindCount").textContent = data.totalReminders ?? 0;
-        document.getElementById("HealthCount").textContent = data.totalHealthRecords ?? 0;
+        function updateStat(id, value) {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        el.style.opacity = "0";
+
+        setTimeout(() => {
+            el.textContent = value ?? 0;
+            el.style.opacity = "1";
+        }, 120);
+    }
+        updateStat("TotalPetsCount", data.totalPets);
+        updateStat("AptCount", data.totalAppointments);
+        updateStat("RemindCount", data.totalReminders);
+        updateStat("HealthCount", data.totalHealthRecords);
 
     } catch (error) {
         console.error("Dashboard summary error:", error);
@@ -57,21 +58,26 @@ async function loadPets(userId) {
         const empty = document.getElementById("EmptyPets");
 
         if (!Array.isArray(pets) || pets.length === 0) {
-            container.innerHTML = "";
-            empty.style.display = "block";
+            setTimeout(() => {
+                container.innerHTML = "";
+                empty.style.display = "block";
+            }, 200);
             return;
         }
 
         empty.style.display = "none";
-
-        container.innerHTML = pets.map(pet => `
-            <div class="status-row" style="grid-template-columns: 1.5fr 1fr 1fr;">
-                <span>${pet.name}</span>
-                <span>${pet.species}</span>
-                <span>${pet.breed}</span>
-            </div>
-        `).join("");
-
+        
+        container.style.opacity = "0";    
+        setTimeout(() => {
+            container.innerHTML = pets.map(pet => `
+                <div class="status-row" style="grid-template-columns: 1.5fr 1fr 1fr;">
+                    <span>${pet.name}</span>
+                    <span>${pet.species}</span>
+                    <span>${pet.breed}</span>
+                </div>
+            `).join("");
+            container.style.opacity = "1";
+        }, 120);
     } catch (err) {
         console.error("Load pets error:", err);
     }
@@ -84,6 +90,28 @@ window.onload = function() {
         bookingDate.setAttribute('min', today);
     }
 };
+
+function showDashboardSkeletons() {
+    document.getElementById("TotalPetsCount").innerHTML = `<span class="skeleton" style="display:inline-block;width:35px;height:24px;"></span>`;
+    document.getElementById("AptCount").innerHTML = `<span class="skeleton" style="display:inline-block;width:35px;height:24px;"></span>`;
+    document.getElementById("RemindCount").innerHTML = `<span class="skeleton" style="display:inline-block;width:35px;height:24px;"></span>`;
+    document.getElementById("HealthCount").innerHTML = `<span class="skeleton" style="display:inline-block;width:35px;height:24px;"></span>`;
+}
+
+function showPetsSkeleton() {
+    const container = document.getElementById("PetsList");
+    const empty = document.getElementById("EmptyPets");
+
+    if (!container) return;
+
+    if (empty) empty.style.display = "none";
+
+    container.innerHTML = `
+        <div class="skeleton skeleton-row"></div>
+        <div class="skeleton skeleton-row"></div>
+        <div class="skeleton skeleton-row"></div>
+    `;
+}
 
 function openActionModal(type) {
     const modals = {
@@ -239,6 +267,7 @@ document.getElementById("addPetForm").addEventListener("submit", async function 
         showSuccessMessage("Pet Added", "Your pet has been added successfully.");
 
         loadDashboardSummary(userId, localStorage.getItem("role"));
+        showPetsSkeleton();
         loadPets(userId);
 
     } catch (error) {

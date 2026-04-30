@@ -1,3 +1,9 @@
+document.addEventListener("DOMContentLoaded", function () {
+    const user = requireLogin("User");
+    if (!user) return;
+
+});
+
 window.onload = function() {
     const today = new Date()
         .toISOString()

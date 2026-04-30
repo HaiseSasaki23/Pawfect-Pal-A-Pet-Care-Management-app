@@ -53,6 +53,8 @@ namespace PawfectPal.Api.Controllers
                     message = "Login successful.",
                     userId = user.UserId,
                     userName = user.UserName,
+                    ownerFName = user.OwnerFName,
+                    ownerLName = user.OwnerLName,
                     role = user.Role
                 });
             }
