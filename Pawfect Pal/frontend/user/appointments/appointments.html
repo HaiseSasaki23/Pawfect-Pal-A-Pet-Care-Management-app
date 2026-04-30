@@ -5,62 +5,67 @@
     <meta name="viewport" 
           content="width=device-width, initial-scale=1.0">
     <title>Pawfect Pal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" 
-          rel="stylesheet">
-    <link rel="stylesheet" 
-          href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preload" as="image" href="../../sidebar/logo.png">
+    <link rel="preload" as="image" href="../../sidebar/active.png">
+    <link rel="preload" as="image" href="../../sidebar/peek.png">     
 </head>
 <body class="dashboard-body">
     <div class="dashboard-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <img src="../../sidebar/logo.png" 
+                <img src="../sidebar/logo.png" 
                      alt="Pawfect Pal" 
                      class="sidebar-logo-landscape">
             </div>
             
             <nav class="sidebar-nav">
-                <a href="dashboard.html" class="nav-item">
-                    <img src="../../sidebar/dashboard-m.png" class="custom-icon-nav"> 
+                <a href="../dashboard/dashboard.html" class="nav-item">
+                    <img src="../sidebar/dashboard-m.png" class="custom-icon-nav"> 
                     Dashboard 
-                    <img src="../../sidebar/active.png" class="nav-char">
+                    <img src="../sidebar/active.png" class="nav-char">
                 </a>
-                <a href="pets.html" class="nav-item">
-                    <img src="../../sidebar/pets-m.png" class="custom-icon-nav"> 
+
+                <a href="../pets/pets.html" class="nav-item">
+                    <img src="../sidebar/pets-m.png" class="custom-icon-nav"> 
                     Pets 
-                    <img src="../../sidebar/active.png" class="nav-char">
+                    <img src="../sidebar/active.png" class="nav-char">
                 </a>
-                <a href="#" class="nav-item active">
-                    <img src="../../sidebar/appointment-m.png" class="custom-icon-nav"> 
+
+                <a href="../appointments/appointments.html" class="nav-item active">
+                    <img src="../sidebar/appointment-m.png" class="custom-icon-nav"> 
                     Appointments 
-                    <img src="../../sidebar/active.png" class="nav-char">
+                    <img src="../sidebar/active.png" class="nav-char">
                 </a>
-                <a href="#" class="nav-item">
-                    <img src="../../sidebar/health-m.png" class="custom-icon-nav"> 
-                    Health Records
-                    <img src="../../sidebar/active.png" class="nav-char">
+
+                <a href="../healthrecords/healthrecords.html" class="nav-item">
+                    <img src="../sidebar/health-m.png" class="custom-icon-nav"> 
+                    Health Records 
+                    <img src="../sidebar/active.png" class="nav-char">
                 </a>
-                <a href="#" class="nav-item">
-                    <img src="../../sidebar/services-m.png" class="custom-icon-nav"> 
+
+                <a href="../services/services.html" class="nav-item">
+                    <img src="../sidebar/services-m.png" class="custom-icon-nav"> 
                     Services 
-                    <img src="../../sidebar/active.png" class="nav-char">
+                    <img src="../sidebar/active.png" class="nav-char">
                 </a>
-                <a href="#" class="nav-item">
-                    <img src="../../sidebar/billing-m.png" class="custom-icon-nav"> 
-                    Payment
-                    <img src="../../sidebar/active.png" class="nav-char">
+
+                <a href="../payment/payment.html" class="nav-item">
+                    <img src="../sidebar/billing-m.png" class="custom-icon-nav"> 
+                    Payment 
+                    <img src="../sidebar/active.png" class="nav-char">
                 </a>
             </nav>
-
             <div class="sidebar-footer">
                 <div class="user-info">
                     <strong class="user-name">
-                        <span id="OwnerFName">Guest</span> <span id="OwnerLName">User</span>
+                        <span id="sidebarOwnerFName"></span> <span id="sidebarOwnerLName"></span>
                     </strong>
                     <span class="user-role">Pet Owner</span>
                 </div>
                 <a href="#" class="nav-item logout-item" onclick="triggerLogout()">
-                    <img src="../../sidebar/logout-m.png" class="custom-icon-nav logout-icon" alt="Logout"> 
+                    <img src="../sidebar/logout-m.png" class="custom-icon-nav logout-icon" alt="Logout"> 
                     Logout 
                 </a>
             </div>
@@ -280,7 +285,7 @@
         </div>
     </div>
 
-    <script src="../data/auth.js"></script>
+    <script src="../../data/auth.js"></script>
     <script src="appointments.js"></script>
 </body>
 </html>

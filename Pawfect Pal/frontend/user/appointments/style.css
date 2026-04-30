@@ -22,6 +22,19 @@ body {
     background-color: #faf8ff;
     min-height: 100vh;
     color: var(--text-dark);
+    opacity: 0;
+    animation: pageFadeIn 0.25s ease-in forwards;    
+}
+
+@keyframes pageFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .dashboard-container {
@@ -114,7 +127,7 @@ body {
 .sidebar .nav-item:hover .nav-char {
     width: 40px;
     opacity: 1 !important;
-    content: url('../../sidebar/peek.png') !important;
+    content: url('../sidebar/peek.png') !important;
 }
 
 /* sidebar footer & logout  */
