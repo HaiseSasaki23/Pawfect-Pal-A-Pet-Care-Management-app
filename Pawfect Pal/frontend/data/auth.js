@@ -36,7 +36,7 @@ function loadUserDisplay(user = getCurrentUser()) {
     if (sidebarLName) sidebarLName.textContent = "";
 
     if (welcomeName) {
-        const fullName = `${user.ownerFName || ""} ${user.ownerLName || ""}`.trim();
+        const fullName = `${user.ownerFName || ""}`.trim();
         welcomeName.textContent = fullName || user.userName || "User";
     }
 }
