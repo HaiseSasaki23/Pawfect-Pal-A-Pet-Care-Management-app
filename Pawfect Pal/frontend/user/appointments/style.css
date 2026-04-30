@@ -438,7 +438,10 @@ body {
     cursor: pointer;
 }
 
-.view-btn { background: #f3efff; color: var(--primary-purple); }
+.view-btn { 
+    background: #f3efff; 
+    color: var(--primary-purple); 
+}
 
 /*  modals & overlays */
 .modal-overlay {
@@ -459,9 +462,6 @@ body {
     max-width: 500px;
     padding: 30px;
     border-radius: 24px;
-    display: flex;
-    flex-direction: column;
-    max-height: 90vh; /* prevents modal from going off-screen */
 }
 
 /* add a scrollable area for the form */

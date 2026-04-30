@@ -11,7 +11,7 @@
     <link rel="preload" as="image" href="../../sidebar/active.png">
     <link rel="preload" as="image" href="../../sidebar/peek.png">     
 </head>
-<body class="dashboard-body">
+< class="dashboard-body">
     <div class="dashboard-container">
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -66,8 +66,8 @@
                 </div>
                 <a href="#" class="nav-item logout-item" onclick="triggerLogout()">
                     <img src="../sidebar/logout-m.png" class="custom-icon-nav logout-icon" alt="Logout"> 
-                    Logout 
-                </a>
+                    Logout
+                </a>                
             </div>
         </aside>
 
@@ -134,10 +134,8 @@
                 <span>Date & Time</span>
                 <span>Status</span>
             </div>
-
-            <div class="appointment-list" id="appointmentList"> 
                 <div class="appointment-list" id="appointmentList"> 
-                    </div>
+            </div>
         </main>
     </div>
 
@@ -250,7 +248,7 @@
                         </div>
                         <div class="input-group">
                             <input type="text" id="gcashRef" placeholder="Reference Number (13 Numbers only)"
-                                    maxlength="13"oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                    maxlength="13"oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         </div>
                 </div>
                 <button type="submit" 
@@ -260,6 +258,7 @@
             </form>
         </div>
     </div>
+</div>
 
     <div id="successToast" class="success-toast-overlay">
         <div class="success-toast-content">
@@ -283,7 +282,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div>    
 
     <script src="../../data/auth.js"></script>
     <script src="appointments.js"></script>
