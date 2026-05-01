@@ -25,11 +25,13 @@ builder.Services.AddSingleton<DatabaseHelper>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<PetRepository>();
 builder.Services.AddScoped<DashboardRepository>();
+builder.Services.AddScoped<AppointmentRepository>();
 
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PetService>();
 builder.Services.AddScoped<DashboardService>();
+builder.Services.AddScoped<AppointmentService>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
