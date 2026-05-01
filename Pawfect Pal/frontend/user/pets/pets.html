@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawfect Pal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preload" as="image" href="../../sidebar/logo.png">
+    <link rel="preload" as="image" href="../../sidebar/active.png">
+    <link rel="preload" as="image" href="../../sidebar/peek.png">      
+    
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="../sidebar/logo.png" alt="Pawfect Pal" class="sidebar-logo-landscape">
+            </div>
+            <nav class="sidebar-nav">
+                <a href="../dashboard/dashboard.html" class="nav-item">
+                    <img src="../sidebar/dashboard-m.png" class="custom-icon-nav"> 
+                    Dashboard 
+                    <img src="../sidebar/active.png" class="nav-char">
+                </a>
+
+                <a href="../pets/pets.html" class="nav-item active">
+                    <img src="../sidebar/pets-m.png" class="custom-icon-nav"> 
+                    Pets 
+                    <img src="../sidebar/active.png" class="nav-char">
+                </a>
+
+                <a href="../appointments/appointments.html" class="nav-item">
+                    <img src="../sidebar/appointment-m.png" class="custom-icon-nav"> 
+                    Appointments 
+                    <img src="../sidebar/active.png" class="nav-char">
+                </a>
+
+                <a href="../healthrecords/healthrecords.html" class="nav-item">
+                    <img src="../sidebar/health-m.png" class="custom-icon-nav"> 
+                    Health Records
+                    <img src="../sidebar/active.png" class="nav-char">
+                </a>
+
+                <a href="../services/services.html" class="nav-item">
+                    <img src="../sidebar/services-m.png" class="custom-icon-nav"> 
+                    Services 
+                    <img src="../sidebar/active.png" class="nav-char">
+                </a>
+
+                <a href="../payment/payment.html" class="nav-item">
+                    <img src="../sidebar/billing-m.png" class="custom-icon-nav"> 
+                    Payment
+                    <img src="../sidebar/active.png" class="nav-char">
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <strong class="user-name">
+                        <span id="sidebarOwnerFName"></span> <span id="sidebarOwnerLName"></span>
+                    </strong>
+                    <span class="user-role">Pet Owner</span>
+                </div>
+                    <a href="#" class="nav-item logout-item" onclick="triggerLogout()">
+                        <img src="../sidebar/logout-m.png" class="custom-icon-nav logout-icon" alt="Logout"> 
+                        Logout 
+                    </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="content-header"></header>
+
+            <section class="pets-browser-container">
+                <div class="browser-controls">
+                    <div class="search-container">
+                        <div class="search-box">
+                            <input type="text" id="petSearch" placeholder="Search pets..." onkeyup="handleFilter()">
+                            <img src="user-pets/search.png" class="search-icon-btn" onclick="handleFilter()" alt="Search">
+                        </div>
+                    </div>
+                    
+                    <button class="add-pet-btn-inline" onclick="openActionModal('Add Pet')">+ Add New Pet</button>
+
+                    <select class="species-filter" id="speciesFilter" onchange="handleFilter()">
+                        <option value="All">All Species</option>
+                        <option value="Dog">Dog</option>
+                        <option value="Cat">Cat</option>
+                        <option value="Rabbit">Rabbit</option>
+                        <option value="Bird">Bird</option>
+                        <option value="Hamster">Hamster</option>
+                    </select>
+
+                    <select class="species-filter" id="genderFilter" onchange="handleFilter()">
+                        <option value="All">Genders</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+
+                    <select class="species-filter" id="ageFilter" onchange="handleFilter()">
+                        <option value="All">Ages</option>
+                        <option value="0-1">0-1 yrs</option>
+                        <option value="2-5">2-5 yrs</option>
+                        <option value="6+">6+ yrs</option>
+                    </select>
+
+                    <button class="clear-btn" onclick="clearFilters()">Clear <span class="arrow-icon">›</span></button>
+                </div>
+
+                <div class="pets-grid" id="petsGrid"></div>
+            </section>
+        </main>
+    </div>
+
+    <div id="mainModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header"><h2 id="modalTitle">Title</h2><button class="close-btn" onclick="closeModal('mainModal')">&times;</button></div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-header" style="justify-content: center; border: none;">
+                <h2 style="color: var(--primary-purple); font-size: 20px;">Confirm Action</h2>
+            </div>
+
+            <div class="modal-body">
+                <p id="confirmMessage" style="margin-bottom: 25px; color: var(--text-dark);">
+                    Are you sure?
+                </p>
+
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button id="btnConfirmDelete" class="submit-btn" style="margin: 0; background-color: #ff5e78; flex: 1;">
+                        Confirm
+                    </button>
+
+                    <button onclick="closeModal('confirmModal')" class="action-btn view-btn" style="flex: 1; border-radius: 12px; height: 48px;">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../data/auth.js"></script> 
+    <script src="pets.js"></script>
+</body>
+</html>

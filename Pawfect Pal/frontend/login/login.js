@@ -54,10 +54,15 @@ loginForm.addEventListener("submit", async function (e) {
 
         localStorage.setItem("userId", data.userId);
         localStorage.setItem("userName", data.userName);
+        localStorage.setItem("ownerFName", data.ownerFName);
+        localStorage.setItem("ownerLName", data.ownerLName);
         localStorage.setItem("role", data.role);
 
-        window.location.href = "../dashboard/dashboard.html";
-
+        if (data.role.toLowerCase() === "admin") {
+            window.location.href = "../admin/dashboard/dashboard.html";
+        } else {
+            window.location.href = "../user/dashboard/dashboard.html";
+        }
     } catch (error) {
         console.error("Login error:", error);
         alert("Could not connect to the server.");

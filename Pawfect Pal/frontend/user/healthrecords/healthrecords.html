@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawfect Pal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preload" as="image" href="../../sidebar/logo.png">
+    <link rel="preload" as="image" href="../../sidebar/active.png">
+    <link rel="preload" as="image" href="../../sidebar/peek.png">   
+
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="../sidebar/logo.png" alt="Pawfect Pal" class="sidebar-logo-landscape">
+            </div>
+            <nav class="sidebar-nav">
+                <a href="../dashboard/dashboard.html" class="nav-item">
+                    <img src="../sidebar/dashboard-m.png" class="custom-icon-nav"> 
+                    Dashboard 
+                    <img src="../sidebar/active.png" class="nav-char">
+                </a>
+
+                <a href="../pets/pets.html" class="nav-item">
+                    <img src="../sidebar/pets-m.png" class="custom-icon-nav"> 
+                    Pets 
+                    <img src="../sidebar/active.png" class="nav-char">
+                </a>
+
+                <a href="../appointments/appointments.html" class="nav-item">
+                    <img src="../sidebar/appointment-m.png" class="custom-icon-nav"> 
+                    Appointments 
+                    <img src="../sidebar/active.png" class="nav-char">
+                </a>
+
+                <a href="../healthrecords/healthrecords.html" class="nav-item active">
+                    <img src="../sidebar/health-m.png" class="custom-icon-nav"> 
+                    Health Records 
+                    <img src="../sidebar/active.png" class="nav-char">
+                </a>
+
+                <a href="../services/services.html" class="nav-item">
+                    <img src="../sidebar/services-m.png" class="custom-icon-nav"> 
+                    Services 
+                    <img src="../sidebar/active.png" class="nav-char">
+                </a>
+
+                <a href="../payment/payment.html" class="nav-item">
+                    <img src="../sidebar/billing-m.png" class="custom-icon-nav"> 
+                    Payment 
+                    <img src="../sidebar/active.png" class="nav-char">
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <strong class="user-name">
+                        <span id="sidebarOwnerFName"></span> <span id="sidebarOwnerLName"></span>
+                    </strong>
+                    <span class="user-role">Pet Owner</span>
+                </div>
+                <a href="#" class="nav-item logout-item" onclick="triggerLogout()">
+                    <img src="../sidebar/logout-m.png" class="custom-icon-nav logout-icon" alt="Logout"> 
+                    Logout 
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="action-bar">
+                <div class="search-box">
+                    <img src="user-health/search.png" class="search-icon-btn" alt="Search">
+                    <input type="text" id="petSearch" placeholder="Search pet...">
+                </div>
+                                
+                <div class="filter-box">
+                    <select id="statusFilter" class="filter-dropdown">
+                        <option value="All">All Species</option>
+                        <option value="Dog">Dog</option>
+                        <option value="Cat">Cat</option>
+                        <option value="Rabbit">Rabbit</option>
+                        <option value="Bird">Bird</option>
+                        <option value="Hamster">Hamster</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="emptyState" style="display: none; flex-direction: column; align-items: center; justify-content: center; padding: 100px 20px; text-align: center;">
+                    <img src="user-health/no-record.png" alt="No results" style="width: 300px; height: 300px; object-fit: contain; margin-bottom: 20px; opacity: 0.6;">
+                    <h3 style="color: var(--primary-purple); font-size: 24px; margin-bottom: 8px;">No Pets Found</h3>
+                    <p style="color: var(--text-muted); font-size: 16px;">Try searching for a different name or changing the species filter.</p>
+            </div>
+
+            <div class="health-card" data-species="">
+                <div class="card-pet-info">
+                    <div class="avatar-container">
+                        <img src="" alt="Pet" class="pet-img" id="displayPetImg">
+                    </div>
+                    <div class="pet-text">
+                        <h3 class="pet-name" id="displayPetName"></h3>
+                        <p class="pet-breed" id="displayPetBreed"></p>
+                        <div class="mini-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Weight</span>
+                                <span class="stat-val" id="displayWeight">--</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Last Visit</span>
+                                <span class="stat-val" id="displayLastVisit">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-health-data">
+                    </div>
+
+                <div class="card-actions">
+                    <button class="view-history-btn" onclick="openFullHistory()">
+                        <span>View Full History</span>
+                        <span class="arrow">›</span>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <div id="mainModal" class="modal-overlay">
+            <div class="modal-content history-modal-size">
+                <div class="modal-header">
+                    <h2 id="modalTitle">View Full History</h2>
+                    <button class="close-btn" onclick="closeModal('mainModal')">&times;</button>
+                </div>
+                <div id="modalBody">
+                    <div class="history-container">
+                        <div class="history-pet-header">
+                            <div class="pet-id-card">
+                                <img src="" class="history-avatar" id="historyPetAvatar">
+                                <div class="pet-meta">
+                                    <h2 id="historyPetName"></h2> 
+                                    <p id="historyPetBreed"></p> 
+                                </div>
+                            </div>
+                            <div class="quick-stats">
+                                <div class="stat-pill">
+                                    <img src="user-health/weight.png" class="label-icon"> 
+                                    <div><span>Current Weight</span><strong id="historyWeight">--</strong></div> 
+                                </div>
+                                <div class="stat-pill">
+                                    <img src="user-health/date.png" class="label-icon"> 
+                                    <div><span>Last Visit</span><strong id="historyLastVisit">--</strong></div> 
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="history-table-wrapper">
+                            <table class="history-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date Recorded</th>
+                                        <th>Record Type</th>
+                                        <th>Details</th>
+                                        <th>Status</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historyTableBody">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>    
+
+        <div id="confirmModal" class="modal-overlay">
+            <div class="modal-content" style="max-width: 400px; text-align: center;">
+                <div class="modal-header" style="justify-content: center; border: none;">
+                    <h2 style="color: var(--primary-purple); font-size: 20px;">Confirm Log out</h2>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmMessage" style="margin-bottom: 25px; color: var(--text-dark);"></p>
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button id="btnConfirmDelete" class="submit-btn" style="margin: 0; background-color: #ff5e78; flex: 1;">Remove</button>
+                        <button onclick="closeModal('confirmModal')" class="action-btn view-btn" style="flex: 1; border-radius: 12px; height: 48px;">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <script src="../../data/auth.js"></script>        
+    <script src="healthrecords.js"></script>
+
+</body>
+</html>
