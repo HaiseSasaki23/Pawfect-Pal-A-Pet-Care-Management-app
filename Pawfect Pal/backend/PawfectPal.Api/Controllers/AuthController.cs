@@ -63,5 +63,33 @@ namespace PawfectPal.Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpPost("forgot-password")]
+        public IActionResult ForgotPassword([FromBody] ForgotPasswordDto dto)
+        {
+            try
+            {
+                _authService.ForgotPassword(dto);
+                return Ok(new { message = "If this email exists, a reset link has been sent." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("reset-password")]
+        public IActionResult ResetPassword([FromBody] ResetPasswordDto dto)
+        {
+            try
+            {
+                _authService.ResetPassword(dto);
+                return Ok(new { message = "Password reset successful." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }                
     }
 }
