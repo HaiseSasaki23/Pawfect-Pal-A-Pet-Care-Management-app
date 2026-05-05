@@ -85,7 +85,6 @@ async function loadPets(userId) {
     }
 }
 
-// Load pets specifically for the appointment modal dropdown
 async function loadPetsForDropdown() {
     const userId = localStorage.getItem("userId");
     
@@ -275,7 +274,7 @@ function toggleGcashDetails() {
     }
 }
 
-// Full logic for service price calculation
+// price calculation
 document.querySelectorAll('input[name="services"]').forEach(cb => {
     cb.addEventListener('change', () => {
         let total = 0;

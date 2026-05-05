@@ -17,7 +17,7 @@ function initAppointmentPage() {
 /* API Configuration*/
 const API_BASE_URL = 'http://localhost:5182';
 
-/* --- date limit --- */
+/* date limit */
 function setMinimumBookingDate() {
     const today = new Date().toISOString().split("T")[0];
     const bookingDate = document.getElementById("bookingDate");
@@ -27,13 +27,12 @@ function setMinimumBookingDate() {
     }
 }
 
-/* --- Load pets from backend --- */
+/* Load pets */
 async function loadAppointments() {
     const userId = localStorage.getItem("userId");
     if (!userId) return;
 
     try {
-        // ✅ Use correct capitalization: Appointment (capital A)
         const response = await fetch(`${API_BASE_URL}/api/Appointment/user/${userId}?t=${Date.now()}`);
         const data = await response.json();
 
@@ -45,29 +44,24 @@ async function loadAppointments() {
             return;
         }
 
-        // ✅ Use correct capitalization: Pet (capital P)
         const petsResponse = await fetch(`${API_BASE_URL}/api/Pet/user/${userId}?t=${Date.now()}`);
         const pets = await petsResponse.json();
         
-        // Create a map of petId to species for quick lookup
         const petSpeciesMap = {};
         pets.forEach(pet => {
-            // Log each pet to see what IDs are available
             console.log("Pet:", pet.id, pet.petId, pet.name, pet.species);
             const petId = pet.id || pet.petId;
             petSpeciesMap[petId] = pet.species || "Unknown";
         });
 
-        console.log("Pet Species Map:", petSpeciesMap); // Debug: Check the map
+        console.log("Pet Species Map:", petSpeciesMap);
 
         data.forEach(app => {
             const card = document.createElement("div");
             card.className = "appointment-card";
 
-            // Log appointment to see what petId is available
             console.log("Appointment:", app.petId, app.petName);
             
-            // Get species from the map using petId
             const species = petSpeciesMap[app.petId] || "Unknown";
 
             let servicesText = app.services || "N/A";
@@ -99,12 +93,10 @@ async function loadAppointments() {
             <span class="status-badge ${(app.appStatus || "pending").toLowerCase()}">${app.appStatus || "Pending"}</span>
             `;
 
-            // Store attributes for filtering
             card.setAttribute("data-pet", (app.petName || "").toLowerCase());
             card.setAttribute("data-status", (app.appStatus || "").toLowerCase());
             card.setAttribute("data-species", species.toLowerCase());
             
-            // Handle service IDs properly
             let serviceIds = app.serviceIds || [];
             if (typeof serviceIds === 'string') {
                 serviceIds = serviceIds.split(',');
@@ -153,7 +145,7 @@ async function loadPetsDropdown() {
         console.error("Error loading pets:", error);
     }
 }
-/* --- modal control functions --- */
+/* modal control functions */
 function openModal(id) {
     const modal = document.getElementById(id);
 
@@ -186,7 +178,7 @@ function closeModal(id) {
     }
 }
 
-/* --- service calculation logic --- */
+/* service calculation logic */
 function setupServiceCalculation() {
     const serviceCheckboxes = document.querySelectorAll('input[name="services"]');
 
@@ -210,7 +202,7 @@ function setupServiceCalculation() {
     });
 }
 
-/* --- gcash detail toggle --- */
+/* gcash detail toggle */
 function toggleGcashDetails() {
     const paymentSelect = document.getElementById("bookingPayment");
     const gcashBox = document.getElementById("gcashDetails");
@@ -224,7 +216,7 @@ function toggleGcashDetails() {
     }
 }
 
-/* --- form submission logic with backend connection --- */
+/* form submission logic with backend connection */
 function setupBookAppointmentForm() {
     const bookAppointmentForm = document.getElementById("bookAppointmentForm");
 
@@ -305,7 +297,7 @@ function setupBookAppointmentForm() {
     });
 }
 
-/* --- success message --- */
+/* success message  */
 function showSuccessMessage() {
     const successToast = document.getElementById("successToast");
 
@@ -322,7 +314,7 @@ function hideSuccessMessage() {
     }
 }
 
-/* --- unified filter logic --- */
+/* unified filter logic */
 function filterAppointments() {
     const searchInput = document.getElementById("appSearch");
     const speciesFilter = document.getElementById("speciesFilter");
@@ -368,7 +360,7 @@ function filterAppointments() {
     });
 }
 
-/* --- clear all filters logic --- */
+/* clear all filters logic */
 function clearAllFilters() {
     const searchInput = document.getElementById("appSearch");
     const speciesFilter = document.getElementById("speciesFilter");
@@ -393,7 +385,7 @@ function clearAllFilters() {
     filterAppointments();
 }
 
-/* --- service dropdown --- */
+/* service dropdown */
 function toggleServiceDropdown() {
     const container = document.querySelector(".dropdown-check-container");
 
@@ -402,7 +394,7 @@ function toggleServiceDropdown() {
     }
 }
 
-/* --- close dropdown and modal when clicking outside --- */
+/* close dropdown and modal when clicking outside */
 function setupOutsideClickClose() {
     window.addEventListener("click", function (e) {
         const container = document.querySelector(".dropdown-check-container");
