@@ -22,7 +22,7 @@ namespace PawfectPal.Api.Services
             return _repo.GetAppointmentById(id);
         }
 
-        public List<Appointment> GetByUserId(int userId)
+        public List<dynamic> GetByUserId(int userId)
         {
             return _repo.GetAppointmentsByUserId(userId);
         }

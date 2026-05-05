@@ -33,7 +33,7 @@ async function loadAppointments() {
     if (!userId) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/appointment/user/${userId}`);
+        const response = await fetch(`${API_BASE_URL}/api/appointment/user/${userId}?t=${Date.now()}`);
         const data = await response.json();
 
         const container = document.getElementById("appointmentList");
@@ -49,12 +49,16 @@ async function loadAppointments() {
             card.className = "appointment-card";
 
             card.innerHTML = `
-                <span></span>
-                <span>${app.petName || "Pet #" + app.petId}</span>
-                <span>N/A</span>
-                <span>${new Date(app.appointmentDate).toLocaleString()}</span>
-                <span class="status ${app.appStatus.toLowerCase()}">${app.appStatus}</span>
+            <span></span>
+            <span>${app.petName}</span>
+            <span>${app.services || "N/A"}</span>
+            <span>${new Date(app.appointmentDate).toLocaleString()}</span>
+            <span class="status ${app.appStatus.toLowerCase()}">${app.appStatus}</span>
             `;
+
+            card.setAttribute("data-pet", app.petName);
+            card.setAttribute("data-status", app.appStatus);
+            card.setAttribute("data-services", app.serviceIds);
 
             container.appendChild(card);
         });
@@ -64,6 +68,32 @@ async function loadAppointments() {
     }
 }
 
+async function loadPetsDropdown() {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/appointment/user/${userId}?t=${Date.now()}`);
+        const pets = await response.json();
+
+        const select = document.getElementById("bookingPetName");
+
+        if (!select) return;
+
+        select.innerHTML = `<option value="" disabled selected>Select Pet</option>`;
+
+        pets.forEach(pet => {
+            const option = document.createElement("option");
+            option.value = pet.petId;
+            option.textContent = pet.name; // IMPORTANT: depends on your backend field
+
+            select.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error("Error loading pets:", error);
+    }
+}
 /* --- modal control functions --- */
 function openModal(id) {
     const modal = document.getElementById(id);
@@ -205,6 +235,7 @@ function setupBookAppointmentForm() {
             if (response.ok) {
                 closeModal("bookAppointmentModal");
                 showSuccessMessage();
+                loadAppointments();
             } else {
                 alert("Error: " + result.message);
             }

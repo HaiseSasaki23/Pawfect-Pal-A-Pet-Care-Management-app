@@ -90,26 +90,52 @@ namespace PawfectPal.Api.Repositories
             return MapAppointment(dt.Rows[0]);
         }
 
-        public List<Appointment> GetAppointmentsByUserId(int userId)
+public List<dynamic> GetAppointmentsByUserId(int userId)
+{
+    string query = @"
+        SELECT 
+            a.AppointmentID,
+            a.UserID,
+            a.PetID,
+            p.Name AS PetName,
+            a.AppointmentDate,
+            a.AppStatus,
+            GROUP_CONCAT(s.ServiceType) AS Services,
+            GROUP_CONCAT(s.ServiceID) AS ServiceIds
+        FROM appointment a
+        JOIN pet p ON a.PetID = p.PetID
+        LEFT JOIN appointment_services aps ON a.AppointmentID = aps.AppointmentID
+        LEFT JOIN service s ON aps.ServiceID = s.ServiceID
+        WHERE a.UserID = @UserID
+        GROUP BY a.AppointmentID
+        ORDER BY a.AppointmentDate DESC
+    ";
+
+    var parameters = new List<MySqlParameter>
+    {
+        new("@UserID", userId)
+    };
+
+    DataTable dt = _db.ExecuteQuery(query, parameters);
+
+    List<dynamic> list = new();
+
+    foreach (DataRow row in dt.Rows)
+    {
+        list.Add(new
         {
-            string query = "SELECT * FROM appointment WHERE UserID = @UserID";
+            appointmentId = Convert.ToInt32(row["AppointmentID"]),
+            petId = Convert.ToInt32(row["PetID"]),
+            petName = row["PetName"].ToString(),
+            appointmentDate = Convert.ToDateTime(row["AppointmentDate"]),
+            appStatus = row["AppStatus"].ToString(),
+            services = row["Services"]?.ToString() ?? "",
+            serviceIds = row["ServiceIds"]?.ToString() ?? ""
+        });
+    }
 
-            var parameters = new List<MySqlParameter>
-            {
-                new("@UserID", userId)
-            };
-
-            DataTable dt = _db.ExecuteQuery(query, parameters);
-
-            List<Appointment> list = new();
-
-            foreach (DataRow row in dt.Rows)
-            {
-                list.Add(MapAppointment(row));
-            }
-
-            return list;
-        }
+    return list;
+}
 
         public void UpdateAppointment(Appointment appointment)
         {
