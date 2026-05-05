@@ -118,9 +118,19 @@
                     <div class="record-payment-card">
                         <div class="card-header">
                             <div class="icon-circle pink"><img src="img-payments/cash-payment.png"></div>
-                            <h4>Cash Payment</h4>
+                            <h4>Record Payment</h4>
                         </div>
                         <form id="cashPaymentForm" class="payment-form">
+                            <label>Payment Method</label>
+                            <div class="method-toggle">
+                                <button type="button" class="method-btn active" id="btnCash" onclick="switchMethod('cash')">
+                                    💵 Cash
+                                </button>
+                                <button type="button" class="method-btn" id="btnGcash" onclick="switchMethod('gcash')">
+                                    📱 GCash
+                                </button>
+                            </div>
+
                             <label>Appointment ID</label>
                             <select id="appointmentSelect" onchange="autoPopulateDetails()">
                                 <option value="" disabled selected>Search appointment...</option>
@@ -140,21 +150,39 @@
                                         <input type="number" id="payAmount" readonly>
                                     </div>
                                 </div>
-                                <div class="field-group">
+                                <div class="field-group" id="cashReceivedGroup">
                                     <label>Cash Received</label>
                                     <div class="input-with-symbol">
                                         <span>P</span>
                                         <input type="number" id="cashReceived" oninput="calculateChange()">
                                     </div>
                                 </div>
+                                <div class="field-group" id="gcashAmountGroup" style="display:none;">
+                                    <label>Amount Paid</label>
+                                    <div class="input-with-symbol">
+                                        <span>P</span>
+                                        <input type="number" id="gcashAmountPaid" oninput="calculateChange()">
+                                    </div>
+                                </div>
                             </div>
 
-                            <label>Change</label>
-                            <div class="input-with-symbol change-field">
-                                <span>P</span>
-                                <input type="number" id="payChange" readonly>
+                            <div id="changeSection">
+                                <label>Change</label>
+                                <div class="input-with-symbol change-field">
+                                    <span>P</span>
+                                    <input type="number" id="payChange" readonly>
+                                </div>
                             </div>
-                            <button type="submit" class="submit-payment-btn">+ Record Cash Payment</button>
+
+                            <div id="gcashSection" style="display:none;">
+                                <label>GCash Name</label>
+                                <input type="text" id="gcashName" placeholder="e.g. Juan Dela Cruz">
+
+                                <label>Reference Number</label>
+                                <input type="text" id="gcashRef" placeholder="e.g. 1234567890">
+                            </div>
+
+                            <button type="submit" class="submit-payment-btn" id="submitPaymentBtn">+ Record Cash Payment</button>
                         </form>
                     </div>
                 </aside>
@@ -197,6 +225,7 @@
         </div>
     </div>
 
+    <script src="../data/auth.js"></script>
     <script src="payments.js"></script>
 
 </body>
