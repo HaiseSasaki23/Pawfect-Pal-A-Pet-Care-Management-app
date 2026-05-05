@@ -33,7 +33,8 @@ async function loadAppointments() {
     if (!userId) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/appointment/user/${userId}?t=${Date.now()}`);
+        // ✅ Use correct capitalization: Appointment (capital A)
+        const response = await fetch(`${API_BASE_URL}/api/Appointment/user/${userId}?t=${Date.now()}`);
         const data = await response.json();
 
         const container = document.getElementById("appointmentList");
@@ -44,27 +45,85 @@ async function loadAppointments() {
             return;
         }
 
+        // ✅ Use correct capitalization: Pet (capital P)
+        const petsResponse = await fetch(`${API_BASE_URL}/api/Pet/user/${userId}?t=${Date.now()}`);
+        const pets = await petsResponse.json();
+        
+        // Create a map of petId to species for quick lookup
+        const petSpeciesMap = {};
+        pets.forEach(pet => {
+            // Log each pet to see what IDs are available
+            console.log("Pet:", pet.id, pet.petId, pet.name, pet.species);
+            const petId = pet.id || pet.petId;
+            petSpeciesMap[petId] = pet.species || "Unknown";
+        });
+
+        console.log("Pet Species Map:", petSpeciesMap); // Debug: Check the map
+
         data.forEach(app => {
             const card = document.createElement("div");
             card.className = "appointment-card";
 
+            // Log appointment to see what petId is available
+            console.log("Appointment:", app.petId, app.petName);
+            
+            // Get species from the map using petId
+            const species = petSpeciesMap[app.petId] || "Unknown";
+
+            let servicesText = app.services || "N/A";
+            if (Array.isArray(app.services)) {
+                servicesText = app.services.join(', ');
+            }
+
+            const dateObj = new Date(app.appointmentDate);
+            const datePart = dateObj.toLocaleString('en-US', { 
+                year: 'numeric',
+                month: 'long', 
+                day: 'numeric'
+            });
+            const timePart = dateObj.toLocaleString('en-US', { 
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+            const formattedDate = `${datePart} | ${timePart}`;
+
             card.innerHTML = `
             <span></span>
-            <span>${app.petName}</span>
-            <span>${app.services || "N/A"}</span>
-            <span>${new Date(app.appointmentDate).toLocaleString()}</span>
-            <span class="status ${app.appStatus.toLowerCase()}">${app.appStatus}</span>
+            <span>
+                ${app.petName}<br>
+                <small style="color: #999; font-size: 11px;">${species}</small>
+            </span>
+            <span>${servicesText}</span>
+            <span>${formattedDate}</span>
+            <span class="status-badge ${(app.appStatus || "pending").toLowerCase()}">${app.appStatus || "Pending"}</span>
             `;
 
-            card.setAttribute("data-pet", app.petName);
-            card.setAttribute("data-status", app.appStatus);
-            card.setAttribute("data-services", app.serviceIds);
+            // Store attributes for filtering
+            card.setAttribute("data-pet", (app.petName || "").toLowerCase());
+            card.setAttribute("data-status", (app.appStatus || "").toLowerCase());
+            card.setAttribute("data-species", species.toLowerCase());
+            
+            // Handle service IDs properly
+            let serviceIds = app.serviceIds || [];
+            if (typeof serviceIds === 'string') {
+                serviceIds = serviceIds.split(',');
+            } else if (typeof serviceIds === 'number') {
+                serviceIds = [serviceIds.toString()];
+            } else if (!Array.isArray(serviceIds)) {
+                serviceIds = [];
+            }
+            card.setAttribute("data-services", serviceIds.join(','));
 
             container.appendChild(card);
         });
 
     } catch (error) {
         console.error("Error loading appointments:", error);
+        const container = document.getElementById("appointmentList");
+        if (container) {
+            container.innerHTML = "<p style='text-align:center; padding:40px; color:red;'>Failed to load appointments.<br>Error: ${error.message}</p>";
+        }
     }
 }
 
@@ -73,7 +132,7 @@ async function loadPetsDropdown() {
     if (!userId) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/appointment/user/${userId}?t=${Date.now()}`);
+        const response = await fetch(`${API_BASE_URL}/api/pet/user/${userId}?t=${Date.now()}`);
         const pets = await response.json();
 
         const select = document.getElementById("bookingPetName");
@@ -85,7 +144,7 @@ async function loadPetsDropdown() {
         pets.forEach(pet => {
             const option = document.createElement("option");
             option.value = pet.petId;
-            option.textContent = pet.name; // IMPORTANT: depends on your backend field
+            option.textContent = pet.name;
 
             select.appendChild(option);
         });
