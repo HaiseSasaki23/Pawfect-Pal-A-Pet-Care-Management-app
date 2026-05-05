@@ -1,0 +1,706 @@
+:root {
+    --primary-purple: #9d72d6;
+    --primary-hover: #8a5bc9;
+    --soft-pink: #fdf5f7;
+    --bg-lavender: #f8f0ff;
+    --text-dark: #4a4a4a;
+    --text-muted: #999;
+    --sidebar-width: 285px;
+    --card-shadow: 0 4px 15px rgba(0,0,0,0.02);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Quicksand', sans-serif;
+}
+
+body {
+    background-color: #faf8ff;
+    min-height: 100vh;
+    color: var(--text-dark);
+}
+
+.dashboard-container {
+    display: flex;
+    width: 100%;
+}
+
+.sidebar {
+    width: var(--sidebar-width);
+    background: white;
+    padding: 10px 20px 30px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #f0f0f0;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    z-index: 100;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    justify-content: flex-start;
+}
+
+.sidebar-logo-landscape {
+    width: 100%;
+    max-width: 220px;
+    height: auto;
+    object-fit: contain;
+    margin-left: -5px;
+}
+
+.sidebar-nav {
+    flex-grow: 1;
+    overflow-y: auto; 
+    margin-bottom: 20px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: #777;
+    font-weight: 500;
+    border-radius: 12px;
+    margin-bottom: 5px;
+    transition: 0.2s;
+    position: relative;
+    height: 50px;
+}
+
+.nav-item.active, .nav-item:hover {
+    background: var(--bg-lavender);
+    color: var(--primary-purple);
+}
+
+.custom-icon-nav {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+.nav-char {
+    width: 40px;
+    height: 40px;
+    margin-left: auto;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.nav-item.active .nav-char {
+    opacity: 1;
+}
+
+.sidebar:hover .nav-item.active .nav-char {
+    opacity: 0;
+}
+
+.sidebar .nav-item:hover .nav-char {
+    width: 40px;
+    opacity: 1 !important;
+    content: url('../../sidebar/peek.png') !important;
+}
+
+.sidebar-footer {
+    padding-top: 20px;
+    border-top: 1px solid #f5f5f5;
+    margin-top: auto; 
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; 
+}
+
+.user-name {
+    display: block;
+    font-size: 25px;
+    line-height: 1; 
+    margin-bottom: 5px;
+}
+
+.user-role {
+    display: block;
+    font-size: 14px !important;
+    color: var(--primary-purple);
+}
+
+.logout-item {
+    padding-left: 5px !important; 
+    margin-top: 10px;
+    color: #ff5e78 !important;   
+    width: 100%;                 
+}
+
+.logout-item {
+    margin-top: 10px;
+    color: #ff5e78 !important;
+    margin-left: -10px; 
+    padding-left: 10px !important; 
+    width: calc(100% + 10px);
+    transition: 0.2s;
+}
+
+.logout-icon {
+    width: 40px;  
+    height: 40px; 
+    object-fit: contain; 
+}
+
+.main-content {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    padding: 10px 40px 40px; 
+    min-height: 100vh;
+}
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    padding: 30px;
+    border-radius: 24px;
+}
+
+.modal-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 20px; 
+}
+
+.close-btn { 
+    background: none; 
+    border: none; 
+    font-size: 24px; 
+    cursor: pointer; 
+    color: #bbb; 
+}
+
+.view-btn { 
+    background: #f3efff; 
+    color: var(--primary-purple); 
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.modal-form input, #otherSpec {
+    padding: 12px;
+    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    background: #fafafa;
+    outline: none;
+    font-size: 14px;
+    color: var(--text-dark);
+}
+
+.submit-btn {
+    background: var(--primary-purple);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.3s;
+}
+
+.submit-btn:hover { 
+    background: var(--primary-hover); 
+}
+.modal-form input:invalid:not(:placeholder-shown) {
+    border-color: #ff5e78;
+}
+.action-btn {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+/* --- Main Content Layout --- */
+.main-content {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    padding: 30px 40px; /* Adjusted padding for better breathing room */
+    background-color: #faf8ff; /* Matches body background */
+    min-height: 100vh;
+}
+
+/* --- Record Payment Card Styles --- */
+.record-payment-card {
+    background: white;
+    padding: 25px;
+    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow); /* Subtle shadow from theme */
+    max-width: 450px; /* Keeps the form compact and centered if needed */
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: -5px;
+}
+
+.card-header h4 {
+    font-size: 20px;
+    color: var(--text-dark);
+    font-weight: 700;
+}
+
+.icon-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 15px; /* Squircle style[cite: 6] */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.icon-circle img {
+    width: 60px; /* Scaled down for internal balance */
+    height: 60px;
+    object-fit: contain;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 25px;
+}
+
+.clear-btn {
+    background: #f3efff;
+    color: var(--primary-purple);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* --- Form Elements --- */
+.payment-form label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+    margin-top: 15px;
+}
+
+.payment-form input, 
+.payment-form select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    background: #fafafa;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 14px;
+    color: var(--text-dark);
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.payment-form input:focus, 
+.payment-form select:focus {
+    border-color: var(--primary-purple);
+}
+
+.payment-form input[readonly] {
+    background-color: #f5f5f5; /* Visual cue that it is auto-populated */
+    cursor: not-allowed;
+}
+
+/* --- Grid for Amount and Cash Received --- */
+.amount-notes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.input-with-symbol {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-symbol span {
+    position: absolute;
+    left: 15px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.input-with-symbol input {
+    padding-left: 35px; /* Offset text to make room for 'P' symbol */
+}
+
+/* --- Change Field Styling --- */
+.change-field input {
+    background-color: #f0fdf4 !important; /* Soft green success background */
+    border: 1px solid #bbf7d0 !important;
+    color: #16a34a !important;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+/* --- Layout Grid --- */
+.payment-top-bar {
+    display: grid;
+    /* Defines fixed widths for filters and lets search take the rest of the space */
+    grid-template-columns: 200px 200px 1fr; 
+    gap: 15px;
+    margin-bottom: 30px;
+    align-items: center;
+}
+
+.date-input-top {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    background: white;
+    color: var(--text-dark);
+    outline: none;
+    cursor: pointer;
+}
+
+.date-input-top:focus {
+    border-color: var(--primary-purple);
+}
+
+.search-box input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    background: white;
+    outline: none;
+}
+
+.search-box input:focus {
+    border-color: var(--primary-purple);
+}
+
+.payment-top-bar input, .payment-top-bar select {
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #f0f0f0;
+    background: white;
+}
+
+/* --- Transactions Table --- */
+.transactions-container {
+    background: white;
+    padding: 25px;
+    border-radius: 24px;
+    box-shadow: var(--card-shadow);
+}
+
+.section-header {
+    display: flex;
+    flex-direction: column; /* Moves title above filters[cite: 42] */
+    align-items: flex-start; /* Aligns title to the left */
+    gap: 20px; /* Space between title and filter row */
+    margin-bottom: 25px;
+}
+
+.payment-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.payment-table th {
+    text-align: left;
+    padding: 15px;
+    color: var(--text-muted);
+    border-bottom: 1px solid #f5f5f5;
+    font-weight: 700;
+}
+
+.payment-table th:last-child, 
+.payment-table td:last-child {
+    width: 120px; /* Increased width for the amount */
+    text-align: right; /* Aligns currency to the right for better readability */
+    padding-right: 25px;
+}
+
+.payment-table td {
+    padding: 15px;
+    border-bottom: 1px solid #fafafa;
+    vertical-align: middle;
+}
+
+/* Avatar styling inside table */
+.payment-table .user-cell, .payment-table .pet-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.payment-table img {
+    width: 32px; /* Small enough for table rows[cite: 6, 9] */
+    height: 32px;
+    border-radius: 50%; /* Makes them perfectly circular[cite: 9] */
+    object-fit: cover; /* Prevents stretching[cite: 9] */
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+/* --- Action Sidebar Cards --- */
+/* --- Layout Grid Fix --- */
+.payments-main-grid {
+    display: grid !important; /* Forces the grid layout */
+    grid-template-columns: 1fr 300px; /* Table takes 1 fraction, Sidebar stays 400px */
+    gap: 30px;
+    align-items: start;
+}
+
+.payment-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.due-payments-card {
+    background: white;
+    padding: 20px;
+    border-radius: 24px;
+    box-shadow: var(--card-shadow);
+    text-align: center;
+}
+
+.view-due-btn {
+    width: 100%;
+    background: var(--primary-purple);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 700;
+    margin-top: 15px;
+    cursor: pointer;
+}
+
+/* --- Record Cash Payment Button UI --- */
+.submit-payment-btn {
+    width: 100%;
+    background: var(--primary-purple); /* Pawfect Pal Purple */
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 15px;
+    font-weight: 700;
+    font-size: 15px;
+    margin-top: 25px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.1s;
+}
+
+.submit-payment-btn:hover {
+    background: var(--primary-hover); /* Darker purple on hover */
+    transform: translateY(-1px); /* Slight lift effect */
+}
+
+.submit-payment-btn:active {
+    transform: translateY(0);
+}
+
+.table-filters {
+    display: flex;
+    flex-direction: row; /* Filters stay side-by-side[cite: 36] */
+    gap: 12px;
+    width: 100%; /* Stretches across the container */
+    align-items: center;
+}
+
+.table-filters .search-box {
+    flex-grow: 1; /* Allows the search bar to fill available horizontal space */
+}
+
+.table-method-filter {
+    padding: 8px 12px;
+    border: 1px solid #f0f0f0;
+    border-radius: 10px;
+    background: #fafafa;
+    font-size: 13px;
+    color: var(--text-dark);
+    outline: none;
+    cursor: pointer;
+}
+
+.table-method-filter:focus {
+    border-color: var(--primary-purple);
+}
+
+/* Tags for Payment Methods */
+.method-tag {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.method-tag.gcash {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+.method-tag.cash {
+    background-color: var(--bg-lavender);
+    color: var(--primary-purple);
+}
+
+/* User/Pet Cell Layout */
+.user-cell, .pet-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* --- Modal Specific Adjustments --- */
+#mainModal .modal-content {
+    max-width: 800px; /* Wider for the table */
+    width: 90%;
+}
+
+#mainModal .modal-body {
+    max-height: 60vh; /* Scrollable if there are many pending payments */
+    overflow-y: auto;
+    padding-top: 10px;
+}
+
+/* Ensure modal table headers stick to the top when scrolling */
+#mainModal .payment-table th {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+}
+
+/* --- Modal Table Adjustments --- */
+#modalBody .payment-table {
+    width: 100%;
+    table-layout: auto; /* Allows specific width overrides */
+}
+
+/* Ensure specific columns in the modal don't squeeze */
+#modalBody .payment-table th, 
+#modalBody .payment-table td {
+    white-space: nowrap; /* Prevents text from wrapping into multiple lines */
+    padding: 12px 15px; /* Comfortable spacing[cite: 51] */
+}
+
+/* Give the Date column a specific width to prevent squeezing[cite: 51] */
+#modalBody .payment-table th:nth-child(5), 
+#modalBody .payment-table td:nth-child(5) {
+    width: 160px; /* Fixed width for the Date column[cite: 51] */
+    min-width: 160px;
+}
+
+/* Adjust the Amount column in the modal[cite: 51] */
+#modalBody .payment-table th:nth-child(4), 
+#modalBody .payment-table td:nth-child(4) {
+    width: 120px;
+    text-align: right; /* Keeps currency aligned[cite: 51] */
+}
+
+/* Small Success Modal Styling */
+.modal-content.small-modal {
+    max-width: 350px; /* Force a small width */
+    text-align: center;
+    padding: 25px;
+    border-radius: 20px;
+}
+
+.success-icon-circle {
+    background: #f0fdf4;
+    color: #16a34a;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    font-size: 24px;
+}
+
+/* Error Icon for Small Pop-up[cite: 54] */
+.error-icon-circle {
+    background: #fef2f2;
+    color: #ef4444;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.empty-state {
+    display: none; /* Hidden by default[cite: 27] */
+    padding: 80px 20px !important;
+    text-align: center;
+    background: #ffffff;
+    border-radius: 24px;
+    width: 100%;
+    border: 2px dashed #f0f0f0;
+    margin-top: 20px;
+}
+
+.empty-state-content img {
+    width: 120px;
+    margin-bottom: 20px;
+    opacity: 0.6;
+}
+
+.empty-state-content h4 {
+    color: var(--text-dark);
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.empty-state-content p {
+    color: var(--text-muted);
+    font-size: 14px;
+}

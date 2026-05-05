@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawfect Pal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="../../sidebar/logo.png" alt="Pawfect Pal" class="sidebar-logo-landscape">
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <img src="../../sidebar/dashboard-m.png" class="custom-icon-nav"> 
+                    Dashboard 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/pets-m.png" class="custom-icon-nav"> 
+                    Pets 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/appointment-m.png" class="custom-icon-nav"> 
+                    Appointments 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/request-m.png" class="custom-icon-nav"> 
+                    Requests
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/health-m.png" class="custom-icon-nav"> 
+                    Health Records
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item active">
+                    <img src="../../sidebar/billing-m.png" class="custom-icon-nav"> 
+                    Payments
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <strong class="user-name">
+                        <span id="UserName">User</span>
+                    </strong>
+                    <span class="user-role">Admin</span>
+                </div>
+                <a href="#" class="nav-item logout-item" onclick="triggerLogout()">
+                    <img src="../../sidebar/logout-m.png" class="custom-icon-nav logout-icon" alt="Logout"> 
+                    Logout 
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="payments-main-grid">
+                <section class="transactions-container">
+                    <div class="section-header">
+                        <h3>Recent Transactions</h3>
+                        <div class="table-filters">
+                        <div class="search-box">
+                            <input type="text" placeholder="Search by Payment ID, User, Pet...">
+                        </div>    
+                            <select class="table-method-filter">
+                                <option>Payment Methods</option>
+                                <option value="Cash">Cash</option>
+                                <option value="GCash">GCash</option>
+                            </select>
+
+                        <div class="calendar-filter">
+                            <input type="date" class="date-input-top">
+                        </div>
+                            <button class="clear-btn">Clear Filters</button>
+                        </div>
+                    </div>
+                    <table class="payment-table">
+                        <thead>
+                            <tr>
+                                <th>Payment ID</th>
+                                <th>User</th>
+                                <th>Pet</th>
+                                <th>Appointment ID</th>
+                                <th>Date & Time</th>
+                                <th>Method</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionBody">
+                        </tbody>
+                    </table>
+                    <div id="no-payments" class="empty-state">
+                        <div class="empty-state-content">
+                            <img src="img-payments/no-payments.png" alt="No Transactions">
+                            <h4>No Transactions Found</h4>
+                            <p>There are no recorded payments matching your current filters.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <aside class="payment-sidebar">
+                    <div class="due-payments-card">
+                        <div class="card-header">
+                            <div class="icon-circle"><img src="img-payments/due-payments.png"></div>
+                            <div>
+                                <h4>View Due Payments</h4>
+                            </div>
+                        </div>
+                        <button class="view-due-btn" onclick="openDuePaymentsModal()">See all pending payments</button>
+                    </div>
+
+                    <div class="record-payment-card">
+                        <div class="card-header">
+                            <div class="icon-circle pink"><img src="img-payments/cash-payment.png"></div>
+                            <h4>Cash Payment</h4>
+                        </div>
+                        <form id="cashPaymentForm" class="payment-form">
+                            <label>Appointment ID</label>
+                            <select id="appointmentSelect" onchange="autoPopulateDetails()">
+                                <option value="" disabled selected>Search appointment...</option>
+                            </select>
+
+                            <label>User</label>
+                            <input type="text" id="payUser" readonly>
+
+                            <label>Pet</label>
+                            <input type="text" id="payPet" readonly>
+
+                            <div class="amount-notes-grid">
+                                <div class="field-group">
+                                    <label>Amount Due</label>
+                                    <div class="input-with-symbol">
+                                        <span>P</span>
+                                        <input type="number" id="payAmount" readonly>
+                                    </div>
+                                </div>
+                                <div class="field-group">
+                                    <label>Cash Received</label>
+                                    <div class="input-with-symbol">
+                                        <span>P</span>
+                                        <input type="number" id="cashReceived" oninput="calculateChange()">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <label>Change</label>
+                            <div class="input-with-symbol change-field">
+                                <span>P</span>
+                                <input type="number" id="payChange" readonly>
+                            </div>
+                            <button type="submit" class="submit-payment-btn">+ Record Cash Payment</button>
+                        </form>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+         <div id="mainModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header"><h2 id="modalTitle">Title</h2><button class="close-btn" onclick="closeModal('mainModal')">&times;</button></div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-header" style="justify-content: center; border: none;">
+                <h2 style="color: var(--primary-purple); font-size: 20px;">Confirm Log out</h2>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage" style="margin-bottom: 25px; color: var(--text-dark);"></p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button id="btnConfirmDelete" class="submit-btn" style="margin: 0; background-color: #ff5e78; flex: 1;">Remove</button>
+                    <button onclick="closeModal('confirmModal')" class="action-btn view-btn" style="flex: 1; border-radius: 12px; height: 48px;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="paymentAlertModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-header" style="justify-content: center; border: none;">
+                <h2 id="alertTitle" style="font-size: 20px;"></h2>
+            </div>
+            <div class="modal-body">
+                <p id="alertMessage" style="margin-bottom: 25px; color: var(--text-dark);"></p>
+                <div style="display: flex; justify-content: center;">
+                    <button id="alertBtn" class="submit-btn" style="margin: 0; flex: 1; width: 100%;">Action</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="payments.js"></script>
+
+</body>
+</html>
