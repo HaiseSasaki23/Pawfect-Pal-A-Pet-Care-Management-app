@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawfect Pal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="../../sidebar/logo.png" alt="Pawfect Pal" class="sidebar-logo-landscape">
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <img src="../../sidebar/dashboard-m.png" class="custom-icon-nav"> 
+                    Dashboard 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item active">
+                    <img src="../../sidebar/pets-m.png" class="custom-icon-nav"> 
+                    Pets 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/appointment-m.png" class="custom-icon-nav"> 
+                    Appointments 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/request-m.png" class="custom-icon-nav"> 
+                    Requests
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/health-m.png" class="custom-icon-nav"> 
+                    Health Records
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/billing-m.png" class="custom-icon-nav"> 
+                    Payments
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <strong class="user-name">
+                        <span id="UserName">User</span>
+                    </strong>
+                    <span class="user-role">Admin</span>
+                </div>
+                <a href="#" class="nav-item logout-item" onclick="triggerLogout()">
+                    <img src="../../sidebar/logout-m.png" class="custom-icon-nav logout-icon" alt="Logout"> 
+                    Logout 
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <!-- two-column layout -->
+            <div class="split-layout" id="splitLayout">
+    
+                <div class="panel panel-owners" id="panelOwners">
+                    <div class="panel-toolbar">
+                        <div class="search-wrap">
+                            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                            <input type="text" id="searchInput" placeholder="Search owner…">
+                        </div>
+                        <select class="sort-select" id="sortSelect">
+                            <option value="">Sort By</option>
+                            <option value="name-asc">Name A→Z</option>
+                            <option value="name-desc">Name Z→A</option>
+                            <option value="uid-asc">ID ↑</option>
+                            <option value="uid-desc">ID ↓</option>
+                        </select>
+                        <button class="add-btn" onclick="openAddOwner()">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            Add Owner
+                        </button>
+                    </div>
+    
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width:54px;">ID</th>
+                                    <th>Owner</th>
+                                    <th>Username</th>
+                                    <th>Contact</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ownerTableBody"></tbody>
+                        </table>
+                        <div class="table-empty" id="tableEmpty" style="display:none;">
+                            <img src="img-pets/no-owner.png" alt="No owners" class="no-owner-img">
+                            <p>No owners yet. Add one to get started!</p>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="panel panel-pets" id="panelPets">
+                    <!-- default empty state -->
+                    <div class="pets-empty-state" id="petsEmptyState">
+                        <div class="pets-empty-icon">🏠</div>
+                        <p class="pets-empty-title">Select an owner</p>
+                        <p class="pets-empty-sub">Click the paw icon next to an owner to view their pets</p>
+                    </div>
+                    <div id="petsContent" style="display:none; height:100%; display:none; flex-direction:column;">
+                        <div class="owner-focus-strip" id="ownerFocusStrip">
+                            <div class="owner-focus-avatar" id="ownerFocusAvatar"></div>
+                            <div class="owner-focus-info">
+                                <div class="owner-focus-name" id="ownerFocusName"></div>
+                                <div class="owner-focus-meta" id="ownerFocusMeta"></div>
+                            </div>
+                            <div class="owner-focus-badge" id="ownerFocusBadge"></div>
+                            <button class="close-panel-btn" onclick="closePetsPanel()" title="Close">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="pets-toolbar">
+                            <div class="search-wrap" style="flex:1; max-width:100%;">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                                </svg>
+                                <input type="text" id="petSearchInput" placeholder="Search pets…">
+                            </div>
+                            <select class="sort-select" id="petSpeciesFilter">
+                                <option value="">All Species</option>
+                                <option value="Dog">Dogs</option>
+                                <option value="Cat">Cats</option>
+                                <option value="Other">Others</option>
+                            </select>
+                            <select class="sort-select" id="petGenderFilter">
+                                <option value="">Genders</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                            <button class="add-btn" id="addPetBtn" onclick="openAddPet()">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                Add Pet
+                            </button>
+                        </div>
+    
+                        <div class="pets-scroll" id="petsGrid"></div>
+                    </div>
+                </div>
+    
+            </div>
+        </main>
+    </div>
+    
+    <div id="petDetailModal" class="modal-overlay pet-detail-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 style="color:var(--primary-purple)">Pet Details</h2>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button class="icon-btn btn-edit" id="petDetailEditBtn" title="Edit Pet">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </button>
+                    <button class="icon-btn btn-del" id="petDetailDelBtn" title="Delete Pet">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6l-1 14H6L5 6"/>
+                            <path d="M10 11v6M14 11v6"/>
+                            <path d="M9 6V4h6v2"/>
+                        </svg>
+                    </button>
+                    <button class="close-btn" onclick="closeModal('petDetailModal')">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body" id="petDetailBody"></div>
+        </div>
+    </div>
+    
+    <div id="petFormModal" class="modal-overlay">
+        <div class="modal-content pet-form-modal-wide">
+            <div class="modal-header">
+                <h2 id="petFormTitle" style="color:var(--primary-purple)">Pet Information</h2>
+                <button class="close-btn" onclick="closePetFormModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:0;">
+                <input type="hidden" id="fPetId">
+                <div class="pet-form-two-col">
+
+                    <div class="pet-form-photo-col">
+                        <div class="pf-photo-label">Pet Photo</div>
+                        <div class="pf-photo-circle" id="petPhotoPreview" id="petPhotoCircle"
+                             title="Drag to reposition"
+                             onmousedown="pfDragStart(event)"
+                             ontouchstart="pfTouchStart(event)">
+                            <span id="petPhotoEmoji">🐾</span>
+                            <img id="petPhotoImg" src="" alt="" style="display:none;">
+                        </div>
+                        <label class="pf-upload-btn">
+                            Upload New Photo
+                            <input type="file" id="fPetPhoto" accept="image/*" onchange="previewPetPhoto(this)" style="display:none;">
+                        </label>
+                        <div class="pf-zoom-wrap">
+                            <div class="pf-zoom-label">ZOOM &amp; POSITION</div>
+                            <input type="range" id="pfZoomSlider" min="100" max="300" value="100" class="pf-zoom-slider" oninput="pfZoomChange(this.value)">
+                        </div>
+                        <button type="button" class="pf-undo-btn" onclick="pfUndoAdjustments()">Undo Adjustments</button>
+                    </div>
+
+                    <div class="pet-form-fields-col">
+                        <div class="pf-fields-grid">
+                            <div class="pf-field-group">
+                                <label class="pf-label">PET NAME</label>
+                                <input type="text" id="fPetName" class="pf-input" placeholder="Pet Name" required>
+                            </div>
+                            <div class="pf-field-group">
+                                <label class="pf-label">OWNER NAME</label>
+                                <input type="text" id="fPetOwnerDisplay" class="pf-input" placeholder="Owner" readonly style="background:#f8f6ff;cursor:default;">
+                            </div>
+                            <div class="pf-field-group">
+                                <label class="pf-label">SPECIES</label>
+                                <select id="fPetSpecies" class="pf-input pf-select" required onchange="toggleOtherSpecies(this.value)">
+                                    <option value="">Select Species</option>
+                                    <option value="Dog">Dog</option>
+                                    <option value="Cat">Cat</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <!-- shown only when other is picked -->
+                                <input type="text" id="fPetSpeciesOther" class="pf-input" placeholder="Specify species…" style="display:none; margin-top:8px;">
+                            </div>
+                            <div class="pf-field-group">
+                                <label class="pf-label">BREED</label>
+                                <input type="text" id="fPetBreed" class="pf-input" placeholder="Breed" required>
+                            </div>
+                            <div class="pf-field-group">
+                                <label class="pf-label">COLOR</label>
+                                <input type="text" id="fPetColor" class="pf-input" placeholder="Color">
+                            </div>
+                            <div class="pf-field-group">
+                                <label class="pf-label">GENDER</label>
+                                <select id="fPetGender" class="pf-input pf-select" required>
+                                    <option value="">Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            <div class="pf-field-group">
+                                <label class="pf-label">BIRTHDATE</label>
+                                <input type="date" id="fPetBirthdate" class="pf-input" required>
+                            </div>
+                            <div class="pf-field-group">
+                                <label class="pf-label">AGE</label>
+                                <input type="text" id="fPetAge" class="pf-input" placeholder="Auto-calculated" readonly style="background:#f0eeff;color:var(--primary-purple);font-weight:700;cursor:default;">
+                            </div>
+                            <div class="pf-field-group pf-full-width">
+                                <label class="pf-label">LAST VISIT</label>
+                                <input type="date" id="fPetLastVisit" class="pf-input">
+                            </div>
+                        </div>
+                        <div class="pf-actions">
+                            <button type="button" class="pf-save-btn" onclick="submitPetForm()">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="ownerFormModal" class="modal-overlay">
+        <div class="modal-content" style="max-width:520px;">
+            <div class="modal-header">
+                <h2 id="ownerFormTitle" style="color:var(--primary-purple)">Add New Owner</h2>
+                <button class="close-btn" onclick="closeOwnerFormModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-form" id="ownerForm">
+                    <input type="hidden" id="fUserId">
+                    <div class="form-row">
+                        <input type="text"  id="fOwnerFName"  placeholder="First Name"     required>
+                        <input type="text"  id="fOwnerLName"  placeholder="Last Name"      required>
+                    </div>
+                    <input type="text"  id="fUserName"    placeholder="Username"           required>
+                    <input type="text"  id="fContactNum"  placeholder="Contact Number"     required>
+                    <input type="email" id="fEmail"       placeholder="Email"              required>
+                    <input type="text"  id="fAddress"     placeholder="Address"            required>
+                    <button type="button" class="submit-btn" onclick="submitOwnerForm()">Save Owner</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-content" style="max-width:400px;text-align:center;">
+            <div class="modal-header" style="justify-content:center;border:none;padding-bottom:8px;">
+                <h2 id="confirmTitle" style="color:var(--primary-purple);font-size:20px;">Confirm</h2>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage" style="margin-bottom:25px;color:var(--text-dark);line-height:1.6;"></p>
+                <div style="display:flex;gap:10px;justify-content:center;">
+                    <button id="btnConfirmAction" class="submit-btn" style="margin:0;flex:1;">Confirm</button>
+                    <button onclick="closeModal('confirmModal')" class="action-btn view-btn" style="flex:1;border-radius:12px;height:48px;font-weight:700;font-size:14px;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="unsavedModal" class="modal-overlay">
+        <div class="modal-content" style="max-width:400px;text-align:center;">
+            <div class="modal-header" style="justify-content:center;border:none;padding-bottom:8px;">
+                <h2 style="color:#f59e0b;font-size:20px;">⚠️ Unsaved Changes</h2>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom:25px;color:var(--text-dark);line-height:1.6;">You have unsaved changes. Are you sure you want to close without saving?</p>
+                <div style="display:flex;gap:10px;justify-content:center;">
+                    <button id="btnDiscardChanges" class="submit-btn" style="margin:0;flex:1;background:#ff5e78;">Discard Changes</button>
+                    <button onclick="closeModal('unsavedModal')" class="action-btn view-btn" style="flex:1;border-radius:12px;height:48px;font-weight:700;font-size:14px;">Keep Editing</button>
+                </div>
+            </div>
+        </div>
+    </div>
+        </main>
+
+         <div id="mainModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header"><h2 id="modalTitle">Title</h2><button class="close-btn" onclick="closeModal('mainModal')">&times;</button></div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-header" style="justify-content: center; border: none;">
+                <h2 style="color: var(--primary-purple); font-size: 20px;">Confirm Log out</h2>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage" style="margin-bottom: 25px; color: var(--text-dark);"></p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button id="btnConfirmDelete" class="submit-btn" style="margin: 0; background-color: #ff5e78; flex: 1;">Remove</button>
+                    <button onclick="closeModal('confirmModal')" class="action-btn view-btn" style="flex: 1; border-radius: 12px; height: 48px;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="imgLightbox">
+        <button class="lightbox-close" onclick="closeLightbox()" title="Close (Esc)">&times;</button>
+        <span class="lightbox-hint">Scroll or pinch to zoom · Drag to pan</span>
+        <div id="imgLightboxViewport">
+            <img id="imgLightboxImg" src="" alt="Pet photo">
+        </div>
+        <div class="lightbox-controls">
+            <button onclick="lbZoomOut()" title="Zoom out (−)">−</button>
+            <span class="lightbox-zoom-label" id="lbZoomLabel">100%</span>
+            <button onclick="lbZoomIn()" title="Zoom in (+)">+</button>
+            <div class="lb-divider"></div>
+            <button onclick="lbReset()" title="Fit to screen (0)" style="font-size:11px;width:auto;padding:0 12px;border-radius:20px;letter-spacing:.3px;">Fit</button>
+        </div>
+    </div>
+
+    <script src="a-pets.js"></script>
+
+</body>
+</html>
