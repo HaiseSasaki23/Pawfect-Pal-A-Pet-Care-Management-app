@@ -691,23 +691,6 @@ document.getElementById('btnDiscardChanges').addEventListener('click', () => {
     }
 });
 
-function triggerLogout() {
-    document.getElementById('confirmTitle').textContent = 'Confirm Log Out';
-    document.getElementById('confirmMessage').textContent = 'Are you sure you want to log out of Pawfect Pal?';
-
-    const btn = document.getElementById('btnConfirmAction');
-    btn.textContent = 'Log Out';
-    btn.style.background = '#ff5e78';
-    btn.onclick = logoutNow;
-
-    document.getElementById('confirmModal').style.display = 'flex';
-}
-
-function logoutNow() {
-    ['userId', 'userName', 'ownerFName', 'ownerLName', 'role'].forEach(k => localStorage.removeItem(k));
-    window.location.href = '../../login/login.html';
-}
-
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
 }
