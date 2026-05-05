@@ -10,7 +10,12 @@ function initAppointmentPage() {
     setupServiceCalculation();
     setupBookAppointmentForm();
     setupOutsideClickClose();
+    loadPetsDropdown();
+    loadAppointments();
 }
+
+/* API Configuration*/
+const API_BASE_URL = 'http://localhost:5182';
 
 /* --- date limit --- */
 function setMinimumBookingDate() {
@@ -19,6 +24,43 @@ function setMinimumBookingDate() {
 
     if (bookingDate) {
         bookingDate.setAttribute("min", today);
+    }
+}
+
+/* --- Load pets from backend --- */
+async function loadAppointments() {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/appointment/user/${userId}`);
+        const data = await response.json();
+
+        const container = document.getElementById("appointmentList");
+        container.innerHTML = "";
+
+        if (!data.length) {
+            container.innerHTML = "<p>No appointments found.</p>";
+            return;
+        }
+
+        data.forEach(app => {
+            const card = document.createElement("div");
+            card.className = "appointment-card";
+
+            card.innerHTML = `
+                <span></span>
+                <span>${app.petName || "Pet #" + app.petId}</span>
+                <span>N/A</span>
+                <span>${new Date(app.appointmentDate).toLocaleString()}</span>
+                <span class="status ${app.appStatus.toLowerCase()}">${app.appStatus}</span>
+            `;
+
+            container.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error("Error loading appointments:", error);
     }
 }
 
@@ -93,19 +135,26 @@ function toggleGcashDetails() {
     }
 }
 
-/* --- form submission logic --- */
+/* --- form submission logic with backend connection --- */
 function setupBookAppointmentForm() {
     const bookAppointmentForm = document.getElementById("bookAppointmentForm");
 
     if (!bookAppointmentForm) return;
 
-    bookAppointmentForm.addEventListener("submit", function (e) {
+    bookAppointmentForm.addEventListener("submit", async function (e) {
         e.preventDefault();
 
         const selectedServiceElements = document.querySelectorAll('input[name="services"]:checked');
-
-        const serviceIDs = Array.from(selectedServiceElements).map(function (el) {
-            return el.value;
+        
+        const serviceMap = {
+            'checkup': 1,
+            'vaccination': 2,
+            'deworming': 3,
+            'grooming': 4
+        };
+        
+        const serviceIds = Array.from(selectedServiceElements).map(function (el) {
+            return serviceMap[el.value];
         });
 
         const petSelect = document.getElementById("bookingPetName");
@@ -113,13 +162,18 @@ function setupBookAppointmentForm() {
         const timeInput = document.getElementById("bookingTime");
         const gcashRef = document.getElementById("gcashRef");
 
-        if (!petSelect || !dateInput || !timeInput) {
-            alert("Booking form is incomplete.");
+        if (!petSelect.value) {
+            alert("Please select a pet");
             return;
         }
 
-        if (serviceIDs.length === 0) {
+        if (serviceIds.length === 0) {
             alert("Please select at least one service.");
+            return;
+        }
+
+        if (!dateInput.value || !timeInput.value) {
+            alert("Please select date and time");
             return;
         }
 
@@ -127,22 +181,37 @@ function setupBookAppointmentForm() {
         const timePart = timeInput.value;
         const fullDateTime = `${datePart} ${timePart}:00`;
 
-        const appointmentPayload = {
-            appointment: {
-                PetID: parseInt(petSelect.value),
-                AppointmentDate: fullDateTime,
-                RequestStatus: "Pending",
-                AppStatus: "Pending",
-                Notes: gcashRef ? gcashRef.value : "",
-                UserID: parseInt(localStorage.getItem("userId"))
-            },
-            services: serviceIDs
+        const appointmentData = {
+            userId: parseInt(localStorage.getItem("userId")),
+            petId: parseInt(petSelect.value),
+            appointmentDate: fullDateTime.replace(' ','T'),
+            requestStatus: "Pending",
+            appStatus: "Pending",
+            notes: gcashRef ? gcashRef.value : "",
+            serviceIds: serviceIds
         };
 
-        console.log("Junction-Table Ready Data:", appointmentPayload);
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/appointment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(appointmentData)
+            });
 
-        closeModal("bookAppointmentModal");
-        showSuccessMessage();
+            const result = await response.json();
+
+            if (response.ok) {
+                closeModal("bookAppointmentModal");
+                showSuccessMessage();
+            } else {
+                alert("Error: " + result.message);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Cannot connect to backend. Make sure it's running at " + API_BASE_URL);
+        }
     });
 }
 
@@ -257,4 +326,10 @@ function setupOutsideClickClose() {
             closeModal("confirmModal");
         }
     });
+}
+
+function triggerLogout() {
+    localStorage.removeItem("userId");
+    localStorage.removeItem("user");
+    window.location.href = "../login.html";
 }

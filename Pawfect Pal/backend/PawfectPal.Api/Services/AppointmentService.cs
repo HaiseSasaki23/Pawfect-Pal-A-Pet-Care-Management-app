@@ -29,11 +29,11 @@ namespace PawfectPal.Api.Services
 
         public void Create(Appointment appointment)
         {
-            if (appointment.AppointmentDate < DateTime.Now)
-                throw new Exception("Cannot book past date.");
+            // if (appointment.AppointmentDate < DateTime.Now)
+            // throw new Exception("Cannot book past date.");
 
-            if (appointment.ServiceIds == null || !appointment.ServiceIds.Any())
-                throw new Exception("Select at least one service.");
+            // if (appointment.ServiceIds == null || !appointment.ServiceIds.Any())
+            //     throw new Exception("Select at least one service.");
 
             appointment.RequestStatus = "Pending";
             appointment.AppStatus = "Pending";

@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!user) return;
 
     loadPets(user.userId);
+    loadPets(user.userId);
 });
 
 /* global elements */
@@ -14,7 +15,12 @@ const petsGrid = document.getElementById("petsGrid");
 
 let allPets = [];
 let petToDeleteId = null;
+let allPets = [];
+let petToDeleteId = null;
 
+/* utility */
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = "none";
 /* utility */
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = "none";
@@ -99,8 +105,18 @@ function handleFilter() {
     const speciesSel = document.getElementById("speciesFilter").value;
     const genderSel = document.getElementById("genderFilter").value;
     const ageSel = document.getElementById("ageFilter").value;
+    const searchTerm = document.getElementById("petSearch").value.toLowerCase();
+    const speciesSel = document.getElementById("speciesFilter").value;
+    const genderSel = document.getElementById("genderFilter").value;
+    const ageSel = document.getElementById("ageFilter").value;
 
     let visibleCount = 0;
+
+    document.querySelectorAll(".pet-card").forEach(card => {
+        const name = card.querySelector("h3").innerText.toLowerCase();
+        const species = card.getAttribute("data-species");
+        const gender = card.querySelector(".pet-gender").innerText.includes("Male") ? "Male" : "Female";
+        const ageText = card.querySelector("p").innerText;
 
     document.querySelectorAll(".pet-card").forEach(card => {
         const name = card.querySelector("h3").innerText.toLowerCase();
@@ -117,9 +133,20 @@ function handleFilter() {
             } else {
                 ageInYears = parseInt(match[0]);
             }
+        const match = ageText.match(/\d+/);
+
+        if (match) {
+            if (ageText.includes("month")) {
+                ageInYears = parseInt(match[0]) / 12;
+            } else {
+                ageInYears = parseInt(match[0]);
+            }
         }
 
         let ageMatch = true;
+        if (ageSel === "0-1") ageMatch = ageInYears <= 1;
+        else if (ageSel === "2-5") ageMatch = ageInYears >= 2 && ageInYears <= 5;
+        else if (ageSel === "6+") ageMatch = ageInYears >= 6;
         if (ageSel === "0-1") ageMatch = ageInYears <= 1;
         else if (ageSel === "2-5") ageMatch = ageInYears >= 2 && ageInYears <= 5;
         else if (ageSel === "6+") ageMatch = ageInYears >= 6;

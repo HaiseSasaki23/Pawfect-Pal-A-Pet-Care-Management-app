@@ -10,5 +10,6 @@ namespace PawfectPal.Api.Models
         public string AppStatus { get; set; } = "Pending";
         public string? Notes { get; set; }
         public List<int> ServiceIds { get; set; } = new List<int>();
+        
     }
 }
