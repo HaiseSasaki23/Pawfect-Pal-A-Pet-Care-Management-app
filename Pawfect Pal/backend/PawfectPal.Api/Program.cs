@@ -32,6 +32,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PetService>();
 builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<AppointmentService>();
+builder.Services.AddScoped<EmailService>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
