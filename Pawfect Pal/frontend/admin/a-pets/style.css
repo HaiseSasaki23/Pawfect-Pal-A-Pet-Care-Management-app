@@ -501,6 +501,7 @@ body {
     gap: 20px;
     align-items: start;
     min-height: calc(100vh - 130px);
+    overflow: hidden;
 }
 
 .panel-owners {
@@ -515,8 +516,9 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    min-height: 500px;
-    max-height: calc(100vh - 150px);
+    height: fit-content;
+    min-height: 650px;
+    margin-top: 30px;
 }
 
 .panel-pets {
@@ -546,8 +548,8 @@ body {
 
 .split-layout.split-active .panel-pets.has-owner {
     background: white;
-    border: none;
-    box-shadow: 0 4px 20px rgba(157,114,214,.1);
+    border: 2px solid var(--primary-purple);
+    box-shadow: 0 4px 28px rgba(157,114,214,.25);
 }
 
 .panel-toolbar {
