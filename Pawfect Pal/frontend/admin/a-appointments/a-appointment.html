@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawfect Pal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .card-icon {
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-icon img {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="../../sidebar/logo.png" alt="Pawfect Pal" class="sidebar-logo-landscape">
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <img src="../../sidebar/dashboard-m.png" class="custom-icon-nav"> 
+                    Dashboard 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/pets-m.png" class="custom-icon-nav"> 
+                    Pets 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item active">
+                    <img src="../../sidebar/appointment-m.png" class="custom-icon-nav"> 
+                    Appointments 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/request-m.png" class="custom-icon-nav"> 
+                    Requests
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/health-m.png" class="custom-icon-nav"> 
+                    Health Records
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="#" class="nav-item">
+                    <img src="../../sidebar/billing-m.png" class="custom-icon-nav"> 
+                    Payments
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <strong class="user-name">
+                        <span id="UserName">User</span>
+                    </strong>
+                    <span class="user-role">Admin</span>
+                </div>
+                <a href="#" class="nav-item logout-item" onclick="triggerLogout()">
+                    <img src="../../sidebar/logout-m.png" class="custom-icon-nav logout-icon" alt="Logout"> 
+                    Logout 
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+
+            <!-- SUMMARY CARDS (top) -->
+            <div class="summary-grid">
+                <div class="summary-card card-total">
+                    <div class="card-icon"><img src="img-appointment/total.png" alt="Total"></div>
+                    <div class="card-info">
+                        <div class="card-label">Total Appointments</div>
+                        <div class="card-count">0</div>
+                    </div>
+                </div>
+                <div class="summary-card card-checkedin">
+                    <div class="card-icon"><img src="img-appointment/checkedin.png" alt="Checked-In"></div>
+                    <div class="card-info">
+                        <div class="card-label">Checked-In</div>
+                        <div class="card-count">0</div>
+                    </div>
+                </div>
+                <div class="summary-card card-inprogress">
+                    <div class="card-icon"><img src="img-appointment/inprogress.png" alt="In-Progress"></div>
+                    <div class="card-info">
+                        <div class="card-label">In-Progress</div>
+                        <div class="card-count">0</div>
+                    </div>
+                </div>
+                <div class="summary-card card-completed">
+                    <div class="card-icon"><img src="img-appointment/completed.png" alt="Completed Today"></div>
+                    <div class="card-info">
+                        <div class="card-label">Completed Today</div>
+                        <div class="card-count">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <div class="search-box">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <input type="text" id="searchInput" placeholder="Search owner or pet...">
+                </div>
+                <button class="filter-btn" id="btnDateFilter">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                    <span id="dateFilterLabel">Select Date</span>
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <button class="filter-btn" id="btnStatusFilter">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                    <span id="statusFilterLabel">All Status</span>
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div class="filter-btn-wrapper" style="position:relative;">
+                    <button class="filter-btn" id="btnServiceFilter" style="width:100%;">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3h18M7 9h10M11 15h2"/></svg>
+                        <span id="serviceFilterLabel">All Services</span>
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div class="filter-dropdown" id="serviceFilterDropdown" style="display:none; min-width:180px;"></div>
+                </div>
+                <button class="new-appt-btn" onclick="openNewAppointmentModal()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    New Appointment
+                </button>
+            </div>
+
+            <!-- TABLE -->
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Appt ID</th>
+                            <th>Owner Name</th>
+                            <th>Pet Name</th>
+                            <th>Service Type</th>
+                            <th>Date &amp; Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appointmentTableBody">
+                        <!-- rows injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+        </main>
+
+        <!-- ─── LOGOUT CONFIRM MODAL ─── -->
+        <div id="confirmModal" class="modal-overlay">
+            <div class="modal-content" style="max-width:400px; text-align:center;">
+                <div class="modal-header" style="justify-content:center; border:none;">
+                    <h2 style="color:var(--primary-purple); font-size:20px;">Confirm Log out</h2>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmMessage" style="margin-bottom:25px; color:var(--text-dark);"></p>
+                    <div style="display:flex; gap:10px; justify-content:center;">
+                        <button id="btnConfirmDelete" class="submit-btn" style="margin:0; background-color:#ff5e78; flex:1;">Remove</button>
+                        <button onclick="closeModal('confirmModal')" class="action-btn view-btn" style="flex:1; border-radius:12px; height:48px;">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── NEW / EDIT APPOINTMENT MODAL ─── -->
+        <div id="newAppointmentModal" class="modal-overlay">
+            <div class="modal-content" style="max-width:500px;">
+                <div class="modal-header">
+                    <h2 style="color:var(--primary-purple);">New Appointment</h2>
+                    <button class="close-btn" onclick="closeNewAppointmentModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">User ID</label>
+                        <select id="apptUserId" class="form-input" onchange="onUserChange()">
+                            <option value="">Select User</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Pet ID</label>
+                        <select id="apptPetId" class="form-input" onchange="onFormChange()">
+                            <option value="">Select Pet</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Service Type</label>
+                        <div class="svc-dd-wrapper">
+                            <button type="button" class="svc-dd-btn" id="serviceDropdownBtn">
+                                <span id="serviceDropdownDisplay">Select Services</span>
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+                            </button>
+                            <div class="svc-dd-list" id="serviceDropdownList"></div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="flex:1;">
+                            <label class="form-label">Appointment Date</label>
+                            <input type="date" id="apptDate" class="form-input" oninput="onFormChange()">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label class="form-label">Time <span style="color:var(--text-muted);font-weight:500;font-size:11px;">(7AM–5PM)</span></label>
+                            <select id="apptTime" class="form-input" onchange="onFormChange()">
+                                <option value="">Select Time</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notes <span style="color:var(--text-muted);font-weight:500;">(optional)</span></label>
+                        <textarea id="apptNotes" class="form-input form-textarea" placeholder="Add any notes or special instructions..." oninput="onFormChange()"></textarea>
+                    </div>
+                    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px;">
+                        <button onclick="closeNewAppointmentModal()" class="action-btn view-btn" style="border-radius:12px; height:46px; padding:0 22px;">Cancel</button>
+                        <button onclick="submitNewAppointment()" class="submit-btn save-appt-btn" style="margin:0; padding:0 28px;">Save Appointment</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── UNSAVED CHANGES MODAL ─── -->
+        <div id="unsavedModal" class="modal-overlay">
+            <div class="modal-content" style="max-width:400px; text-align:center;">
+                <div class="modal-header" style="justify-content:center; border:none;">
+                    <h2 style="color:var(--primary-purple); font-size:20px;">Unsaved Changes</h2>
+                </div>
+                <div class="modal-body">
+                    <p style="margin-bottom:25px; color:var(--text-dark);">You have unsaved changes. Are you sure you want to discard them?</p>
+                    <div style="display:flex; gap:10px; justify-content:center;">
+                        <button onclick="discardAndClose()" class="submit-btn" style="margin:0; background-color:#ff5e78; flex:1;">Discard</button>
+                        <button onclick="closeModal('unsavedModal')" class="action-btn view-btn" style="flex:1; border-radius:12px; height:48px;">Keep Editing</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── MISSING FIELDS ALERT MODAL ─── -->
+        <div id="alertModal" class="modal-overlay">
+            <div class="modal-content" style="max-width:380px; text-align:center;">
+                <div class="modal-header" style="justify-content:center; border:none;">
+                    <h2 id="alertTitle" style="color:#ff5e78; font-size:20px;">Missing Details</h2>
+                </div>
+                <div class="modal-body">
+                    <p id="alertMessage" style="margin-bottom:25px; color:var(--text-dark); line-height:1.8;"></p>
+                    <button onclick="closeModal('alertModal')" class="submit-btn" style="margin:0; width:100%;">Got it</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── APPOINTMENT SAVED MODAL ─── -->
+        <div id="apptSavedModal" class="modal-overlay">
+            <div class="modal-content" style="max-width:420px; text-align:center;">
+                <div class="modal-header" style="justify-content:center; border:none; padding-bottom:0;">
+                    <div style="font-size:42px; margin-bottom:6px;">🐾</div>
+                </div>
+                <div class="modal-body" style="text-align:center;">
+                    <h2 style="color:var(--primary-purple); font-size:20px; margin-bottom:16px;">Appointment Saved!</h2>
+                    <div class="saved-detail-grid">
+                        <div class="saved-row"><span class="saved-lbl">Appointment ID</span><span id="savedApptId" class="saved-val appt-id-chip"></span></div>
+                        <div class="saved-row"><span class="saved-lbl">Owner</span><span id="savedOwner" class="saved-val"></span></div>
+                        <div class="saved-row"><span class="saved-lbl">Pet</span><span id="savedPet" class="saved-val"></span></div>
+                        <div class="saved-row"><span class="saved-lbl">Service</span><span id="savedService" class="saved-val"></span></div>
+                        <div class="saved-row"><span class="saved-lbl">Schedule</span><span id="savedDateTime" class="saved-val"></span></div>
+                    </div>
+                    <button onclick="closeModal('apptSavedModal')" class="submit-btn" style="margin:20px 0 0; width:100%;">Done</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── VIEW APPOINTMENT MODAL ─── -->
+        <div id="viewAppointmentModal" class="modal-overlay">
+            <div class="modal-content" style="max-width:480px;">
+                <div class="modal-header">
+                    <h2 style="color:var(--primary-purple);">Appointment Details</h2>
+                    <button class="close-btn" onclick="closeViewModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="view-detail-grid">
+                        <div class="view-row">
+                            <span class="view-lbl">Appointment ID</span>
+                            <span id="viewApptId" class="view-val appt-id-chip"></span>
+                        </div>
+                        <div class="view-row">
+                            <span class="view-lbl">User ID</span>
+                            <span id="viewUserId" class="view-val"></span>
+                        </div>
+                        <div class="view-row">
+                            <span class="view-lbl">Pet ID</span>
+                            <span id="viewPetId" class="view-val"></span>
+                        </div>
+                        <div class="view-row">
+                            <span class="view-lbl">Owner Name</span>
+                            <span id="viewOwner" class="view-val"></span>
+                        </div>
+                        <div class="view-row">
+                            <span class="view-lbl">Pet Name</span>
+                            <span id="viewPet" class="view-val"></span>
+                        </div>
+                        <div class="view-row">
+                            <span class="view-lbl">Service</span>
+                            <div id="viewServiceContainer" class="view-val" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+                        </div>
+                        <div class="view-row">
+                            <span class="view-lbl">Schedule</span>
+                            <span id="viewDateTime" class="view-val"></span>
+                        </div>
+                        <div class="view-row">
+                            <span class="view-lbl">Status</span>
+                            <select id="viewStatusSelect" class="form-input" style="padding:6px 12px; height:auto; font-size:13px; font-weight:700; width:auto; min-width:160px; border-radius:10px;" onchange="onViewStatusChange()">
+                                <option value="Pending">Pending</option>
+                                <option value="Checked-In">Checked-In</option>
+                                <option value="In-Progress">In-Progress</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="view-row view-row-notes">
+                            <span class="view-lbl">Notes</span>
+                            <span id="viewNotes" class="view-val view-notes-text"></span>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+                        <button id="viewEditBtn" style="margin:0; padding:10px 28px; background:#ede9fe; color:var(--primary-purple); border:none; border-radius:12px; font-family:'Quicksand',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:background 0.15s;" onmouseover="this.style.background='#ddd6fe'" onmouseout="this.style.background='#ede9fe'">
+                            Edit Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── COMPLETED APPOINTMENT MODAL ─── -->
+        <div id="completedModal" class="modal-overlay">
+            <div class="modal-content" style="max-width:420px; text-align:center;">
+                <div class="modal-header" style="justify-content:center; border:none; padding-bottom:0;">
+                    <div style="font-size:42px; margin-bottom:6px;">✅</div>
+                </div>
+                <div class="modal-body" style="text-align:center;">
+                    <h2 style="color:#2563eb; font-size:20px; margin-bottom:6px;">Appointment Completed</h2>
+                    <p style="color:var(--text-muted); font-size:13px; margin-bottom:18px;">This appointment has already been completed and cannot be edited.</p>
+                    <div class="saved-detail-grid">
+                        <div class="saved-row"><span class="saved-lbl">Appointment ID</span><span id="completedApptId" class="saved-val appt-id-chip"></span></div>
+                        <div class="saved-row"><span class="saved-lbl">Owner</span><span id="completedOwner" class="saved-val"></span></div>
+                        <div class="saved-row"><span class="saved-lbl">Pet</span><span id="completedPet" class="saved-val"></span></div>
+                        <div class="saved-row"><span class="saved-lbl">Service</span><span id="completedService" class="saved-val"></span></div>
+                        <div class="saved-row"><span class="saved-lbl">Schedule</span><span id="completedDateTime" class="saved-val"></span></div>
+                        <div class="saved-row"><span class="saved-lbl">Notes</span><span id="completedNotes" class="saved-val"></span></div>
+                    </div>
+                    <button onclick="closeModal('completedModal')" class="submit-btn" style="margin:20px 0 0; width:100%; background:#2563eb;">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- unsaved changes guard for the view modal edit -->
+        <div id="unsavedViewModal" class="modal-overlay">
+            <div class="modal-content" style="max-width:400px; text-align:center;">
+                <div class="modal-header" style="justify-content:center; border:none;">
+                    <h2 style="color:var(--primary-purple); font-size:20px;">Unsaved Changes</h2>
+                </div>
+                <div class="modal-body">
+                    <p style="margin-bottom:25px; color:var(--text-dark);">You have unsaved changes. Are you sure you want to discard them?</p>
+                    <div style="display:flex; gap:10px; justify-content:center;">
+                        <button onclick="discardViewAndClose()" class="submit-btn" style="margin:0; background-color:#ff5e78; flex:1;">Discard</button>
+                        <button onclick="closeModal('unsavedViewModal')" class="action-btn view-btn" style="flex:1; border-radius:12px; height:48px;">Keep Editing</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- delete confirm modal -->
+        <div id="deleteConfirmModal" class="modal-overlay">
+            <div class="modal-content" style="max-width:400px; text-align:center;">
+                <div class="modal-header" style="justify-content:center; border:none;">
+                    <h2 style="color:#ff5e78; font-size:20px;">Delete Appointment</h2>
+                </div>
+                <div class="modal-body">
+                    <p style="margin-bottom:6px; color:var(--text-dark);">Are you sure you want to delete</p>
+                    <p style="margin-bottom:25px; font-weight:700; color:var(--primary-purple);" id="deleteApptIdLabel"></p>
+                    <p style="margin-bottom:25px; color:var(--text-muted); font-size:13px;">This can't be undone!</p>
+                    <div style="display:flex; gap:10px; justify-content:center;">
+                        <button id="btnConfirmDeleteAppt" class="submit-btn" style="margin:0; background-color:#ff5e78; flex:1;">Yes, Delete</button>
+                        <button onclick="closeModal('deleteConfirmModal')" class="action-btn view-btn" style="flex:1; border-radius:12px; height:48px;">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="a-appointment.js"></script>
+</body>
+</html>
