@@ -67,19 +67,3 @@ function openFullHistory() {
 function closeModal(modalId) { 
     document.getElementById(modalId).style.display = 'none'; 
 }
-
-function triggerLogout() {
-    const confirmMessage = document.getElementById('confirmMessage');
-    const confirmBtn = document.getElementById('btnConfirmDelete');
-
-    confirmMessage.innerText = "Are you sure you want to log out of Pawfect Pal?";
-    confirmBtn.innerText = "Logout";
-    confirmBtn.style.backgroundColor = "#ff5e78";
-
-    confirmBtn.onclick = function() {
-        window.location.href = "login.html"; 
-    };
-
-    confirmModal.style.display = 'flex';
-}
-
