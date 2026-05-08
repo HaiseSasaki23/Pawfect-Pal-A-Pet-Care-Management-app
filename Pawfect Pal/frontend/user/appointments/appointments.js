@@ -10,9 +10,14 @@ function initAppointmentPage() {
     setupServiceCalculation();
     setupBookAppointmentForm();
     setupOutsideClickClose();
+    loadPetsDropdown();
+    loadAppointments();
 }
 
-/* --- date limit --- */
+/* API Configuration*/
+const API_BASE_URL = 'http://localhost:5182';
+
+/* date limit */
 function setMinimumBookingDate() {
     const today = new Date().toISOString().split("T")[0];
     const bookingDate = document.getElementById("bookingDate");
@@ -22,7 +27,125 @@ function setMinimumBookingDate() {
     }
 }
 
-/* --- modal control functions --- */
+/* Load pets */
+async function loadAppointments() {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/Appointment/user/${userId}?t=${Date.now()}`);
+        const data = await response.json();
+
+        const container = document.getElementById("appointmentList");
+        container.innerHTML = "";
+
+        if (!data.length) {
+            container.innerHTML = "<p>No appointments found.</p>";
+            return;
+        }
+
+        const petsResponse = await fetch(`${API_BASE_URL}/api/Pet/user/${userId}?t=${Date.now()}`);
+        const pets = await petsResponse.json();
+        
+        const petSpeciesMap = {};
+        pets.forEach(pet => {
+            console.log("Pet:", pet.id, pet.petId, pet.name, pet.species);
+            const petId = pet.id || pet.petId;
+            petSpeciesMap[petId] = pet.species || "Unknown";
+        });
+
+        console.log("Pet Species Map:", petSpeciesMap);
+
+        data.forEach(app => {
+            const card = document.createElement("div");
+            card.className = "appointment-card";
+
+            console.log("Appointment:", app.petId, app.petName);
+            
+            const species = petSpeciesMap[app.petId] || "Unknown";
+
+            let servicesText = app.services || "N/A";
+            if (Array.isArray(app.services)) {
+                servicesText = app.services.join(', ');
+            }
+
+            const dateObj = new Date(app.appointmentDate);
+            const datePart = dateObj.toLocaleString('en-US', { 
+                year: 'numeric',
+                month: 'long', 
+                day: 'numeric'
+            });
+            const timePart = dateObj.toLocaleString('en-US', { 
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+            const formattedDate = `${datePart} | ${timePart}`;
+
+            card.innerHTML = `
+            <span></span>
+            <span>
+                ${app.petName}<br>
+                <small style="color: #999; font-size: 11px;">${species}</small>
+            </span>
+            <span>${servicesText}</span>
+            <span>${formattedDate}</span>
+            <span class="status-badge ${(app.appStatus || "pending").toLowerCase()}">${app.appStatus || "Pending"}</span>
+            `;
+
+            card.setAttribute("data-pet", (app.petName || "").toLowerCase());
+            card.setAttribute("data-status", (app.appStatus || "").toLowerCase());
+            card.setAttribute("data-species", species.toLowerCase());
+            
+            let serviceIds = app.serviceIds || [];
+            if (typeof serviceIds === 'string') {
+                serviceIds = serviceIds.split(',');
+            } else if (typeof serviceIds === 'number') {
+                serviceIds = [serviceIds.toString()];
+            } else if (!Array.isArray(serviceIds)) {
+                serviceIds = [];
+            }
+            card.setAttribute("data-services", serviceIds.join(','));
+
+            container.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error("Error loading appointments:", error);
+        const container = document.getElementById("appointmentList");
+        if (container) {
+            container.innerHTML = "<p style='text-align:center; padding:40px; color:red;'>Failed to load appointments.<br>Error: ${error.message}</p>";
+        }
+    }
+}
+
+async function loadPetsDropdown() {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/pet/user/${userId}?t=${Date.now()}`);
+        const pets = await response.json();
+
+        const select = document.getElementById("bookingPetName");
+
+        if (!select) return;
+
+        select.innerHTML = `<option value="" disabled selected>Select Pet</option>`;
+
+        pets.forEach(pet => {
+            const option = document.createElement("option");
+            option.value = pet.petId;
+            option.textContent = pet.name;
+
+            select.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error("Error loading pets:", error);
+    }
+}
+/* modal control functions */
 function openModal(id) {
     const modal = document.getElementById(id);
 
@@ -55,7 +178,7 @@ function closeModal(id) {
     }
 }
 
-/* --- service calculation logic --- */
+/* service calculation logic */
 function setupServiceCalculation() {
     const serviceCheckboxes = document.querySelectorAll('input[name="services"]');
 
@@ -79,7 +202,7 @@ function setupServiceCalculation() {
     });
 }
 
-/* --- gcash detail toggle --- */
+/* gcash detail toggle */
 function toggleGcashDetails() {
     const paymentSelect = document.getElementById("bookingPayment");
     const gcashBox = document.getElementById("gcashDetails");
@@ -93,19 +216,26 @@ function toggleGcashDetails() {
     }
 }
 
-/* --- form submission logic --- */
+/* form submission logic with backend connection */
 function setupBookAppointmentForm() {
     const bookAppointmentForm = document.getElementById("bookAppointmentForm");
 
     if (!bookAppointmentForm) return;
 
-    bookAppointmentForm.addEventListener("submit", function (e) {
+    bookAppointmentForm.addEventListener("submit", async function (e) {
         e.preventDefault();
 
         const selectedServiceElements = document.querySelectorAll('input[name="services"]:checked');
-
-        const serviceIDs = Array.from(selectedServiceElements).map(function (el) {
-            return el.value;
+        
+        const serviceMap = {
+            'checkup': 1,
+            'vaccination': 2,
+            'deworming': 3,
+            'grooming': 4
+        };
+        
+        const serviceIds = Array.from(selectedServiceElements).map(function (el) {
+            return serviceMap[el.value];
         });
 
         const petSelect = document.getElementById("bookingPetName");
@@ -113,13 +243,18 @@ function setupBookAppointmentForm() {
         const timeInput = document.getElementById("bookingTime");
         const gcashRef = document.getElementById("gcashRef");
 
-        if (!petSelect || !dateInput || !timeInput) {
-            alert("Booking form is incomplete.");
+        if (!petSelect.value) {
+            alert("Please select a pet");
             return;
         }
 
-        if (serviceIDs.length === 0) {
+        if (serviceIds.length === 0) {
             alert("Please select at least one service.");
+            return;
+        }
+
+        if (!dateInput.value || !timeInput.value) {
+            alert("Please select date and time");
             return;
         }
 
@@ -127,26 +262,42 @@ function setupBookAppointmentForm() {
         const timePart = timeInput.value;
         const fullDateTime = `${datePart} ${timePart}:00`;
 
-        const appointmentPayload = {
-            appointment: {
-                PetID: parseInt(petSelect.value),
-                AppointmentDate: fullDateTime,
-                RequestStatus: "Pending",
-                AppStatus: "Pending",
-                Notes: gcashRef ? gcashRef.value : "",
-                UserID: parseInt(localStorage.getItem("userId"))
-            },
-            services: serviceIDs
+        const appointmentData = {
+            userId: parseInt(localStorage.getItem("userId")),
+            petId: parseInt(petSelect.value),
+            appointmentDate: fullDateTime.replace(' ','T'),
+            requestStatus: "Pending",
+            appStatus: "Pending",
+            notes: gcashRef ? gcashRef.value : "",
+            serviceIds: serviceIds
         };
 
-        console.log("Junction-Table Ready Data:", appointmentPayload);
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/appointment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(appointmentData)
+            });
 
-        closeModal("bookAppointmentModal");
-        showSuccessMessage();
+            const result = await response.json();
+
+            if (response.ok) {
+                closeModal("bookAppointmentModal");
+                showSuccessMessage();
+                loadAppointments();
+            } else {
+                alert("Error: " + result.message);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Cannot connect to backend. Make sure it's running at " + API_BASE_URL);
+        }
     });
 }
 
-/* --- success message --- */
+/* success message  */
 function showSuccessMessage() {
     const successToast = document.getElementById("successToast");
 
@@ -163,7 +314,7 @@ function hideSuccessMessage() {
     }
 }
 
-/* --- unified filter logic --- */
+/* unified filter logic */
 function filterAppointments() {
     const searchInput = document.getElementById("appSearch");
     const speciesFilter = document.getElementById("speciesFilter");
@@ -209,7 +360,7 @@ function filterAppointments() {
     });
 }
 
-/* --- clear all filters logic --- */
+/* clear all filters logic */
 function clearAllFilters() {
     const searchInput = document.getElementById("appSearch");
     const speciesFilter = document.getElementById("speciesFilter");
@@ -234,7 +385,7 @@ function clearAllFilters() {
     filterAppointments();
 }
 
-/* --- service dropdown --- */
+/* service dropdown */
 function toggleServiceDropdown() {
     const container = document.querySelector(".dropdown-check-container");
 
@@ -243,7 +394,7 @@ function toggleServiceDropdown() {
     }
 }
 
-/* --- close dropdown and modal when clicking outside --- */
+/* close dropdown and modal when clicking outside */
 function setupOutsideClickClose() {
     window.addEventListener("click", function (e) {
         const container = document.querySelector(".dropdown-check-container");
@@ -257,4 +408,10 @@ function setupOutsideClickClose() {
             closeModal("confirmModal");
         }
     });
+}
+
+function triggerLogout() {
+    localStorage.removeItem("userId");
+    localStorage.removeItem("user");
+    window.location.href = "../login.html";
 }
