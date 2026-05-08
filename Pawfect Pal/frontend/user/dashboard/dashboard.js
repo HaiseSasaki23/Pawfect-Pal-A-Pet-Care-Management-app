@@ -7,6 +7,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     loadDashboardSummary(user.userId, user.role);
     loadPets(user.userId);
+    loadAppointments(user.userId);
+    loadPetsForDropdown();
 
     const petPhotoInput = document.getElementById("petPhoto");
     if (petPhotoInput) {
@@ -140,6 +142,100 @@ async function loadPets(userId) {
     }
 }
 
+async function loadPetsForDropdown() {
+    const userId = localStorage.getItem("userId");
+    
+    if (!userId) {
+        console.error("No user ID found");
+        return;
+    }
+
+    const select = document.getElementById("bookingPetName");
+    if (!select) return;
+
+    select.innerHTML = `<option value="" disabled>Loading pets...</option>`;
+
+    try {
+        const response = await fetch(`http://localhost:5182/api/Pet/user/${userId}?t=${Date.now()}`);
+
+        if (!response.ok) {
+            throw new Error(`Failed to load pets. Status: ${response.status}`);
+        }
+
+        const pets = await response.json();
+
+        select.innerHTML = `<option value="" disabled selected>Select Pet</option>`;
+
+        if (!Array.isArray(pets) || pets.length === 0) {
+            select.innerHTML = `<option value="" disabled>No pets found. Please add a pet first.</option>`;
+            return;
+        }
+
+        pets.forEach(pet => {
+            const option = document.createElement("option");
+            option.value = pet.id;
+            option.textContent = pet.name;
+            select.appendChild(option);
+        });
+
+        console.log(`Loaded ${pets.length} pet(s) for appointment dropdown`);
+
+    } catch (error) {
+        console.error("Error loading pets for dropdown:", error);
+        select.innerHTML = `<option value="" disabled>Failed to load pets</option>`;
+    }
+}
+
+async function loadAppointments(userId) {
+    try {
+        const response = await fetch(`http://localhost:5182/api/Appointment/user/${userId}`);
+
+        if (!response.ok) {
+            throw new Error("Failed to load appointments");
+        }
+
+        const appointments = await response.json();
+
+        const container = document.getElementById("AptList");
+        const empty = document.getElementById("EmptyApt");
+
+        if (!appointments || appointments.length === 0) {
+            container.innerHTML = "";
+            empty.style.display = "flex";
+            return;
+        }
+
+        empty.style.display = "none";
+
+        container.innerHTML = appointments.map(apt => {
+            const date = new Date(apt.appointmentDate);
+            const day = date.getDate();
+            const month = date.toLocaleString('default', { month: 'short' });
+
+            return `
+                <div class="appointment-list-item">
+                    <div class="calendar-mini">
+                        <div class="cal-month">${month}</div>
+                        <div class="cal-day">${day}</div>
+                    </div>
+                    <div class="apt-details-list">
+                        <strong>${apt.petName}</strong>
+                        <div class="apt-time-row">
+                            ⏰ ${apt.appointmentTime || ""}
+                        </div>
+                        <div class="apt-time-row">
+                            🛠 ${apt.services || "No service"}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join("");
+
+    } catch (error) {
+        console.error("Load appointments error:", error);
+    }
+}
+
 function getSpeciesEmoji(species) {
     const s = (species || "").toLowerCase();
     if (s === "dog") return "🐶";
@@ -197,11 +293,23 @@ const MODAL_MAP = {
 };
 
 function openActionModal(type) {
+    const modals = {
+        'Add Pet': 'addPetModal',
+        'Appointment': 'bookAppointmentModal',
+        'Reminders': 'remindersModal'
+    };
+    if (modals[type]) {
+        if (type === 'Appointment') {
+            loadPetsForDropdown();
+        }
+        
+        document.getElementById(modals[type]).style.display = 'flex';
     document.querySelector('.dashboard-container').classList.add('page-blurred');
     if (MODAL_MAP[type]) {
         document.getElementById(MODAL_MAP[type]).style.display = 'flex';
         document.body.classList.add('modal-open');
         if (type === 'Appointment') populatePetDropdown();
+        }
     }
 }
 
