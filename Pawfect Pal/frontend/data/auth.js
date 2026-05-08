@@ -67,9 +67,17 @@ function getCurrentUser() {
 
 function showAuthRequiredModal() {
     ensureAuthModalExists();
+    ensureAuthBlurStyle();
 
     const modal = document.getElementById("authRequiredModal");
     const loginBtn = document.getElementById("authLoginBtn");
+    const page = document.querySelector(".dashboard-container");
+
+    if (page) {
+        page.classList.add("page-blurred");
+        page.style.pointerEvents = "none";
+        page.style.userSelect = "none";
+    }
 
     loginBtn.onclick = function () {
         window.location.href = "../../login/login.html";
@@ -80,6 +88,20 @@ function showAuthRequiredModal() {
     };
 
     modal.style.display = "flex";
+}
+
+function ensureAuthBlurStyle() {
+    if (document.getElementById("authBlurStyle")) return;
+
+    const style = document.createElement("style");
+    style.id = "authBlurStyle";
+    style.innerHTML = `
+        .page-blurred {
+            filter: blur(6px);
+            transition: filter 0.2s ease;
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 function requireLogin(expectedRole = null) {
