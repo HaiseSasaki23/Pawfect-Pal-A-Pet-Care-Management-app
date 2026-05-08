@@ -26,6 +26,7 @@ builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<PetRepository>();
 builder.Services.AddScoped<DashboardRepository>();
 builder.Services.AddScoped<AppointmentRepository>();
+builder.Services.AddScoped<AppointmentRepository>();
 
 
 builder.Services.AddScoped<AuthService>();
@@ -33,6 +34,7 @@ builder.Services.AddScoped<PetService>();
 builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<AppointmentService>();
 builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<AppointmentService>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
@@ -46,5 +48,12 @@ app.UseCors("AllowFrontend");
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var appointmentService = scope.ServiceProvider.GetRequiredService<AppointmentService>();
+
+    appointmentService.CreateAppointmentReminders();
+}
 
 app.Run();

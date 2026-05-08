@@ -52,19 +52,39 @@ namespace PawfectPal.Api.Services
         }
 
         public void UpdateStatus(int id, string status)
-        {
-            var valid = new[]
-            {
-                "Pending", "Confirmed", "Denied",
-                "Checked-In", "In-Progress", "Completed"
-            };
+{
+    var valid = new[]
+    {
+        "Pending", "Confirmed", "Denied",
+        "Checked-In", "In-Progress", "Completed"
+    };
 
-            if (!valid.Contains(status))
-                throw new Exception("Invalid status.");
+    if (!valid.Contains(status))
+        throw new Exception("Invalid status.");
 
-            _repo.UpdateStatus(id, status);
-        }
+    _repo.UpdateStatus(id, status);
 
+    // CREATE NOTIFICATION
+    string message = $"Your appointment status has been updated to '{status}'.";
+
+    _repo.CreateNotification(id, message, "Appointment");
+}
+
+public void CreateAppointmentReminders()
+{
+    var appointments = _repo.GetTomorrowAppointments();
+
+    foreach (var appointment in appointments)
+    {
+        string message = $"Reminder: You have an appointment tomorrow for {appointment.PetName}.";
+
+        _repo.CreateNotification(
+            appointment.AppointmentId,
+            message,
+            "Reminder"
+        );
+    }
+}
         public void Delete(int id)
         {
             _repo.DeleteAppointment(id);

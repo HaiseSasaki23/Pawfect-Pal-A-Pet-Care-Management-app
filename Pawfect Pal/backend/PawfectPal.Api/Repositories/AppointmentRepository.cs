@@ -209,6 +209,47 @@ public List<dynamic> GetAppointmentsByUserId(int userId)
             _db.ExecuteNonQuery(query, parameters);
         }
 
+        public void CreateNotification(int appointmentId, string message, string type)
+    {
+        using var conn = _db.GetConnection();
+
+        // Get UserId from appointment
+        string getUserSql = @"
+            SELECT p.UserID
+            FROM appointment a
+            INNER JOIN pet p ON a.PetID = p.PetID 
+            WHERE a.AppointmentID = @AppointmentId
+        ";
+
+        using var cmdUser = new MySqlCommand(getUserSql, conn);
+
+        conn.Open();
+
+        cmdUser.Parameters.AddWithValue("@AppointmentId", appointmentId);
+
+        object result = cmdUser.ExecuteScalar();
+
+        if (result == null)
+            return;
+
+        int userId = Convert.ToInt32(result);
+
+        string sql = @"
+            INSERT INTO notification
+            (UserID, Message, Type, IsRead, CreatedAt)
+            VALUES
+            (@UserID, @Message, @Type, 0, NOW())
+        ";
+
+        using var cmd = new MySqlCommand(sql, conn);
+
+        cmd.Parameters.AddWithValue("@UserID", userId);
+        cmd.Parameters.AddWithValue("@Message", message);
+        cmd.Parameters.AddWithValue("@Type", type);
+
+        cmd.ExecuteNonQuery();
+    }
+
         private Appointment MapAppointment(DataRow row)
         {
             return new Appointment
@@ -222,6 +263,38 @@ public List<dynamic> GetAppointmentsByUserId(int userId)
                 Notes = row["Notes"] == DBNull.Value ? null : row["Notes"].ToString(),
                 ServiceIds = new List<int>() // optional: fetch later
             };
+        }
+        public List<dynamic> GetTomorrowAppointments()
+        {
+            List<dynamic> list = new();
+
+            using var conn = _db.GetConnection();
+
+            string sql = @"
+                SELECT 
+                    a.AppointmentID,
+                    p.Name AS PetName
+                FROM appointment a
+                INNER JOIN pet p ON a.PetID = p.PetID
+                WHERE DATE(a.AppointmentDate) = DATE(DATE_ADD(NOW(), INTERVAL 1 DAY))
+            ";
+
+            using var cmd = new MySqlCommand(sql, conn);
+
+            conn.Open();
+
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                list.Add(new
+                {
+                    AppointmentId = Convert.ToInt32(reader["AppointmentID"]),
+                    PetName = reader["PetName"].ToString()
+                });
+            }
+
+            return list;
         }
     }
 }
