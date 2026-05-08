@@ -9,7 +9,29 @@ document.addEventListener("DOMContentLoaded", function () {
     loadPets(user.userId);
     loadAppointments(user.userId);
     loadPetsForDropdown();
+
+    const petPhotoInput = document.getElementById("petPhoto");
+    if (petPhotoInput) {
+        petPhotoInput.addEventListener("change", function () {
+            const file = this.files[0];
+            const img = document.getElementById("petPhotoImg");
+            const emoji = document.getElementById("defaultPetEmoji");
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    img.src = e.target.result;
+                    img.style.display = "block";
+                    emoji.style.display = "none";
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // update default emoji when species changes
+    document.getElementById("petSpecies")?.addEventListener("change", updateDefaultEmoji);
 });
+
 async function loadDashboardSummary(userId, role) {
     const url = role.toLowerCase() === "admin"
         ? "http://localhost:5182/api/Dashboard/admin-summary"
@@ -17,43 +39,69 @@ async function loadDashboardSummary(userId, role) {
 
     try {
         const response = await fetch(url);
-
-        if (!response.ok) {
-            throw new Error("Failed to load dashboard summary.");
-        }
-
+        if (!response.ok) throw new Error("Failed to load dashboard summary.");
         const data = await response.json();
 
         function updateStat(id, value) {
-        const el = document.getElementById(id);
-        if (!el) return;
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.style.opacity = "0";
+            setTimeout(() => {
+                el.textContent = value ?? 0;
+                el.style.opacity = "1";
+            }, 120);
+        }
 
-        el.style.opacity = "0";
-
-        setTimeout(() => {
-            el.textContent = value ?? 0;
-            el.style.opacity = "1";
-        }, 120);
-    }
         updateStat("TotalPetsCount", data.totalPets);
         updateStat("AptCount", data.totalAppointments);
-        updateStat("RemindCount", data.totalReminders);
-        updateStat("HealthCount", data.totalHealthRecords);
+
+        // due Balance
+        const dueEl = document.getElementById("DueBalance");
+        if (dueEl) {
+            dueEl.style.opacity = "0";
+            setTimeout(() => {
+                const amount = data.dueBalance ?? 0;
+                dueEl.textContent = `₱${amount.toLocaleString()}`;
+                if (amount > 0) {
+                    dueEl.classList.add("overdue");
+                } else {
+                    dueEl.classList.remove("overdue");
+                }
+                dueEl.style.opacity = "1";
+            }, 120);
+        }
+
+        // check appointments for overdue (2 weeks after completed)
+        if (data.appointments) {
+            markOverdueBalances(data.appointments);
+        }
 
     } catch (error) {
         console.error("Dashboard summary error:", error);
-        alert("Could not load dashboard data.");
     }
+}
+
+// mark due balance red if appointment was completed >2 weeks ago and unpaid
+function markOverdueBalances(appointments) {
+    const now = new Date();
+    const twoWeeksMs = 14 * 24 * 60 * 60 * 1000;
+    appointments.forEach(apt => {
+        if (apt.status === "Completed" && !apt.isPaid) {
+            const completedDate = new Date(apt.completedDate || apt.date);
+            if (now - completedDate > twoWeeksMs) {
+                const dueEl = document.getElementById("DueBalance");
+                if (dueEl) dueEl.classList.add("overdue");
+                const pill = dueEl?.closest(".stat-pill");
+                if (pill) pill.classList.add("overdue-pill");
+            }
+        }
+    });
 }
 
 async function loadPets(userId) {
     try {
         const response = await fetch(`http://localhost:5182/api/Pet/user/${userId}`);
-
-        if (!response.ok) {
-            throw new Error(`Failed to load pets. Status: ${response.status}`);
-        }
-
+        if (!response.ok) throw new Error(`Failed to load pets. Status: ${response.status}`);
         const pets = await response.json();
 
         const container = document.getElementById("PetsList");
@@ -62,22 +110,31 @@ async function loadPets(userId) {
         if (!Array.isArray(pets) || pets.length === 0) {
             setTimeout(() => {
                 container.innerHTML = "";
-                empty.style.display = "block";
+                empty.style.display = "flex";
             }, 200);
             return;
         }
 
         empty.style.display = "none";
-        
-        container.style.opacity = "0";    
+        container.style.opacity = "0";
         setTimeout(() => {
-            container.innerHTML = pets.map(pet => `
-                <div class="status-row" style="grid-template-columns: 1.5fr 1fr 1fr;">
-                    <span>${pet.name}</span>
-                    <span>${pet.species}</span>
-                    <span>${pet.breed}</span>
-                </div>
-            `).join("");
+            container.innerHTML = pets.map(pet => {
+                const emoji = getSpeciesEmoji(pet.species);
+                return `
+                <div class="pet-list-item">
+                    <div class="pet-avatar-emoji">${emoji}</div>
+                    <div class="pet-details-list">
+                        <div class="pet-name-row">
+                            <strong>${pet.name}</strong>
+                            <span class="species-tag" style="${getSpeciesTagStyle(pet.species)}">${pet.species}</span>
+                        </div>
+                        <div class="breed-text">${pet.breed}</div>
+                    </div>
+                    <div class="pet-info-right">
+                        <span>${pet.gender || ""}</span>
+                    </div>
+                </div>`;
+            }).join("");
             container.style.opacity = "1";
         }, 120);
     } catch (err) {
@@ -179,35 +236,61 @@ async function loadAppointments(userId) {
     }
 }
 
-window.onload = function() {
+function getSpeciesEmoji(species) {
+    const s = (species || "").toLowerCase();
+    if (s === "dog") return "🐶";
+    if (s === "cat") return "🐱";
+    return "🐾";
+}
+
+function getSpeciesTagStyle(species) {
+    const s = (species || "").toLowerCase();
+    if (s === "dog") return "background:#ede3ff; color:#9d72d6;";
+    if (s === "cat") return "background:#dbfce8; color:#2e9e5b;";
+    return "background:#ffefe0; color:#e07820;";
+}
+
+function updateDefaultEmoji() {
+    const species = document.getElementById("petSpecies")?.value;
+    const emoji = document.getElementById("defaultPetEmoji");
+    const img = document.getElementById("petPhotoImg");
+    if (!emoji || img?.style.display === "block") return;
+    if (species === "Dog") emoji.textContent = "🐶";
+    else if (species === "Cat") emoji.textContent = "🐱";
+    else emoji.textContent = "🐾";
+}
+
+// skeleton loaders 
+window.onload = function () {
     const today = new Date().toISOString().split('T')[0];
     const bookingDate = document.getElementById('bookingDate');
-    if (bookingDate) {
-        bookingDate.setAttribute('min', today);
-    }
+    if (bookingDate) bookingDate.setAttribute('min', today);
 };
 
 function showDashboardSkeletons() {
-    document.getElementById("TotalPetsCount").innerHTML = `<span class="skeleton" style="display:inline-block;width:35px;height:24px;"></span>`;
-    document.getElementById("AptCount").innerHTML = `<span class="skeleton" style="display:inline-block;width:35px;height:24px;"></span>`;
-    document.getElementById("RemindCount").innerHTML = `<span class="skeleton" style="display:inline-block;width:35px;height:24px;"></span>`;
-    document.getElementById("HealthCount").innerHTML = `<span class="skeleton" style="display:inline-block;width:35px;height:24px;"></span>`;
+    ["TotalPetsCount", "AptCount", "DueBalance"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = `<span class="skeleton" style="display:inline-block;width:55px;height:24px;"></span>`;
+    });
 }
 
 function showPetsSkeleton() {
     const container = document.getElementById("PetsList");
     const empty = document.getElementById("EmptyPets");
-
     if (!container) return;
-
     if (empty) empty.style.display = "none";
-
     container.innerHTML = `
         <div class="skeleton skeleton-row"></div>
         <div class="skeleton skeleton-row"></div>
         <div class="skeleton skeleton-row"></div>
     `;
 }
+
+const MODAL_MAP = {
+    'Add Pet': 'addPetModal',
+    'Appointment': 'bookAppointmentModal',
+    'Reminders': 'remindersModal'
+};
 
 function openActionModal(type) {
     const modals = {
@@ -221,44 +304,140 @@ function openActionModal(type) {
         }
         
         document.getElementById(modals[type]).style.display = 'flex';
+    document.querySelector('.dashboard-container').classList.add('page-blurred');
+    if (MODAL_MAP[type]) {
+        document.getElementById(MODAL_MAP[type]).style.display = 'flex';
+        document.body.classList.add('modal-open');
+        if (type === 'Appointment') populatePetDropdown();
+        }
     }
 }
 
-function closeActionModal(type) {
-    const modals = {
-        'Add Pet': 'addPetModal',
-        'Appointment': 'bookAppointmentModal',
-        'Reminders': 'remindersModal'
-    };
-    const id = modals[type];
-    if (id) {
-        document.getElementById(id).style.display = 'none';
-        if (type === 'Reminders') {
-            const dot = document.getElementById('RemindDot');
-            if (dot) dot.classList.remove('active');
-        } else {
-            const formId = type === 'Add Pet' ? 'addPetForm' : 'bookAppointmentForm';
-            const form = document.getElementById(formId);
-            if (form) form.reset();
-            
-            if (type === 'Add Pet') document.getElementById('otherSpeciesGroup').style.display = 'none';
-            if (type === 'Appointment') {
-                document.getElementById('bookingTotal').innerText = '₱0';
-                document.getElementById('gcashDetails').style.display = 'none';
-            }
-            clearErrors();
+async function populatePetDropdown() {
+    const userId = localStorage.getItem("userId");
+    const select = document.getElementById("bookingPetName");
+    if (!select || !userId) return;
+    try {
+        const res = await fetch(`http://localhost:5182/api/Pet/user/${userId}`);
+        const pets = await res.json();
+        select.innerHTML = `<option value="" disabled selected>Select Pet</option>`;
+        if (Array.isArray(pets)) {
+            pets.forEach(p => {
+                const opt = document.createElement("option");
+                opt.value = p.petId || p.id;
+                opt.textContent = `${getSpeciesEmoji(p.species)} ${p.name}`;
+                select.appendChild(opt);
+            });
         }
+    } catch (e) {
+        console.error("Could not load pets for booking:", e);
     }
+}
+
+function formHasChanges(type) {
+    if (type === 'Add Pet') {
+        const fields = ['petName', 'petColor', 'petBreed'];
+        return fields.some(id => (document.getElementById(id)?.value || "").trim() !== "") ||
+            (document.getElementById('petBirthday')?.value || "") !== "" ||
+            (document.getElementById('petSpecies')?.value || "") !== "" ||
+            (document.getElementById('petGender')?.value || "") !== "";
+    }
+    if (type === 'Appointment') {
+        const servicesChecked = document.querySelectorAll('input[name="services"]:checked').length > 0;
+        return (document.getElementById('bookingPetName')?.value || "") !== "" ||
+            (document.getElementById('bookingDate')?.value || "") !== "" ||
+            (document.getElementById('bookingTime')?.value || "") !== "" ||
+            servicesChecked ||
+            (document.getElementById('bookingPayment')?.value || "") !== "";
+    }
+    return false;
+}
+
+let _pendingCloseType = null;
+
+function requestCloseModal(type) {
+    if (formHasChanges(type)) {
+        _pendingCloseType = type;
+        document.getElementById('unsavedModal').style.display = 'flex';
+        document.body.classList.add('modal-unsaved');
+    } else {
+        closeActionModal(type);
+    }
+}
+
+document.getElementById('unsavedContinueBtn')?.addEventListener('click', () => {
+    document.getElementById('unsavedModal').style.display = 'none';
+    document.body.classList.remove('modal-unsaved');
+    _pendingCloseType = null;
+});
+document.getElementById('unsavedDiscardBtn')?.addEventListener('click', () => {
+    document.getElementById('unsavedModal').style.display = 'none';
+    document.body.classList.remove('modal-unsaved');
+    if (_pendingCloseType) {
+        closeActionModal(_pendingCloseType);
+        _pendingCloseType = null;
+    }
+});
+
+function closeActionModal(type) {
+    document.querySelector('.dashboard-container').classList.remove('page-blurred');
+    const id = MODAL_MAP[type];
+    if (!id) return;
+    document.getElementById(id).style.display = 'none';
+    document.body.classList.remove('modal-open', 'modal-unsaved');
+
+    if (type === 'Reminders') {
+        const dot = document.getElementById('RemindDot');
+        if (dot) dot.classList.remove('active');
+    } else {
+        const formId = type === 'Add Pet' ? 'addPetForm' : 'bookAppointmentForm';
+        const form = document.getElementById(formId);
+        if (form) form.reset();
+
+        if (type === 'Add Pet') {
+            document.getElementById('otherSpeciesGroup').style.display = 'none';
+            const img = document.getElementById('petPhotoImg');
+            const emoji = document.getElementById('defaultPetEmoji');
+            if (img) { img.style.display = 'none'; img.src = ''; }
+            if (emoji) { emoji.style.display = 'block'; emoji.textContent = '🐾'; }
+        }
+        if (type === 'Appointment') {
+            document.getElementById('bookingTotal').innerText = '₱0';
+            document.getElementById('gcashDetails').style.display = 'none';
+        }
+        clearErrors();
+    }
+}
+
+function showAlertModal(title, message, icon = "") {
+    const iconEl = document.getElementById('alertIcon');
+    if (icon) {
+        iconEl.textContent = icon;
+        iconEl.style.display = 'block';
+    } else {
+        iconEl.style.display = 'none';
+    }
+    document.getElementById('alertTitle').textContent = title;
+    document.getElementById('alertMessage').textContent = message;
+    document.getElementById('alertModal').style.display = 'flex';
+    document.body.classList.add('modal-open');
+}
+
+function closeAlertModal() {
+    document.getElementById('alertModal').style.display = 'none';
+    document.body.classList.remove('modal-open', 'modal-unsaved');
 }
 
 function showSuccessMessage(title, message) {
     document.getElementById('successTitle').innerText = title;
     document.getElementById('successMessage').innerText = message;
     document.getElementById('successModal').style.display = 'flex';
+    document.body.classList.add('modal-open');
 }
 
 function closeSuccessModal() {
     document.getElementById('successModal').style.display = 'none';
+    document.body.classList.remove('modal-open', 'modal-unsaved');
 }
 
 function clearErrors() {
@@ -269,12 +448,10 @@ function clearErrors() {
 function toggleGcashDetails() {
     const payment = document.getElementById('bookingPayment').value;
     const gcashBox = document.getElementById('gcashDetails');
-    if (gcashBox) {
-        gcashBox.style.display = payment === 'GCash' ? 'block' : 'none';
-    }
+    if (gcashBox) gcashBox.style.display = payment === 'GCash' ? 'block' : 'none';
 }
 
-// price calculation
+// service price calculation
 document.querySelectorAll('input[name="services"]').forEach(cb => {
     cb.addEventListener('change', () => {
         let total = 0;
@@ -288,7 +465,7 @@ document.querySelectorAll('input[name="services"]').forEach(cb => {
 const validator = (id, errorId, type) => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.addEventListener('input', function() {
+    el.addEventListener('input', function () {
         const lettersOnly = /^[A-Za-z\s]*$/;
         const numbersOnly = /^[0-9]*$/;
         const err = document.getElementById(errorId);
@@ -313,6 +490,7 @@ function toggleOtherSpecies() {
     const select = document.getElementById('petSpecies');
     const group = document.getElementById('otherSpeciesGroup');
     group.style.display = select.value === 'Others' ? 'block' : 'none';
+    updateDefaultEmoji();
 }
 
 function calculateAge() {
@@ -323,73 +501,152 @@ function calculateAge() {
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
-    
-    // Alive data requirement: show "X years old"
     const displayAge = age <= 0 ? "Less than a year" : age + (age === 1 ? " year old" : " years old");
     document.getElementById('petAge').value = displayAge;
 }
 
-document.getElementById('petBirthday').addEventListener('change', calculateAge);
+document.getElementById('petBirthday')?.addEventListener('change', calculateAge);
 
-document.getElementById("addPetForm").addEventListener("submit", async function (e) {
+// add pet form submit 
+document.getElementById("addPetForm")?.addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    const userId = localStorage.getItem("userId");
+    // validation: required fields
+    const petName = document.getElementById("petName").value.trim();
+    const petSpecies = document.getElementById("petSpecies").value;
+    const petColor = document.getElementById("petColor").value.trim();
+    const petBreed = document.getElementById("petBreed").value.trim();
+    const petGender = document.getElementById("petGender").value;
+    const petBirthday = document.getElementById("petBirthday").value;
 
+    if (!petName) { showAlertModal("Missing Details", "Please enter your pet's name.", ""); return; }
+    if (!petSpecies) { showAlertModal("Missing Details", "Please select your pet's species.", ""); return; }
+    if (petSpecies === "Others" && !document.getElementById("otherSpeciesInput").value.trim()) {
+        showAlertModal("Missing Details", "Please specify your pet's species.", ""); return;
+    }
+    if (!petColor) { showAlertModal("Missing Details", "Please enter your pet's color.", ""); return; }
+    if (!petBreed) { showAlertModal("Missing Details", "Please enter your pet's breed.", ""); return; }
+    if (!petGender) { showAlertModal("Missing Details", "Please select your pet's gender.", ""); return; }
+    if (!petBirthday) { showAlertModal("Missing Details", "Please enter your pet's birthday.", ""); return; }
+
+    if (document.querySelector('#addPetForm .input-error')) {
+        showAlertModal("Invalid Input", "Please fix the highlighted fields before submitting.", "");
+        return;
+    }
+
+    const userId = localStorage.getItem("userId");
     const speciesSelect = document.getElementById("petSpecies").value;
     const otherSpecies = document.getElementById("otherSpeciesInput").value.trim();
+    const photoFile = document.getElementById("petPhoto").files[0];
 
-    const pet = {
-        userId: parseInt(userId),
-        name: document.getElementById("petName").value.trim(),
-        species: speciesSelect === "Others" ? otherSpecies : speciesSelect,
-        color: document.getElementById("petColor").value.trim(),
-        breed: document.getElementById("petBreed").value.trim(),
-        gender: document.getElementById("petGender").value,
-        birthdate: document.getElementById("petBirthday").value
-    };
+    const formData = new FormData();
+    formData.append("userId", parseInt(userId));
+    formData.append("name", petName);
+    formData.append("species", speciesSelect === "Others" ? otherSpecies : speciesSelect);
+    formData.append("color", petColor);
+    formData.append("breed", petBreed);
+    formData.append("gender", petGender);
+    formData.append("birthdate", petBirthday);
+    if (photoFile) formData.append("photo", photoFile);
 
     try {
         const response = await fetch("http://localhost:5182/api/Pet", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(pet)
+            body: formData
         });
-
         const data = await response.json();
 
         if (!response.ok) {
-            alert(data.message || "Failed to add pet.");
+            showAlertModal("Oops!", data.message || "Failed to add pet.", "");
             return;
         }
 
         closeActionModal("Add Pet");
-        showSuccessMessage("Pet Added", "Your pet has been added successfully.");
-
-        loadDashboardSummary(userId, localStorage.getItem("role"));
-        showPetsSkeleton();
-        loadPets(userId);
+        showSuccessMessage("Registration Sent!", "Your pet registration has been submitted and is pending admin approval.");
 
     } catch (error) {
         console.error("Add pet error:", error);
-        alert("Could not connect to the server.");
+        showAlertModal("Connection Error", "Could not connect to the server. Please try again.", "");
     }
 });
 
-document.getElementById('bookAppointmentForm').addEventListener('submit', (e) => {
+document.getElementById('bookAppointmentForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!e.target.querySelector('.input-error')) { 
-        closeActionModal('Appointment'); 
-        showSuccessMessage("Booking Sent", "Your appointment request has been submitted."); 
+
+    const petId = document.getElementById('bookingPetName').value;
+    const date = document.getElementById('bookingDate').value;
+    const time = document.getElementById('bookingTime').value;
+    const servicesChecked = document.querySelectorAll('input[name="services"]:checked');
+    const payment = document.getElementById('bookingPayment').value;
+
+    if (!petId) { showAlertModal("Missing Details", "Please select a pet for this appointment.", ""); return; }
+    if (!date) { showAlertModal("Missing Details", "Please pick a date for the appointment.", ""); return; }
+    if (!time) { showAlertModal("Missing Details", "Please select a time slot.", ""); return; }
+    if (servicesChecked.length === 0) { showAlertModal("No Services Selected", "Please select at least one service.", ""); return; }
+    if (!payment) { showAlertModal("Missing Details", "Please choose a payment mode.", ""); return; }
+
+    if (payment === "GCash") {
+        const gcashName = document.getElementById('gcashName').value.trim();
+        const gcashRef = document.getElementById('gcashRef').value.trim();
+        if (!gcashName) { showAlertModal("Missing Details", "Please enter your GCash account name.", ""); return; }
+        if (!gcashRef || gcashRef.length !== 13) { showAlertModal("Invalid Reference", "GCash reference number must be 13 digits.", ""); return; }
+    }
+
+    if (document.querySelector('#bookAppointmentForm .input-error')) {
+        showAlertModal("Invalid Input", "Please fix the highlighted fields before submitting.", "");
+        return;
+    }
+
+    const userId = localStorage.getItem("userId");
+    const services = Array.from(servicesChecked).map(cb => cb.value);
+    const totalEl = document.getElementById('bookingTotal');
+    const totalText = totalEl ? totalEl.innerText.replace(/[₱,]/g, '') : '0';
+    const totalAmount = parseInt(totalText) || 0;
+
+    const gcashName = payment === "GCash" ? document.getElementById('gcashName').value.trim() : null;
+    const gcashRef = payment === "GCash" ? document.getElementById('gcashRef').value.trim() : null;
+
+    const payload = {
+        userId: parseInt(userId),
+        petId: parseInt(petId),
+        date: date,
+        time: time,
+        services: services,
+        totalAmount: totalAmount,
+        paymentMode: payment,
+        gcashAccountName: gcashName,
+        gcashReference: gcashRef
+    };
+
+    try {
+        const response = await fetch("http://localhost:5182/api/Appointment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+            showAlertModal("Booking Failed", data.message || "Could not submit your appointment request.", "");
+            return;
+        }
+
+        closeActionModal('Appointment');
+        showSuccessMessage("Booking Request Sent!", "Your appointment has been submitted and is pending admin confirmation.");
+
+    } catch (error) {
+        console.error("Booking error:", error);
+        showAlertModal("Connection Error", "Could not connect to the server. Please try again.", "");
     }
 });
 
 window.onclick = (e) => {
     if (e.target.classList.contains('modal-overlay')) {
-        closeActionModal('Add Pet');
-        closeActionModal('Appointment');
+        const safeIds = ['unsavedModal', 'alertModal', 'successModal', 'confirmModal'];
+        if (safeIds.includes(e.target.id)) return;
+
+        requestCloseModal('Add Pet');
+        requestCloseModal('Appointment');
         closeActionModal('Reminders');
         closeSuccessModal();
     }

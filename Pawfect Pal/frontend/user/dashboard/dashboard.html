@@ -55,18 +55,17 @@
                     </strong>
                     <span class="user-role">Pet Owner</span>
                 </div>
-                    <a href="#" class="nav-item logout-item" onclick="triggerLogout()">
-                        <img src="../sidebar/logout-m.png" class="custom-icon-nav logout-icon" alt="Logout"> 
-                        Logout
-                    </a>
-                </div>
+                <a href="#" class="nav-item logout-item" onclick="triggerLogout()">
+                    <img src="../sidebar/logout-m.png" class="custom-icon-nav logout-icon" alt="Logout"> 
+                    Logout
+                </a>
             </div>
         </aside>
 
         <main class="main-content">
             <header class="content-header">
                 <div class="welcome-section">
-                    <h1>Good morning, <span id="welcomeOwnerFName"></span>! 🐾</h1>
+                    <h1 id="greetingText">Good morning, <span id="welcomeOwnerFName"></span>! 🐾</h1>
                     <p class="welcome-subtitle">Here's what's happening with your furry friends today 🐾</p>
                 </div>
                 <div class="header-right">
@@ -77,7 +76,7 @@
                 </div>
             </header>
 
-            <section class="stats-row">
+            <section class="stats-row stats-row-3">
                 <div class="stat-pill purple-soft">
                     <div class="pill-icon-circle">
                         <img src="user-dashboard/pets-d.png" class="img-30x30">
@@ -96,22 +95,14 @@
                         <h3 id="AptCount">0</h3>
                     </div>
                 </div>
-                <div class="stat-pill orange-soft">
+                <div class="stat-pill red-soft clickable-pill" onclick="window.location.href='../payment/payment.html'" title="View payment details">
                     <div class="pill-icon-circle">
-                        <img src="user-dashboard/reminder-d.png" class="img-30x30">
+                        <img src="user-dashboard/due-payments.png" class="img-30x30">
                     </div>
                     <div class="pill-data">
-                        <p>Due Reminders</p>
-                        <h3 id="RemindCount">0</h3>
-                    </div>
-                </div>
-                <div class="stat-pill blue-soft">
-                    <div class="pill-icon-circle">
-                        <img src="user-dashboard/health-d.png" class="img-30x30">
-                    </div>
-                    <div class="pill-data">
-                        <p>Health Records</p>
-                        <h3 id="HealthCount">0</h3>
+                        <p>Due Balance</p>
+                        <h3 id="DueBalance" class="due-balance-amount">₱0</h3>
+                        <span class="pill-subtext">Tap to view payments →</span>
                     </div>
                 </div>
             </section>
@@ -119,15 +110,13 @@
             <div class="main-grid-layout">
                 <div class="display-card">
                     <div class="display-card-header">
-                        <span>My Pets</span>
-                        <button class="add-small-btn" onclick="openActionModal('Add Pet')">
-                            + Add Pet
-                        </button>
+                        <div><span>My Pets</span></div>
+                        <button class="add-small-btn" onclick="openActionModal('Add Pet')">+ Add Pet</button>
                     </div>
                     
                     <div class="data-list" id="PetsList"></div>
 
-                    <div class="empty-state" id="EmptyPets">
+                    <div class="empty-state" id="EmptyPets" style="display:none;">
                         <img src="user-dashboard/no-pets.png" class="empty-img">
                         <h3>No pets yet</h3>
                         <p>Add your first furry friend to start managing their care.</p>
@@ -139,36 +128,43 @@
 
                 <div class="display-card">
                     <div class="display-card-header">
-                        <span>Upcoming Appointments</span>
-                        <button class="add-small-btn" onclick="openActionModal('Appointment')">
-                            + Book Appointment
-                        </button>
+                        <div><span>Upcoming Appointments</span></div>
+                        <button class="add-small-btn" onclick="openActionModal('Appointment')">+ Book</button>
                     </div>
                     
                     <div class="data-list" id="AptList"></div>
 
-                    <div class="empty-state" id="EmptyApt">
+                    <div class="empty-state" id="EmptyApt" style="display:none;">
                         <img src="user-dashboard/no-appointments.png" class="empty-img">
                         <h3>No appointments scheduled</h3>
                         <p>Book an appointment to keep your pet healthy and happy.</p>
                         <button class="primary-action-btn" onclick="openActionModal('Appointment')">+ Book an Appointment</button>
                     </div>
                     
-                    <a href="#" class="view-all-link">View all appointments →</a>
+                    <a href="../appointments/appointments.html" class="view-all-link">View all appointments →</a>
                 </div>
             </div>
         </main>
     </div>
 
     <div id="addPetModal" class="modal-overlay">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeActionModal('Add Pet')">&times;</span>
+        <div class="modal-content modal-scrollable">
+            <span class="close-modal" onclick="requestCloseModal('Add Pet')">&times;</span>
             <h2 class="modal-title">Register Your Pet</h2>
-            <form id="addPetForm" class="pet-form">
+            <form id="addPetForm" class="pet-form" novalidate>
+
                 <div class="input-group">
                     <label>Pet Photo</label>
-                    <input type="file" id="petPhoto" accept="image/*">
+                    <div class="photo-upload-wrapper">
+                        <div class="pet-photo-preview" id="petPhotoPreview">
+                            <span class="default-pet-emoji" id="defaultPetEmoji">🐾</span>
+                            <img id="petPhotoImg" src="" alt="" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                        </div>
+                        <label for="petPhoto" class="upload-photo-btn">📷 Choose Photo</label>
+                        <input type="file" id="petPhoto" accept="image/*" style="display:none;">
+                    </div>
                 </div>
+
                 <div class="input-group">
                     <input type="text" id="petName" placeholder="Pet Name" required>
                     <small class="error-msg" id="nameError">Letters only.</small>
@@ -184,12 +180,9 @@
                 <div class="input-group">
                     <select id="petSpecies" required onchange="toggleOtherSpecies()">
                         <option value="" disabled selected>Select Species</option>
-                        <option value="Dog">Dog</option>
-                        <option value="Cat">Cat</option>
-                        <option value="Rabbit">Rabbit</option>
-                        <option value="Bird">Bird</option>
-                        <option value="Hamster">Hamster</option>
-                        <option value="Others">Others</option>
+                        <option value="Dog">🐶 Dog</option>
+                        <option value="Cat">🐱 Cat</option>
+                        <option value="Others">Others (specify below)</option>
                     </select>
                 </div>
                 <div class="input-group" id="otherSpeciesGroup" style="display: none;">
@@ -216,15 +209,15 @@
     </div>
 
     <div id="bookAppointmentModal" class="modal-overlay">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeActionModal('Appointment')">&times;</span>
+        <div class="modal-content modal-scrollable">
+            <span class="close-modal" onclick="requestCloseModal('Appointment')">&times;</span>
             <h2 class="modal-title">Book an Appointment</h2>
-            <form id="bookAppointmentForm" class="pet-form">
+            <form id="bookAppointmentForm" class="pet-form" novalidate>
                 <div class="input-group">
                     <label>Select Pet</label>
                     <select id="bookingPetName" name="Name" required>
                         <option value="" disabled selected>Select Pet</option>
-                        </select>
+                    </select>
                 </div>
                 <div class="input-group">
                     <label>Date</label>
@@ -313,6 +306,7 @@
 
     <div id="successModal" class="modal-overlay">
         <div class="modal-content success-box">
+            <div class="success-icon-wrap"></div>
             <h2 id="successTitle" class="modal-title">Request Sent</h2>
             <p id="successMessage" class="welcome-subtitle">Your request is now pending admin confirmation.</p>
             <button class="primary-action-btn full-width" onclick="closeSuccessModal()">Got it!</button>
@@ -324,25 +318,39 @@
             <div class="modal-header" style="justify-content: center; border: none;">
                 <h2 style="color: var(--primary-purple); font-size: 20px;">Confirm Action</h2>
             </div>
-
             <div class="modal-body">
-                <p id="confirmMessage" style="margin-bottom: 25px; color: var(--text-dark);">
-                    Are you sure?
-                </p>
-
+                <p id="confirmMessage" style="margin-bottom: 25px; color: var(--text-dark);">Are you sure?</p>
                 <div style="display: flex; gap: 10px; justify-content: center;">
-                    <button id="btnConfirmDelete" class="submit-btn" style="margin: 0; background-color: #ff5e78; flex: 1;">
-                        Confirm
-                    </button>
-
-                    <button onclick="document.getElementById('confirmModal').style.display='none'" class="action-btn view-btn" style="flex: 1; border-radius: 12px; height: 48px;">
-                        Cancel
-                    </button>
+                    <button id="btnConfirmDelete" class="submit-btn" style="margin: 0; background-color: #ff5e78; flex: 1;">Confirm</button>
+                    <button onclick="document.getElementById('confirmModal').style.display='none'" class="action-btn view-btn" style="flex: 1; border-radius: 12px; height: 48px;">Cancel</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <div id="unsavedModal" class="modal-overlay">
+        <div class="modal-content" style="max-width:400px;text-align:center;">
+            <div class="modal-header" style="justify-content:center;border:none;padding-bottom:8px;">
+                <h2 style="color:#f59e0b;font-size:20px;">⚠️ Unsaved Changes</h2>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom:25px;color:var(--text-dark);line-height:1.6;">You have unsaved changes. Are you sure you want to close without saving?</p>
+                <div style="display:flex;gap:10px;justify-content:center;">
+                    <button id="unsavedDiscardBtn" class="submit-btn" style="margin:0;flex:1;background:#ff5e78;">Discard Changes</button>
+                    <button id="unsavedContinueBtn" class="action-btn view-btn" style="flex:1;border-radius:12px;height:48px;font-weight:700;font-size:14px;">Keep Editing</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 350px; text-align: center;">
+            <div id="alertIcon" style="font-size: 40px; margin-bottom: 12px;">⚠️</div>
+            <h2 id="alertTitle" style="color: var(--text-dark); font-size: 20px; font-weight: 700; margin-bottom: 10px;">Heads up!</h2>
+            <p id="alertMessage" style="color: var(--text-muted); margin-bottom: 25px; font-size: 14px;"></p>
+            <button class="register-btn" onclick="closeAlertModal()">Got it</button>
+        </div>
+    </div>
 
     <script src="../../data/auth.js"></script>
     <script src="dashboard.js"></script>
