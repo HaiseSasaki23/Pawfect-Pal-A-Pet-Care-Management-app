@@ -66,7 +66,21 @@ namespace PawfectPal.Api.Services
             _repo.UpdateAppointment(appointment);
         }
 
-        public void UpdateStatus(int id, string status)
+        public void UpdateRequestStatus(int id, string status)
+        {
+            var validRequestStatuses = new[]
+            {
+                "Pending",
+                "Confirmed",
+                "Denied"
+            };
+
+            if (!validRequestStatuses.Contains(status))
+                throw new Exception("Invalid request status.");
+
+            _repo.UpdateRequestStatus(id, status);
+        }
+        public void UpdateAppStatus(int id, string status)
         {
             var validAppStatuses = new[]
             {
@@ -80,7 +94,7 @@ namespace PawfectPal.Api.Services
             if (!validAppStatuses.Contains(status))
                 throw new Exception("Invalid appointment status.");
 
-            _repo.UpdateStatus(id, status);
+            _repo.UpdateAppStatus(id, status);
         }
 
         public void Delete(int id)

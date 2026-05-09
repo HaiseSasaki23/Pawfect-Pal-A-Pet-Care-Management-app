@@ -90,52 +90,52 @@ namespace PawfectPal.Api.Repositories
             return MapAppointment(dt.Rows[0]);
         }
 
-public List<dynamic> GetAppointmentsByUserId(int userId)
-{
-    string query = @"
-        SELECT 
-            a.AppointmentID,
-            a.UserID,
-            a.PetID,
-            p.Name AS PetName,
-            a.AppointmentDate,
-            a.AppStatus,
-            GROUP_CONCAT(s.ServiceType) AS Services,
-            GROUP_CONCAT(s.ServiceID) AS ServiceIds
-        FROM appointment a
-        JOIN pet p ON a.PetID = p.PetID
-        LEFT JOIN appointment_services aps ON a.AppointmentID = aps.AppointmentID
-        LEFT JOIN service s ON aps.ServiceID = s.ServiceID
-        WHERE a.UserID = @UserID
-        GROUP BY a.AppointmentID
-        ORDER BY a.AppointmentDate DESC
-    ";
-
-    var parameters = new List<MySqlParameter>
-    {
-        new("@UserID", userId)
-    };
-
-    DataTable dt = _db.ExecuteQuery(query, parameters);
-
-    List<dynamic> list = new();
-
-    foreach (DataRow row in dt.Rows)
-    {
-        list.Add(new
+        public List<dynamic> GetAppointmentsByUserId(int userId)
         {
-            appointmentId = Convert.ToInt32(row["AppointmentID"]),
-            petId = Convert.ToInt32(row["PetID"]),
-            petName = row["PetName"].ToString(),
-            appointmentDate = Convert.ToDateTime(row["AppointmentDate"]),
-            appStatus = row["AppStatus"].ToString(),
-            services = row["Services"]?.ToString() ?? "",
-            serviceIds = row["ServiceIds"]?.ToString() ?? ""
-        });
-    }
+            string query = @"
+                SELECT 
+                    a.AppointmentID,
+                    a.UserID,
+                    a.PetID,
+                    p.Name AS PetName,
+                    a.AppointmentDate,
+                    a.AppStatus,
+                    GROUP_CONCAT(s.ServiceType) AS Services,
+                    GROUP_CONCAT(s.ServiceID) AS ServiceIds
+                FROM appointment a
+                JOIN pet p ON a.PetID = p.PetID
+                LEFT JOIN appointment_services aps ON a.AppointmentID = aps.AppointmentID
+                LEFT JOIN service s ON aps.ServiceID = s.ServiceID
+                WHERE a.UserID = @UserID
+                GROUP BY a.AppointmentID
+                ORDER BY a.AppointmentDate DESC
+            ";
 
-    return list;
-}
+            var parameters = new List<MySqlParameter>
+            {
+                new("@UserID", userId)
+            };
+
+            DataTable dt = _db.ExecuteQuery(query, parameters);
+
+            List<dynamic> list = new();
+
+            foreach (DataRow row in dt.Rows)
+            {
+                list.Add(new
+                {
+                    appointmentId = Convert.ToInt32(row["AppointmentID"]),
+                    petId = Convert.ToInt32(row["PetID"]),
+                    petName = row["PetName"].ToString(),
+                    appointmentDate = Convert.ToDateTime(row["AppointmentDate"]),
+                    appStatus = row["AppStatus"].ToString(),
+                    services = row["Services"]?.ToString() ?? "",
+                    serviceIds = row["ServiceIds"]?.ToString() ?? ""
+                });
+            }
+
+            return list;
+        }
 
         public void UpdateAppointment(Appointment appointment)
         {
@@ -157,7 +157,6 @@ public List<dynamic> GetAppointmentsByUserId(int userId)
 
             _db.ExecuteNonQuery(query, parameters);
 
-            // 🔥 UPDATE SERVICES
             DeleteAppointmentServices(appointment.AppointmentId);
 
             foreach (var serviceId in appointment.ServiceIds)
@@ -166,7 +165,23 @@ public List<dynamic> GetAppointmentsByUserId(int userId)
             }
         }
 
-        public void UpdateStatus(int id, string status)
+        public void UpdateRequestStatus(int id, string status)
+        {
+            string query = @"
+                UPDATE appointment
+                SET RequestStatus = @Status
+                WHERE AppointmentID = @Id
+            ";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@Id", id),
+                new("@Status", status)
+            };
+
+            _db.ExecuteNonQuery(query, parameters);
+        }
+        public void UpdateAppStatus(int id, string status)
         {
             string query = @"
                 UPDATE appointment
@@ -182,7 +197,6 @@ public List<dynamic> GetAppointmentsByUserId(int userId)
 
             _db.ExecuteNonQuery(query, parameters);
         }
-
         public void DeleteAppointment(int id)
         {
             DeleteAppointmentServices(id);
