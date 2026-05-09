@@ -144,16 +144,11 @@ async function loadPets(userId) {
 
 async function loadPetsForDropdown() {
     const userId = localStorage.getItem("userId");
-    
-    if (!userId) {
-        console.error("No user ID found");
-        return;
-    }
-
     const select = document.getElementById("bookingPetName");
-    if (!select) return;
 
-    select.innerHTML = `<option value="" disabled>Loading pets...</option>`;
+    if (!userId || !select) return;
+
+    select.innerHTML = `<option value="" disabled selected>Loading pets...</option>`;
 
     try {
         const response = await fetch(`http://localhost:5182/api/Pet/user/${userId}?t=${Date.now()}`);
@@ -167,22 +162,20 @@ async function loadPetsForDropdown() {
         select.innerHTML = `<option value="" disabled selected>Select Pet</option>`;
 
         if (!Array.isArray(pets) || pets.length === 0) {
-            select.innerHTML = `<option value="" disabled>No pets found. Please add a pet first.</option>`;
+            select.innerHTML = `<option value="" disabled selected>No pets found. Please add a pet first.</option>`;
             return;
         }
 
         pets.forEach(pet => {
             const option = document.createElement("option");
-            option.value = pet.id;
-            option.textContent = pet.name;
+            option.value = pet.petId;
+            option.textContent = `${getSpeciesEmoji(pet.species)} ${pet.name}`;
             select.appendChild(option);
         });
 
-        console.log(`Loaded ${pets.length} pet(s) for appointment dropdown`);
-
     } catch (error) {
         console.error("Error loading pets for dropdown:", error);
-        select.innerHTML = `<option value="" disabled>Failed to load pets</option>`;
+        select.innerHTML = `<option value="" disabled selected>Failed to load pets</option>`;
     }
 }
 
@@ -314,24 +307,7 @@ function openActionModal(type) {
 }
 
 async function populatePetDropdown() {
-    const userId = localStorage.getItem("userId");
-    const select = document.getElementById("bookingPetName");
-    if (!select || !userId) return;
-    try {
-        const res = await fetch(`http://localhost:5182/api/Pet/user/${userId}`);
-        const pets = await res.json();
-        select.innerHTML = `<option value="" disabled selected>Select Pet</option>`;
-        if (Array.isArray(pets)) {
-            pets.forEach(p => {
-                const opt = document.createElement("option");
-                opt.value = p.petId || p.id;
-                opt.textContent = `${getSpeciesEmoji(p.species)} ${p.name}`;
-                select.appendChild(opt);
-            });
-        }
-    } catch (e) {
-        console.error("Could not load pets for booking:", e);
-    }
+    await loadPetsForDropdown();
 }
 
 function formHasChanges(type) {
@@ -588,8 +564,12 @@ document.getElementById('bookAppointmentForm')?.addEventListener('submit', async
     if (payment === "GCash") {
         const gcashName = document.getElementById('gcashName').value.trim();
         const gcashRef = document.getElementById('gcashRef').value.trim();
+
         if (!gcashName) { showAlertModal("Missing Details", "Please enter your GCash account name.", ""); return; }
-        if (!gcashRef || gcashRef.length !== 13) { showAlertModal("Invalid Reference", "GCash reference number must be 13 digits.", ""); return; }
+        if (!gcashRef || gcashRef.length !== 13) {
+            showAlertModal("Invalid Reference", "GCash reference number must be 13 digits.", "");
+            return;
+        }
     }
 
     if (document.querySelector('#bookAppointmentForm .input-error')) {
@@ -598,24 +578,30 @@ document.getElementById('bookAppointmentForm')?.addEventListener('submit', async
     }
 
     const userId = localStorage.getItem("userId");
-    const services = Array.from(servicesChecked).map(cb => cb.value);
-    const totalEl = document.getElementById('bookingTotal');
-    const totalText = totalEl ? totalEl.innerText.replace(/[₱,]/g, '') : '0';
-    const totalAmount = parseInt(totalText) || 0;
+    const appointmentDate = `${date}T${time}:00`;
 
-    const gcashName = payment === "GCash" ? document.getElementById('gcashName').value.trim() : null;
-    const gcashRef = payment === "GCash" ? document.getElementById('gcashRef').value.trim() : null;
+    const serviceMap = {
+        checkup: 1,
+        vaccination: 2,
+        deworming: 3,
+        grooming: 4
+    };
+
+    const serviceIds = Array.from(servicesChecked).map(cb => {
+        const rawValue = cb.value;
+        const numericValue = parseInt(rawValue);
+
+        if (!isNaN(numericValue)) return numericValue;
+
+        return serviceMap[rawValue.toLowerCase()];
+    }).filter(id => id);
 
     const payload = {
         userId: parseInt(userId),
         petId: parseInt(petId),
-        date: date,
-        time: time,
-        services: services,
-        totalAmount: totalAmount,
-        paymentMode: payment,
-        gcashAccountName: gcashName,
-        gcashReference: gcashRef
+        appointmentDate: appointmentDate,
+        notes: "",
+        serviceIds: serviceIds
     };
 
     try {
@@ -624,6 +610,7 @@ document.getElementById('bookAppointmentForm')?.addEventListener('submit', async
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
+
         const data = await response.json();
 
         if (!response.ok) {
@@ -634,20 +621,11 @@ document.getElementById('bookAppointmentForm')?.addEventListener('submit', async
         closeActionModal('Appointment');
         showSuccessMessage("Booking Request Sent!", "Your appointment has been submitted and is pending admin confirmation.");
 
+        loadDashboardSummary(userId, localStorage.getItem("role"));
+        loadAppointments(userId);
+
     } catch (error) {
         console.error("Booking error:", error);
         showAlertModal("Connection Error", "Could not connect to the server. Please try again.", "");
     }
 });
-
-window.onclick = (e) => {
-    if (e.target.classList.contains('modal-overlay')) {
-        const safeIds = ['unsavedModal', 'alertModal', 'successModal', 'confirmModal'];
-        if (safeIds.includes(e.target.id)) return;
-
-        requestCloseModal('Add Pet');
-        requestCloseModal('Appointment');
-        closeActionModal('Reminders');
-        closeSuccessModal();
-    }
-};
