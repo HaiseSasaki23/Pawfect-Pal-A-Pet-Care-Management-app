@@ -7,11 +7,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function initAppointmentPage() {
     setMinimumBookingDate();
-    setupServiceCalculation();
     setupBookAppointmentForm();
     setupOutsideClickClose();
     loadPetsDropdown();
     loadAppointments();
+    loadServices();
 }
 
 /* API Configuration*/
@@ -145,6 +145,54 @@ async function loadPetsDropdown() {
         console.error("Error loading pets:", error);
     }
 }
+
+async function loadServices() {
+    const servicesBox = document.getElementById("servicesBox");
+    const serviceDropdown = document.getElementById("serviceDropdown");
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/Service?t=${Date.now()}`);
+
+        if (!response.ok) {
+            throw new Error("Failed to load services.");
+        }
+
+        const services = await response.json();
+
+        if (!Array.isArray(services) || services.length === 0) {
+            return;
+        }
+
+        servicesBox.innerHTML = services.map(service => `
+            <div class="beck-option">
+                <input type="checkbox"
+                       id="s${service.serviceID}"
+                       name="services"
+                       data-price="${service.price}"
+                       value="${service.serviceID}">
+                <label for="s${service.serviceID}">
+                    ${service.serviceType} <span>₱${Number(service.price).toLocaleString()}</span>
+                </label>
+            </div>
+        `).join("");
+
+        serviceDropdown.innerHTML = services.map(service => `
+            <label>
+                <input type="checkbox"
+                       class="service-filter-check"
+                       value="${service.serviceID}"
+                       onchange="filterAppointments()">
+                ${service.serviceType}
+            </label>
+        `).join("");
+
+        setupServiceCalculation();
+
+    } catch (error) {
+        console.error("Load services error:", error);
+    }
+}
+
 /* modal control functions */
 function openModal(id) {
     const modal = document.getElementById(id);
@@ -227,16 +275,9 @@ function setupBookAppointmentForm() {
 
         const selectedServiceElements = document.querySelectorAll('input[name="services"]:checked');
         
-        const serviceMap = {
-            'checkup': 1,
-            'vaccination': 2,
-            'deworming': 3,
-            'grooming': 4
-        };
-        
-        const serviceIds = Array.from(selectedServiceElements).map(function (el) {
-            return serviceMap[el.value];
-        });
+        const serviceIds = Array.from(selectedServiceElements)
+            .map(el => parseInt(el.value))
+            .filter(id => !isNaN(id));
 
         const petSelect = document.getElementById("bookingPetName");
         const dateInput = document.getElementById("bookingDate");
