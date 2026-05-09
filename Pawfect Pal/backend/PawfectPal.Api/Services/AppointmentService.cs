@@ -29,11 +29,17 @@ namespace PawfectPal.Api.Services
 
         public void Create(Appointment appointment)
         {
-            // if (appointment.AppointmentDate < DateTime.Now)
-            // throw new Exception("Cannot book past date.");
+            if (appointment.UserId <= 0)
+                throw new Exception("User ID is required.");
 
-            // if (appointment.ServiceIds == null || !appointment.ServiceIds.Any())
-            //     throw new Exception("Select at least one service.");
+            if (appointment.PetId <= 0)
+                throw new Exception("Pet ID is required.");
+
+            if (appointment.AppointmentDate < DateTime.Now)
+                throw new Exception("Cannot book past date.");
+
+            if (appointment.ServiceIds == null || !appointment.ServiceIds.Any())
+                throw new Exception("Select at least one service.");
 
             appointment.RequestStatus = "Pending";
             appointment.AppStatus = "Pending";
@@ -53,14 +59,17 @@ namespace PawfectPal.Api.Services
 
         public void UpdateStatus(int id, string status)
         {
-            var valid = new[]
+            var validAppStatuses = new[]
             {
-                "Pending", "Confirmed", "Denied",
-                "Checked-In", "In-Progress", "Completed"
+                "Pending",
+                "Checked-In",
+                "In-Progress",
+                "Completed",
+                "No-Show"
             };
 
-            if (!valid.Contains(status))
-                throw new Exception("Invalid status.");
+            if (!validAppStatuses.Contains(status))
+                throw new Exception("Invalid appointment status.");
 
             _repo.UpdateStatus(id, status);
         }
