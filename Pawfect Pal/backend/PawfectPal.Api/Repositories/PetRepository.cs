@@ -141,5 +141,24 @@ namespace PawfectPal.Api.Repositories
                 Birthdate = row["Birthdate"] == DBNull.Value ? null : Convert.ToDateTime(row["Birthdate"])
             };
         }
+
+        public bool PetBelongsToUser(int petId, int userId)
+        {
+            string query = @"
+                SELECT COUNT(*)
+                FROM pet
+                WHERE PetID = @PetID
+                AND UserID = @UserID";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@PetID", petId),
+                new("@UserID", userId)
+            };
+
+            object? result = _db.ExecuteScalar(query, parameters);
+
+            return Convert.ToInt32(result) > 0;
+        }
     }
 }

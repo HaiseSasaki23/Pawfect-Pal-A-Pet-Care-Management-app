@@ -6,10 +6,12 @@ namespace PawfectPal.Api.Services
     public class AppointmentService
     {
         private readonly AppointmentRepository _repo;
+        private readonly PetRepository _petRepo;
 
-        public AppointmentService(AppointmentRepository repo)
+        public AppointmentService(AppointmentRepository repo, PetRepository petRepo)
         {
             _repo = repo;
+            _petRepo = petRepo;
         }
 
         public List<Appointment> GetAll()
@@ -34,6 +36,13 @@ namespace PawfectPal.Api.Services
 
             if (appointment.PetId <= 0)
                 throw new Exception("Pet ID is required.");
+
+            if (!_petRepo.PetBelongsToUser(
+                    appointment.PetId,
+                    appointment.UserId))
+            {
+                throw new Exception("Pet does not belong to this user.");
+            }                
 
             if (appointment.AppointmentDate < DateTime.Now)
                 throw new Exception("Cannot book past date.");
