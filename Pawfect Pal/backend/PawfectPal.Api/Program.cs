@@ -27,6 +27,7 @@ builder.Services.AddScoped<PetRepository>();
 builder.Services.AddScoped<DashboardRepository>();
 builder.Services.AddScoped<AppointmentRepository>();
 builder.Services.AddScoped<HealthRecordRepository>();
+builder.Services.AddScoped<ServiceRepository>();
 
 
 builder.Services.AddScoped<AuthService>();
@@ -35,6 +36,7 @@ builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<AppointmentService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<HealthRecordService>();
+builder.Services.AddScoped<PetCareService>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
