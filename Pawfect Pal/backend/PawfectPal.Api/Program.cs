@@ -28,6 +28,8 @@ builder.Services.AddScoped<DashboardRepository>();
 builder.Services.AddScoped<AppointmentRepository>();
 builder.Services.AddScoped<HealthRecordRepository>();
 builder.Services.AddScoped<ServiceRepository>();
+builder.Services.AddScoped<BillingRepository>();
+builder.Services.AddScoped<PaymentRepository>();
 
 
 builder.Services.AddScoped<AuthService>();
@@ -37,6 +39,8 @@ builder.Services.AddScoped<AppointmentService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<HealthRecordService>();
 builder.Services.AddScoped<PetCareService>();
+builder.Services.AddScoped<BillingService>();
+builder.Services.AddScoped<PaymentService>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
