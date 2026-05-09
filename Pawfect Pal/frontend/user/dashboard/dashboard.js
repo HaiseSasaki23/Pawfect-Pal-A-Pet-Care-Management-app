@@ -513,27 +513,28 @@ document.getElementById("addPetForm")?.addEventListener("submit", async function
     const userId = localStorage.getItem("userId");
     const speciesSelect = document.getElementById("petSpecies").value;
     const otherSpecies = document.getElementById("otherSpeciesInput").value.trim();
-    const photoFile = document.getElementById("petPhoto").files[0];
-
-    const formData = new FormData();
-    formData.append("userId", parseInt(userId));
-    formData.append("name", petName);
-    formData.append("species", speciesSelect === "Others" ? otherSpecies : speciesSelect);
-    formData.append("color", petColor);
-    formData.append("breed", petBreed);
-    formData.append("gender", petGender);
-    formData.append("birthdate", petBirthday);
-    if (photoFile) formData.append("photo", photoFile);
+    const pet = {
+        userId: parseInt(userId),
+        name: petName,
+        species: speciesSelect === "Others" ? otherSpecies : speciesSelect,
+        color: petColor,
+        breed: petBreed,
+        gender: petGender,
+        birthdate: petBirthday
+    };
 
     try {
         const response = await fetch("http://localhost:5182/api/Pet", {
             method: "POST",
-            body: formData
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(pet)
         });
-        const data = await response.json();
+    const data = await response.json();
 
         if (!response.ok) {
-            showAlertModal("Oops!", data.message || "Failed to add pet.", "");
+            showAlertModal("Oops!", data.message || JSON.stringify(data) || "Failed to add pet.", "");
             return;
         }
 
@@ -548,6 +549,13 @@ document.getElementById("addPetForm")?.addEventListener("submit", async function
 
 document.getElementById('bookAppointmentForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+
+    if (submitBtn.disabled) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting...";    
 
     const petId = document.getElementById('bookingPetName').value;
     const date = document.getElementById('bookingDate').value;
@@ -627,5 +635,8 @@ document.getElementById('bookAppointmentForm')?.addEventListener('submit', async
     } catch (error) {
         console.error("Booking error:", error);
         showAlertModal("Connection Error", "Could not connect to the server. Please try again.", "");
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Request Booking";
     }
 });
