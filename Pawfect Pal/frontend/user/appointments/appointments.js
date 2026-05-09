@@ -10,8 +10,8 @@ function initAppointmentPage() {
     setupBookAppointmentForm();
     setupOutsideClickClose();
     loadPetsDropdown();
+    loadServices();    
     loadAppointments();
-    loadServices();
 }
 
 /* API Configuration*/
@@ -49,19 +49,15 @@ async function loadAppointments() {
         
         const petSpeciesMap = {};
         pets.forEach(pet => {
-            console.log("Pet:", pet.id, pet.petId, pet.name, pet.species);
             const petId = pet.id || pet.petId;
             petSpeciesMap[petId] = pet.species || "Unknown";
         });
-
-        console.log("Pet Species Map:", petSpeciesMap);
 
         data.forEach(app => {
             const card = document.createElement("div");
             card.className = "appointment-card";
 
-            console.log("Appointment:", app.petId, app.petName);
-            
+          
             const species = petSpeciesMap[app.petId] || "Unknown";
 
             let servicesText = app.services || "N/A";
@@ -451,8 +447,3 @@ function setupOutsideClickClose() {
     });
 }
 
-function triggerLogout() {
-    localStorage.removeItem("userId");
-    localStorage.removeItem("user");
-    window.location.href = "../login.html";
-}
