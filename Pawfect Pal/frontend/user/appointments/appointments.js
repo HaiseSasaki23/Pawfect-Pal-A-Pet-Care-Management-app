@@ -33,7 +33,9 @@ async function loadAppointments() {
     if (!userId) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/Appointment/user/${userId}?t=${Date.now()}`);
+        const response = await fetch(`${API_BASE_URL}/api/Appointment/user/${userId}?t=${Date.now()}`, {
+            headers: getAuthHeaders()
+        });      
         const data = await response.json();
 
         const container = document.getElementById("appointmentList");
@@ -44,7 +46,9 @@ async function loadAppointments() {
             return;
         }
 
-        const petsResponse = await fetch(`${API_BASE_URL}/api/Pet/user/${userId}?t=${Date.now()}`);
+        const petsResponse = await fetch(`${API_BASE_URL}/api/Pet/user/${userId}?t=${Date.now()}`, {
+            headers: getAuthHeaders()
+        });
         const pets = await petsResponse.json();
         
         const petSpeciesMap = {};
@@ -120,7 +124,9 @@ async function loadPetsDropdown() {
     if (!userId) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/pet/user/${userId}?t=${Date.now()}`);
+        const response = await fetch(`${API_BASE_URL}/api/Pet/user/${userId}?t=${Date.now()}`, {
+            headers: getAuthHeaders()
+        });
         const pets = await response.json();
 
         const select = document.getElementById("bookingPetName");
@@ -147,7 +153,9 @@ async function loadServices() {
     const serviceDropdown = document.getElementById("serviceDropdown");
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/Service?t=${Date.now()}`);
+        const response = await fetch(`${API_BASE_URL}/api/Service?t=${Date.now()}`, {
+            headers: getAuthHeaders()
+        });
 
         if (!response.ok) {
             throw new Error("Failed to load services.");
@@ -312,9 +320,7 @@ function setupBookAppointmentForm() {
         try {
             const response = await fetch(`${API_BASE_URL}/api/appointment`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: getAuthHeaders(),
                 body: JSON.stringify(appointmentData)
             });
 

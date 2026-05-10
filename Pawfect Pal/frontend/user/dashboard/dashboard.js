@@ -38,7 +38,9 @@ async function loadDashboardSummary(userId, role) {
         : `http://localhost:5182/api/Dashboard/user-summary/${userId}`;
 
     try {
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            headers: getAuthHeaders()
+        });
         if (!response.ok) throw new Error("Failed to load dashboard summary.");
         const data = await response.json();
 
@@ -100,7 +102,9 @@ function markOverdueBalances(appointments) {
 
 async function loadPets(userId) {
     try {
-        const response = await fetch(`http://localhost:5182/api/Pet/user/${userId}`);
+        const response = await fetch(`http://localhost:5182/api/Pet/user/${userId}`, {
+            headers: getAuthHeaders()
+        });
         if (!response.ok) throw new Error(`Failed to load pets. Status: ${response.status}`);
         const pets = await response.json();
 
@@ -151,7 +155,9 @@ async function loadPetsForDropdown() {
     select.innerHTML = `<option value="" disabled selected>Loading pets...</option>`;
 
     try {
-        const response = await fetch(`http://localhost:5182/api/Pet/user/${userId}?t=${Date.now()}`);
+        const response = await fetch(`http://localhost:5182/api/Pet/user/${userId}?t=${Date.now()}`, {
+            headers: getAuthHeaders()
+        });
 
         if (!response.ok) {
             throw new Error(`Failed to load pets. Status: ${response.status}`);
@@ -181,8 +187,9 @@ async function loadPetsForDropdown() {
 
 async function loadAppointments(userId) {
     try {
-        const response = await fetch(`http://localhost:5182/api/Appointment/user/${userId}`);
-
+        const response = await fetch(`http://localhost:5182/api/Appointment/user/${userId}`, {
+            headers: getAuthHeaders()
+        });
         if (!response.ok) {
             throw new Error("Failed to load appointments");
         }
@@ -526,9 +533,7 @@ document.getElementById("addPetForm")?.addEventListener("submit", async function
     try {
         const response = await fetch("http://localhost:5182/api/Pet", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(pet)
         });
     const data = await response.json();
@@ -615,7 +620,7 @@ document.getElementById('bookAppointmentForm')?.addEventListener('submit', async
     try {
         const response = await fetch("http://localhost:5182/api/Appointment", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: getAuthHeaders(),
             body: JSON.stringify(payload)
         });
 

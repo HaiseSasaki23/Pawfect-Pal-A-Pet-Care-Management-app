@@ -80,5 +80,37 @@ namespace PawfectPal.Api.Repositories
                     new("@UserID", userId)
                 }));
         }
+        public decimal GetDueBalanceByUserId(int userId)
+        {
+            string query = @"
+                SELECT COALESCE(SUM(b.TotalAmount), 0)
+                FROM billing b
+                INNER JOIN appointment a ON b.AppointmentID = a.AppointmentID
+                WHERE a.UserID = @UserID
+                AND b.BillingStatus = 'Unpaid'
+            ";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@UserID", userId)
+            };
+
+            object? result = _db.ExecuteScalar(query, parameters);
+
+            return Convert.ToDecimal(result);
+        }
+
+        public decimal GetTotalDueBalance()
+        {
+            string query = @"
+                SELECT COALESCE(SUM(TotalAmount), 0)
+                FROM billing
+                WHERE BillingStatus = 'Unpaid'
+            ";
+
+            object? result = _db.ExecuteScalar(query);
+
+            return Convert.ToDecimal(result);
+        }
     }
 }

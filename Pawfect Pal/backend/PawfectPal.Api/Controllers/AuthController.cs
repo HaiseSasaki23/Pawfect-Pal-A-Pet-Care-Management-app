@@ -9,10 +9,12 @@ namespace PawfectPal.Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly AuthService _authService;
+        private readonly JwtService _jwtService;
 
-        public AuthController(AuthService authService)
+        public AuthController(AuthService authService, JwtService jwtService)
         {
             _authService = authService;
+            _jwtService = jwtService;
         }
 
         [HttpGet("test-db")]
@@ -48,9 +50,12 @@ namespace PawfectPal.Api.Controllers
                 if (user == null)
                     return Unauthorized(new { message = "Invalid username or password." });
 
+                string token = _jwtService.GenerateToken(user);
+
                 return Ok(new 
                 { 
                     message = "Login successful.",
+                    token = token,
                     userId = user.UserId,
                     userName = user.UserName,
                     ownerFName = user.OwnerFName,

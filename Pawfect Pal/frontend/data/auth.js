@@ -55,8 +55,26 @@ function ensureAuthModalExists() {
     document.body.insertAdjacentHTML("beforeend", modalHTML);
 }
 
+function getAuthHeaders() {
+    const token = localStorage.getItem("token");
+
+    return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+    };
+}
+
+function getAuthHeaderOnly() {
+    const token = localStorage.getItem("token");
+
+    return {
+        "Authorization": `Bearer ${token}`
+    };
+}
+
 function getCurrentUser() {
     return {
+        token: localStorage.getItem("token"),
         userId: localStorage.getItem("userId"),
         userName: localStorage.getItem("userName"),
         ownerFName: localStorage.getItem("ownerFName"),
@@ -230,6 +248,7 @@ function triggerLogout() {
 }
 
 function logoutNow() {
+    localStorage.removeItem("token");
     localStorage.removeItem("userId");
     localStorage.removeItem("userName");
     localStorage.removeItem("ownerFName");

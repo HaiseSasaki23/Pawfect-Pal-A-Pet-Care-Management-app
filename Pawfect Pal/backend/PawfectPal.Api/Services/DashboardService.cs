@@ -18,8 +18,7 @@ namespace PawfectPal.Api.Services
             {
                 TotalPets = _dashboardRepository.GetTotalPets(),
                 TotalAppointments = _dashboardRepository.GetTotalAppointments(),
-                TotalReminders = _dashboardRepository.GetTotalReminders(),
-                TotalHealthRecords = _dashboardRepository.GetTotalHealthRecords()
+                DueBalance = _dashboardRepository.GetTotalDueBalance()
             };
         }
 
@@ -29,8 +28,7 @@ namespace PawfectPal.Api.Services
             {
                 TotalPets = _dashboardRepository.GetTotalPetsByUserId(userId),
                 TotalAppointments = _dashboardRepository.GetTotalAppointmentsByUserId(userId),
-                TotalReminders = _dashboardRepository.GetTotalRemindersByUserId(userId),
-                TotalHealthRecords = _dashboardRepository.GetTotalHealthRecordsByUserId(userId)
+                DueBalance = _dashboardRepository.GetDueBalanceByUserId(userId)
             };
         }
     }
