@@ -17,7 +17,7 @@ const modal = document.getElementById('mainModal');
 async function loadUnpaidBills(userId) {
     try {
         const response = await fetch(
-            `${API_BASE_URL}/api/Billing/user/${userId}/unpaid`,
+            `${API_BASE_URL}/api/Billing/my/unpaid`,
             {
                 headers: getAuthHeaders()
             }
@@ -40,7 +40,7 @@ async function loadUnpaidBills(userId) {
 async function loadPaymentHistory(userId) {
     try {
         const response = await fetch(
-            `${API_BASE_URL}/api/Payment/user/${userId}/history`,
+            `${API_BASE_URL}/api/Payment/my/history`,
             {
                 headers: getAuthHeaders()
             }

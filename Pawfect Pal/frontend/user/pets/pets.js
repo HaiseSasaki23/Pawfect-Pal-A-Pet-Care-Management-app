@@ -27,7 +27,7 @@ function toggleDrop(id) {
 /* load pets */
 async function loadPets(userId) {
     try {
-        const response = await fetch(`http://localhost:5182/api/Pet/user/${userId}`, {
+        const response = await fetch(`http://localhost:5182/api/Pet/my`, {
             headers: getAuthHeaders()
         });
 

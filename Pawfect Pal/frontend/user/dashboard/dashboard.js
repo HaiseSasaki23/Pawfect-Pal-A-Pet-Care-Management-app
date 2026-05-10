@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
 async function loadDashboardSummary(userId, role) {
     const url = role.toLowerCase() === "admin"
         ? "http://localhost:5182/api/Dashboard/admin-summary"
-        : `http://localhost:5182/api/Dashboard/user-summary/${userId}`;
+        : `http://localhost:5182/api/Dashboard/my-summary`;
 
     try {
         const response = await fetch(url, {

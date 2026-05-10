@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PawfectPal.Api.Models;
 using PawfectPal.Api.Services;
+using System.Security.Claims;
 
 namespace PawfectPal.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class PaymentController : ControllerBase
@@ -15,11 +18,12 @@ namespace PawfectPal.Api.Controllers
             _paymentService = paymentService;
         }
 
-        [HttpGet("user/{userId}/history")]
-        public IActionResult GetPaymentHistory(int userId)
+        [HttpGet("my/history")]
+        public IActionResult GetMyPaymentHistory()
         {
             try
             {
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
                 return Ok(_paymentService.GetPaymentsByUserId(userId));
             }
             catch (Exception ex)

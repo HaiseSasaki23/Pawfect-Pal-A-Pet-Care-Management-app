@@ -33,7 +33,7 @@ async function loadAppointments() {
     if (!userId) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/Appointment/user/${userId}?t=${Date.now()}`, {
+        const response = await fetch(`${API_BASE_URL}/api/Appointment/my?t=${Date.now()}`, {
             headers: getAuthHeaders()
         });      
         const data = await response.json();

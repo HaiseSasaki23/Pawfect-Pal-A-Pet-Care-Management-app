@@ -64,6 +64,7 @@ function getAuthHeaders() {
     };
 }
 
+
 function getAuthHeaderOnly() {
     const token = localStorage.getItem("token");
 
@@ -125,13 +126,15 @@ function ensureAuthBlurStyle() {
 function requireLogin(expectedRole = null) {
     const user = getCurrentUser();
 
-    if (!user.userId || !user.role) {
-        showAuthRequiredModal();
+    if (!user.token || !user.userId || !user.role) {
+        alert("You are not logged in.");
+        window.location.href = "../../login/login.html";
         return null;
     }
 
     if (expectedRole && user.role.toLowerCase() !== expectedRole.toLowerCase()) {
-        showAuthRequiredModal();
+        alert("Access denied.");
+        window.location.href = "../../login/login.html";
         return null;
     }
 
@@ -197,8 +200,7 @@ function loadUserDisplay(user = getCurrentUser()) {
     if (sidebarLName) sidebarLName.textContent = "";
 
     if (welcomeName) {
-        const fullName = `${user.ownerFName || ""}`.trim();
-        welcomeName.textContent = fullName || user.userName || "User";
+        welcomeName.textContent = user.ownerFName || user.userName || "User";
     }
 }
 

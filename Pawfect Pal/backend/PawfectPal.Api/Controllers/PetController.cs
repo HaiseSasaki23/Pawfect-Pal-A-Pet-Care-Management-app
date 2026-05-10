@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PawfectPal.Api.Models;
 using PawfectPal.Api.Services;
+using System.Security.Claims;
 
 namespace PawfectPal.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class PetController : ControllerBase
@@ -14,7 +17,8 @@ namespace PawfectPal.Api.Controllers
         {
             _petService = petService;
         }
-
+        
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetPets()
         {
@@ -27,6 +31,21 @@ namespace PawfectPal.Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpGet("my")]
+            public IActionResult GetMyPets()
+            {
+                try
+                {
+                    int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+                    var pets = _petService.GetPetsByUserId(userId);
+                    return Ok(pets);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(new { message = ex.Message });
+                }
+            }      
 
         [HttpGet("{id}")]
         public IActionResult GetPetById(int id)

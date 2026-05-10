@@ -1,8 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PawfectPal.Api.Services;
+using System.Security.Claims;
 
 namespace PawfectPal.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class DashboardController : ControllerBase
@@ -13,7 +16,8 @@ namespace PawfectPal.Api.Controllers
         {
             _dashboardService = dashboardService;
         }
-
+        
+        [Authorize(Roles = "Admin")]
         [HttpGet("admin-summary")]
         public IActionResult GetAdminSummary()
         {
@@ -28,11 +32,12 @@ namespace PawfectPal.Api.Controllers
             }
         }
 
-        [HttpGet("user-summary/{userId}")]
-        public IActionResult GetUserSummary(int userId)
+        [HttpGet("my-summary")]
+        public IActionResult GetMySummary()
         {
             try
             {
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
                 var summary = _dashboardService.GetUserSummary(userId);
                 return Ok(summary);
             }
