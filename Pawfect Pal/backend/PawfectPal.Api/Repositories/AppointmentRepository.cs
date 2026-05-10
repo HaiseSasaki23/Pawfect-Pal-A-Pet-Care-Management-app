@@ -223,6 +223,29 @@ namespace PawfectPal.Api.Repositories
             _db.ExecuteNonQuery(query, parameters);
         }
 
+        public decimal CalculateAppointmentTotal(int appointmentId)
+        {
+            string query = @"
+                SELECT SUM(s.Price)
+                FROM appointment_services aps
+                INNER JOIN service s
+                    ON aps.ServiceID = s.ServiceID
+                WHERE aps.AppointmentID = @AppointmentID
+            ";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@AppointmentID", appointmentId)
+            };
+
+            object? result = _db.ExecuteScalar(query, parameters);
+
+            if (result == DBNull.Value || result == null)
+                return 0;
+
+            return Convert.ToDecimal(result);
+        }
+
         private Appointment MapAppointment(DataRow row)
         {
             return new Appointment

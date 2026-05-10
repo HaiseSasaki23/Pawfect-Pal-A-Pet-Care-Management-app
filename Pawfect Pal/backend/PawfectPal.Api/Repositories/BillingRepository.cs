@@ -64,5 +64,41 @@ namespace PawfectPal.Api.Repositories
 
             _db.ExecuteNonQuery(query, parameters);
         }
+
+        public bool BillingExists(int appointmentId)
+        {
+            string query = @"
+                SELECT COUNT(*)
+                FROM billing
+                WHERE AppointmentID = @AppointmentID
+            ";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@AppointmentID", appointmentId)
+            };
+
+            object? result = _db.ExecuteScalar(query, parameters);
+
+            return Convert.ToInt32(result) > 0;
+        }
+
+        public void CreateBilling(int appointmentId, decimal totalAmount)
+        {
+            string query = @"
+                INSERT INTO billing
+                (AppointmentID, TotalAmount, BillingStatus)
+                VALUES
+                (@AppointmentID, @TotalAmount, 'Unpaid')
+            ";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@AppointmentID", appointmentId),
+                new("@TotalAmount", totalAmount)
+            };
+
+            _db.ExecuteNonQuery(query, parameters);
+        }
     }
 }
