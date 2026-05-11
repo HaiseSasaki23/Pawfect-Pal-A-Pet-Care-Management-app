@@ -249,6 +249,15 @@ function triggerLogout() {
     modal.style.display = "flex";
 }
 
+function handleUnauthorized(response) {
+    if (response.status === 401 || response.status === 403) {
+        logoutNow();
+        return true;
+    }
+
+    return false;
+}
+
 function logoutNow() {
     localStorage.removeItem("token");
     localStorage.removeItem("userId");

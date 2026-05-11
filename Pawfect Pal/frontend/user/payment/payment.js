@@ -46,6 +46,8 @@ async function loadPaymentHistory(userId) {
             }
         );
 
+        if (handleUnauthorized(response)) return;
+
         if (!response.ok) {
             throw new Error("Failed to load payment history.");
         }

@@ -41,6 +41,9 @@ async function loadDashboardSummary(userId, role) {
         const response = await fetch(url, {
             headers: getAuthHeaders()
         });
+
+        if (handleUnauthorized(response)) return;
+
         if (!response.ok) throw new Error("Failed to load dashboard summary.");
         const data = await response.json();
 

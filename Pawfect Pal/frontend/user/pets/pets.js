@@ -31,6 +31,8 @@ async function loadPets(userId) {
             headers: getAuthHeaders()
         });
 
+        if (handleUnauthorized(response)) return;
+
         if (!response.ok) {
             throw new Error(`Failed to load pets. Status: ${response.status}`);
         }

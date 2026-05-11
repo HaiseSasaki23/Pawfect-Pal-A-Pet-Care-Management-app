@@ -36,6 +36,9 @@ async function loadAppointments() {
         const response = await fetch(`${API_BASE_URL}/api/Appointment/my?t=${Date.now()}`, {
             headers: getAuthHeaders()
         });      
+
+        if (handleUnauthorized(response)) return;    
+
         const data = await response.json();
 
         const container = document.getElementById("appointmentList");
