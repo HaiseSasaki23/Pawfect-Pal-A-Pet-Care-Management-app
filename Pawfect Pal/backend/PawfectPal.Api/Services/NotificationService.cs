@@ -19,7 +19,6 @@ public class NotificationController : ControllerBase
         );
     }
 
-    // GET USER NOTIFICATIONS
     [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetUserNotifications(int userId)
     {
@@ -62,7 +61,6 @@ public class NotificationController : ControllerBase
         return Ok(notifications);
     }
 
-    // MARK AS READ
     [HttpPut("read/{id}")]
     public async Task<IActionResult> MarkAsRead(int id)
     {
@@ -85,7 +83,6 @@ public class NotificationController : ControllerBase
         return Ok(new { message = "Notification marked as read." });
     }
 
-    // CREATE NOTIFICATION
     [HttpPost]
     public async Task<IActionResult> CreateNotification([FromBody] Notification notification)
     {
