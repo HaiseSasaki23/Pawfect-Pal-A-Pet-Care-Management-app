@@ -88,6 +88,12 @@ body {
 
 .sidebar-nav::-webkit-scrollbar { display: none; }
 
+.sidebar .nav-item:hover .nav-char {
+    width: 40px;
+    opacity: 1 !important;
+    content: url('../../sidebar/peek.png') !important;
+}
+
 .nav-item {
     display: flex;
     align-items: center;
