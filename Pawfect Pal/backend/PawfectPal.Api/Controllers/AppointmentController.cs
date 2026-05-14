@@ -88,13 +88,13 @@ namespace PawfectPal.Api.Controllers
             }
         }
 
-        [HttpPatch("{id}/status")]
-        public IActionResult UpdateStatus(int id, [FromBody] string status)
+        [HttpPatch("{id}/request-status")]
+        public IActionResult UpdateRequestStatus(int id, [FromBody] string status)
         {
             try
             {
-                _service.UpdateStatus(id, status);
-                return Ok(new { message = "Status updated successfully." });
+                _service.UpdateRequestStatus(id, status);
+                return Ok(new { message = "Request status updated successfully." });
             }
             catch (Exception ex)
             {
@@ -102,6 +102,19 @@ namespace PawfectPal.Api.Controllers
             }
         }
 
+        [HttpPatch("{id}/app-status")]
+        public IActionResult UpdateAppStatus(int id, [FromBody] string status)
+        {
+            try
+            {
+                _service.UpdateAppStatus(id, status);
+                return Ok(new { message = "Appointment status updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {

@@ -7,9 +7,9 @@
     <title>Pawfect Pal</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="preload" as="image" href="../../sidebar/logo.png">
-    <link rel="preload" as="image" href="../../sidebar/active.png">
-    <link rel="preload" as="image" href="../../sidebar/peek.png">     
+    <link rel="preload" as="image" href="../sidebar/logo.png">
+    <link rel="preload" as="image" href="../sidebar/active.png">
+    <link rel="preload" as="image" href="../sidebar/peek.png">     
 </head>
 <body class="dashboard-body">
     <div class="dashboard-container">
@@ -90,7 +90,7 @@
                         <option value="Cat">Cat</option>
                         <option value="Rabbit">Rabbit</option>
                         <option value="Bird">Bird</option>
-                        <option value="Bird">Hamster</option>
+                        <option value="Hamster">Hamster</option>
                     </select>
                 </div>
 
@@ -192,39 +192,9 @@
                 </div>
                 <div class="input-group">
                     <label>Services (₱ Estimate)</label>
-                    <div class="beck-box">
+                    <div class="beck-box" id="servicesBox">
                         <div class="beck-option">
-                            <input type="checkbox" 
-                                   id="s1" 
-                                   name="services" 
-                                   data-price="500" 
-                                   value="checkup">
-                            <label for="s1">Check-up <span>₱500</span></label>
-                        </div>
-                        <div class="beck-option">
-                            <input type="checkbox" 
-                                   id="s2" 
-                                   name="services" 
-                                   data-price="1200" 
-                                   value="vaccination">
-                            <label for="s2">Vaccination <span>₱1,200</span></label>
-                        </div>
-                        <div class="beck-option">
-                            <input type="checkbox" 
-                                   id="s3" 
-                                   name="services" 
-                                   data-price="350" 
-                                   value="deworming">
-                            <label for="s3">Deworming <span>₱350</span></label>
-                        </div>
-                        <div class="beck-option">
-                            <input type="checkbox" 
-                                   id="s4" 
-                                   name="services" 
-                                   data-price="1500" 
-                                   value="grooming">
-                            <label for="s4">Grooming <span>₱1,500</span></label>
-                        </div>
+                            <p style="color:#999; font-size:13px;">Loading services...</p>
                     </div>
                 </div>
                 <div class="input-group total-box purple-soft">

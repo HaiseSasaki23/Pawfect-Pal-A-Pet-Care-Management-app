@@ -38,7 +38,9 @@ async function loadDashboardSummary(userId, role) {
         : `http://localhost:5182/api/Dashboard/user-summary/${userId}`;
 
     try {
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            headers: getAuthHeaders()
+        });
         if (!response.ok) throw new Error("Failed to load dashboard summary.");
         const data = await response.json();
 
@@ -100,7 +102,9 @@ function markOverdueBalances(appointments) {
 
 async function loadPets(userId) {
     try {
-        const response = await fetch(`http://localhost:5182/api/Pet/user/${userId}`);
+        const response = await fetch(`http://localhost:5182/api/Pet/user/${userId}`, {
+            headers: getAuthHeaders()
+        });
         if (!response.ok) throw new Error(`Failed to load pets. Status: ${response.status}`);
         const pets = await response.json();
 
@@ -144,19 +148,16 @@ async function loadPets(userId) {
 
 async function loadPetsForDropdown() {
     const userId = localStorage.getItem("userId");
-    
-    if (!userId) {
-        console.error("No user ID found");
-        return;
-    }
-
     const select = document.getElementById("bookingPetName");
-    if (!select) return;
 
-    select.innerHTML = `<option value="" disabled>Loading pets...</option>`;
+    if (!userId || !select) return;
+
+    select.innerHTML = `<option value="" disabled selected>Loading pets...</option>`;
 
     try {
-        const response = await fetch(`http://localhost:5182/api/Pet/user/${userId}?t=${Date.now()}`);
+        const response = await fetch(`http://localhost:5182/api/Pet/user/${userId}?t=${Date.now()}`, {
+            headers: getAuthHeaders()
+        });
 
         if (!response.ok) {
             throw new Error(`Failed to load pets. Status: ${response.status}`);
@@ -167,29 +168,28 @@ async function loadPetsForDropdown() {
         select.innerHTML = `<option value="" disabled selected>Select Pet</option>`;
 
         if (!Array.isArray(pets) || pets.length === 0) {
-            select.innerHTML = `<option value="" disabled>No pets found. Please add a pet first.</option>`;
+            select.innerHTML = `<option value="" disabled selected>No pets found. Please add a pet first.</option>`;
             return;
         }
 
         pets.forEach(pet => {
             const option = document.createElement("option");
-            option.value = pet.id;
-            option.textContent = pet.name;
+            option.value = pet.petId;
+            option.textContent = `${getSpeciesEmoji(pet.species)} ${pet.name}`;
             select.appendChild(option);
         });
 
-        console.log(`Loaded ${pets.length} pet(s) for appointment dropdown`);
-
     } catch (error) {
         console.error("Error loading pets for dropdown:", error);
-        select.innerHTML = `<option value="" disabled>Failed to load pets</option>`;
+        select.innerHTML = `<option value="" disabled selected>Failed to load pets</option>`;
     }
 }
 
 async function loadAppointments(userId) {
     try {
-        const response = await fetch(`http://localhost:5182/api/Appointment/user/${userId}`);
-
+        const response = await fetch(`http://localhost:5182/api/Appointment/user/${userId}`, {
+            headers: getAuthHeaders()
+        });
         if (!response.ok) {
             throw new Error("Failed to load appointments");
         }
@@ -314,24 +314,7 @@ function openActionModal(type) {
 }
 
 async function populatePetDropdown() {
-    const userId = localStorage.getItem("userId");
-    const select = document.getElementById("bookingPetName");
-    if (!select || !userId) return;
-    try {
-        const res = await fetch(`http://localhost:5182/api/Pet/user/${userId}`);
-        const pets = await res.json();
-        select.innerHTML = `<option value="" disabled selected>Select Pet</option>`;
-        if (Array.isArray(pets)) {
-            pets.forEach(p => {
-                const opt = document.createElement("option");
-                opt.value = p.petId || p.id;
-                opt.textContent = `${getSpeciesEmoji(p.species)} ${p.name}`;
-                select.appendChild(opt);
-            });
-        }
-    } catch (e) {
-        console.error("Could not load pets for booking:", e);
-    }
+    await loadPetsForDropdown();
 }
 
 function formHasChanges(type) {
@@ -537,27 +520,26 @@ document.getElementById("addPetForm")?.addEventListener("submit", async function
     const userId = localStorage.getItem("userId");
     const speciesSelect = document.getElementById("petSpecies").value;
     const otherSpecies = document.getElementById("otherSpeciesInput").value.trim();
-    const photoFile = document.getElementById("petPhoto").files[0];
-
-    const formData = new FormData();
-    formData.append("userId", parseInt(userId));
-    formData.append("name", petName);
-    formData.append("species", speciesSelect === "Others" ? otherSpecies : speciesSelect);
-    formData.append("color", petColor);
-    formData.append("breed", petBreed);
-    formData.append("gender", petGender);
-    formData.append("birthdate", petBirthday);
-    if (photoFile) formData.append("photo", photoFile);
+    const pet = {
+        userId: parseInt(userId),
+        name: petName,
+        species: speciesSelect === "Others" ? otherSpecies : speciesSelect,
+        color: petColor,
+        breed: petBreed,
+        gender: petGender,
+        birthdate: petBirthday
+    };
 
     try {
         const response = await fetch("http://localhost:5182/api/Pet", {
             method: "POST",
-            body: formData
+            headers: getAuthHeaders(),
+            body: JSON.stringify(pet)
         });
-        const data = await response.json();
+    const data = await response.json();
 
         if (!response.ok) {
-            showAlertModal("Oops!", data.message || "Failed to add pet.", "");
+            showAlertModal("Oops!", data.message || JSON.stringify(data) || "Failed to add pet.", "");
             return;
         }
 
@@ -572,6 +554,13 @@ document.getElementById("addPetForm")?.addEventListener("submit", async function
 
 document.getElementById('bookAppointmentForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+
+    if (submitBtn.disabled) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting...";    
 
     const petId = document.getElementById('bookingPetName').value;
     const date = document.getElementById('bookingDate').value;
@@ -588,8 +577,12 @@ document.getElementById('bookAppointmentForm')?.addEventListener('submit', async
     if (payment === "GCash") {
         const gcashName = document.getElementById('gcashName').value.trim();
         const gcashRef = document.getElementById('gcashRef').value.trim();
+
         if (!gcashName) { showAlertModal("Missing Details", "Please enter your GCash account name.", ""); return; }
-        if (!gcashRef || gcashRef.length !== 13) { showAlertModal("Invalid Reference", "GCash reference number must be 13 digits.", ""); return; }
+        if (!gcashRef || gcashRef.length !== 13) {
+            showAlertModal("Invalid Reference", "GCash reference number must be 13 digits.", "");
+            return;
+        }
     }
 
     if (document.querySelector('#bookAppointmentForm .input-error')) {
@@ -598,32 +591,39 @@ document.getElementById('bookAppointmentForm')?.addEventListener('submit', async
     }
 
     const userId = localStorage.getItem("userId");
-    const services = Array.from(servicesChecked).map(cb => cb.value);
-    const totalEl = document.getElementById('bookingTotal');
-    const totalText = totalEl ? totalEl.innerText.replace(/[₱,]/g, '') : '0';
-    const totalAmount = parseInt(totalText) || 0;
+    const appointmentDate = `${date}T${time}:00`;
 
-    const gcashName = payment === "GCash" ? document.getElementById('gcashName').value.trim() : null;
-    const gcashRef = payment === "GCash" ? document.getElementById('gcashRef').value.trim() : null;
+    const serviceMap = {
+        checkup: 1,
+        vaccination: 2,
+        deworming: 3,
+        grooming: 4
+    };
+
+    const serviceIds = Array.from(servicesChecked).map(cb => {
+        const rawValue = cb.value;
+        const numericValue = parseInt(rawValue);
+
+        if (!isNaN(numericValue)) return numericValue;
+
+        return serviceMap[rawValue.toLowerCase()];
+    }).filter(id => id);
 
     const payload = {
         userId: parseInt(userId),
         petId: parseInt(petId),
-        date: date,
-        time: time,
-        services: services,
-        totalAmount: totalAmount,
-        paymentMode: payment,
-        gcashAccountName: gcashName,
-        gcashReference: gcashRef
+        appointmentDate: appointmentDate,
+        notes: "",
+        serviceIds: serviceIds
     };
 
     try {
         const response = await fetch("http://localhost:5182/api/Appointment", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: getAuthHeaders(),
             body: JSON.stringify(payload)
         });
+
         const data = await response.json();
 
         if (!response.ok) {
@@ -634,20 +634,14 @@ document.getElementById('bookAppointmentForm')?.addEventListener('submit', async
         closeActionModal('Appointment');
         showSuccessMessage("Booking Request Sent!", "Your appointment has been submitted and is pending admin confirmation.");
 
+        loadDashboardSummary(userId, localStorage.getItem("role"));
+        loadAppointments(userId);
+
     } catch (error) {
         console.error("Booking error:", error);
         showAlertModal("Connection Error", "Could not connect to the server. Please try again.", "");
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Request Booking";
     }
 });
-
-window.onclick = (e) => {
-    if (e.target.classList.contains('modal-overlay')) {
-        const safeIds = ['unsavedModal', 'alertModal', 'successModal', 'confirmModal'];
-        if (safeIds.includes(e.target.id)) return;
-
-        requestCloseModal('Add Pet');
-        requestCloseModal('Appointment');
-        closeActionModal('Reminders');
-        closeSuccessModal();
-    }
-};

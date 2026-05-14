@@ -1,37 +1,151 @@
-document.addEventListener("DOMContentLoaded", function () {
+const API_BASE_URL = "http://localhost:5182";
+
+let unpaidBills = [];
+
+document.addEventListener("DOMContentLoaded", async function () {
     const user = requireLogin("User");
     if (!user) return;
 
+    await loadUnpaidBills(user.userId);
+    await loadPaymentHistory(user.userId);
+
+    setupSearch();
 });
 
-/* global gui elements */
 const modal = document.getElementById('mainModal');
-const confirmModal = document.getElementById('confirmModal');
 
-document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.querySelector('.search-input');
-    
-    if (searchInput) {
-        searchInput.addEventListener('keyup', function() {
-            const filter = this.value.toLowerCase();
-            const tableRows = document.querySelectorAll('.transaction-table tbody tr');
+async function loadUnpaidBills(userId) {
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/api/Billing/user/${userId}/unpaid`,
+            {
+                headers: getAuthHeaders()
+            }
+        );
 
-            tableRows.forEach(row => {
-                // Get text from Pet Name (2nd column) and Description (3rd column)
-                const petName = row.cells[1].textContent.toLowerCase();
-                const description = row.cells[2].textContent.toLowerCase();
+        if (!response.ok) {
+            throw new Error("Failed to load unpaid bills.");
+        }
 
-                if (petName.includes(filter) || description.includes(filter)) {
-                    row.style.display = ""; // Show row
-                } else {
-                    row.style.display = "none"; // Hide row
-                }
-            });
-        });
+        unpaidBills = await response.json();
+
+        renderBalanceBanner();
+        renderUpcomingPayments();
+
+    } catch (error) {
+        console.error("Unpaid bills error:", error);
     }
-});
+}
 
-// Replace your toggleTransactions function with this refined version
+async function loadPaymentHistory(userId) {
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/api/Payment/user/${userId}/history`,
+            {
+                headers: getAuthHeaders()
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Failed to load payment history.");
+        }
+
+        const payments = await response.json();
+
+        renderTransactionTable(payments);
+
+    } catch (error) {
+        console.error("Payment history error:", error);
+    }
+}
+
+function renderBalanceBanner() {
+    const totalBalance = document.getElementById("totalBalance");
+    const balanceStatus = document.getElementById("balanceStatus");
+
+    const total = unpaidBills.reduce(
+        (sum, bill) => sum + Number(bill.totalAmount),
+        0
+    );
+
+    totalBalance.innerText = `₱ ${total.toLocaleString()}.00`;
+
+    if (total <= 0) {
+        balanceStatus.innerText = "No balance due";
+        balanceStatus.style.color = "#38b2ac";
+    } else {
+        balanceStatus.innerText = "Outstanding balance";
+        balanceStatus.style.color = "var(--primary-purple)";
+    }
+}
+
+function renderUpcomingPayments() {
+    const selectionList = document.querySelector(".selection-list");
+
+    if (!selectionList) return;
+
+    if (unpaidBills.length === 0) {
+        selectionList.innerHTML = "";
+        return;
+    }
+
+    selectionList.innerHTML = unpaidBills.map(bill => `
+        <label class="selection-item">
+            <input
+                type="checkbox"
+                class="pay-check"
+                value="${bill.billingId}"
+                data-amount="${bill.totalAmount}">
+
+            <div style="flex:1;">
+                <strong>Appointment #${bill.appointmentId}</strong>
+                <div style="font-size:13px;color:#999;">
+                    Billing ID: ${bill.billingId}
+                </div>
+            </div>
+
+            <strong>
+                ₱ ${Number(bill.totalAmount).toLocaleString()}
+            </strong>
+        </label>
+    `).join("");
+}
+
+function renderTransactionTable(payments) {
+    const tbody = document.querySelector(".transaction-table tbody");
+    const emptyState = document.getElementById("emptyState");
+
+    if (!tbody) return;
+
+    if (!Array.isArray(payments) || payments.length === 0) {
+        tbody.innerHTML = "";
+        emptyState.style.display = "flex";
+        return;
+    }
+
+    emptyState.style.display = "none";
+
+    tbody.innerHTML = payments.map(payment => `
+        <tr>
+            <td>
+                ${new Date(payment.paidDate).toLocaleDateString()}
+            </td>
+
+            <td>
+                Billing #${payment.billingId}
+            </td>
+
+            <td>
+                ${payment.paymentMethod}
+            </td>
+
+            <td>
+                ₱ ${Number(payment.paidAmount).toLocaleString()}
+            </td>
+        </tr>
+    `).join("");
+}
+
 function toggleTransactions() {
     const modalTitle = document.getElementById('modalTitle');
     const modalBody = document.getElementById('modalBody');
@@ -39,155 +153,137 @@ function toggleTransactions() {
 
     modalTitle.innerText = "Payment Details";
     modalBody.innerHTML = upcomingSection.innerHTML;
+
     modal.style.display = 'flex';
 
-    // Check for empty state inside the modal specifically
-    const selectionList = modalBody.querySelector('.selection-list');
-    const upcomingEmpty = modalBody.querySelector('#upcomingEmptyState');
-    const instructions = modalBody.querySelectorAll('.modal-instruction');
-    const gcashSection = modalBody.querySelector('.gcash-details-section');
-    const totalRow = modalBody.querySelector('.total-pay-row');
+    const modalCheckboxes =
+        modalBody.querySelectorAll('.pay-check');
 
-    if (selectionList && selectionList.querySelectorAll('.selection-item').length === 0) {
-        upcomingEmpty.style.display = 'flex';
-        // Hide payment elements since there's nothing to pay
-        instructions.forEach(i => i.style.display = 'none');
-        if (gcashSection) gcashSection.style.display = 'none';
-        if (totalRow) totalRow.style.display = 'none';
-    } else {
-        upcomingEmpty.style.display = 'none';
-    }
-
-    // Existing checkbox logic
-    const modalCheckboxes = modalBody.querySelectorAll('.pay-check');
-    const display = modalBody.querySelector('#totalDisplay');
+    const display =
+        modalBody.querySelector('#totalDisplay');
 
     modalCheckboxes.forEach(cb => {
         cb.addEventListener('change', () => {
+
             let total = 0;
+
             modalCheckboxes.forEach(c => {
-                if (c.checked) total += parseInt(c.dataset.amount);
+                if (c.checked) {
+                    total += parseFloat(c.dataset.amount);
+                }
             });
-            display.innerText = `₱ ${total.toLocaleString()}.00`;
+
+            display.innerText =
+                `₱ ${total.toLocaleString()}.00`;
         });
     });
 }
 
-function processPayment() {
+async function processPayment() {
     const modalBody = document.getElementById('modalBody');
+
     const nameInput = modalBody.querySelector('#gcashName');
     const refInput = modalBody.querySelector('#gcashRef');
 
-    if (!nameInput.checkValidity() || !refInput.checkValidity()) {
-        alert("Please fix the errors shown in red before confirming.");
+    if (!nameInput.checkValidity() ||
+        !refInput.checkValidity()) {
+
+        alert("Please fix the errors first.");
         return;
     }
 
-    const ownerFName = document.getElementById('OwnerFName')?.innerText || 'user';
+    const selectedBills = Array.from(
+        modalBody.querySelectorAll('.pay-check:checked')
+    );
 
-    const modalTitle = document.getElementById('modalTitle');
-    modalTitle.innerText = "Payment Successful";
-    modalBody.innerHTML = `
-        <div style="text-align: center; padding: 20px;">
-            <img src="user-payment/confirm.png" style="width: 30px; height: 30px; margin-bottom: 15px;" alt="Success">
-            <h3 style="color: var(--text-dark); margin-bottom: 10px;">Payment Confirmed!</h3>
-            <p style="color: var(--text-muted); font-size: 14px;">Thank you, ${ownerFName}! Your payment has been received.</p>
-            <button onclick="location.reload()" class="submit-btn" style="width: 100%; margin-top: 20px;">Done</button>
-        </div>
-    `;
-}
-// Add this to payment.js
-function updateEmptyState(hasData) {
-    const table = document.querySelector('.transaction-table');
-    const emptyState = document.getElementById('emptyState');
-    const balanceText = document.getElementById('totalBalance');
-    const statusLabel = document.getElementById('balanceStatus');
+    if (selectedBills.length === 0) {
+        alert("Select at least one bill.");
+        return;
+    }
 
-    if (hasData) {
-        table.style.display = "table";
-        emptyState.style.display = "none";
-    } else {
-        table.style.display = "none";
-        emptyState.style.display = "flex";
-        balanceText.innerText = "₱ ---"; // Or "₱ 0.00"
-        statusLabel.innerText = "All caught up!";
+    try {
+
+        for (const bill of selectedBills) {
+
+            const paymentData = {
+                billingId: parseInt(bill.value),
+                paymentMethod: "GCash",
+                referenceNumber: refInput.value.trim(),
+                paidAmount: parseFloat(bill.dataset.amount)
+            };
+
+            const response = await fetch(
+                `${API_BASE_URL}/api/Payment`,
+                {
+                    method: "POST",
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(paymentData)
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Payment failed.");
+            }
+        }
+
+        modalBody.innerHTML = `
+            <div style="text-align:center;padding:20px;">
+                <img src="user-payment/confirm.png"
+                     style="width:40px;height:40px;margin-bottom:15px;">
+
+                <h3 style="margin-bottom:10px;">
+                    Payment Successful
+                </h3>
+
+                <p style="color:#777;">
+                    Your payment has been recorded.
+                </p>
+
+                <button
+                    onclick="location.reload()"
+                    class="submit-btn"
+                    style="width:100%;margin-top:20px;">
+
+                    Done
+                </button>
+            </div>
+        `;
+
+    } catch (error) {
+        console.error(error);
+        alert("Payment failed.");
     }
 }
 
-function triggerLogout() {
-    const confirmMessage = document.getElementById('confirmMessage');
-    const confirmBtn = document.getElementById('btnConfirmDelete');
+function setupSearch() {
+    const searchInput =
+        document.querySelector('.search-input');
 
-    confirmMessage.innerText = "Are you sure you want to log out of Pawfect Pal?";
-    confirmBtn.innerText = "Logout";
-    confirmBtn.style.backgroundColor = "#ff5e78";
+    if (!searchInput) return;
 
-    confirmBtn.onclick = function() {
-        window.location.href = "login.html"; 
-    };
+    searchInput.addEventListener('keyup', function () {
 
-    confirmModal.style.display = 'flex';
-}
+        const filter = this.value.toLowerCase();
 
-function closeModal(modalId) { 
-    document.getElementById(modalId).style.display = 'none'; 
-}
+        const tableRows =
+            document.querySelectorAll(
+                '.transaction-table tbody tr'
+            );
 
-function checkDataStates() {
-    const tableBody = document.querySelector('.transaction-table tbody');
-    const tableHeader = document.querySelector('.transaction-table thead');
-    const tableEmptyState = document.getElementById('emptyState');
-    
-    // Use .children.length and check if it's actually empty
-    // We also use .trim() logic just in case the backend left a blank space
-    const isTableEmpty = !tableBody || tableBody.innerHTML.trim() === "";
+        tableRows.forEach(row => {
 
-    if (isTableEmpty) {
-        if (tableEmptyState) tableEmptyState.style.display = 'flex';
-        if (tableHeader) tableHeader.style.display = 'none';
-    } else {
-        if (tableEmptyState) tableEmptyState.style.display = 'none';
-        if (tableHeader) tableHeader.style.display = 'table-header-group';
-    }
+            const text =
+                row.innerText.toLowerCase();
 
-    // Banner logic for "No balance due"
-    const balanceText = document.getElementById('totalBalance');
-    const balanceStatus = document.getElementById('balanceStatus');
-    const selectionList = document.querySelector('.selection-list');
-    const upcomingItems = selectionList ? selectionList.querySelectorAll('.selection-item') : [];
-    
-    if (upcomingItems.length === 0) {
-        balanceText.innerText = "₱ 0.00";
-        balanceStatus.innerText = "No balance due";
-        balanceStatus.style.color = "#38b2ac"; 
-    } else {
-        let totalDue = 0;
-        upcomingItems.forEach(item => {
-            const checkbox = item.querySelector('.pay-check');
-            totalDue += parseInt(checkbox.dataset.amount || 0);
+            row.style.display =
+                text.includes(filter)
+                    ? ""
+                    : "none";
         });
-        balanceText.innerText = `₱ ${totalDue.toLocaleString()}.00`;
-        balanceStatus.innerText = "Outstanding balance";
-        balanceStatus.style.color = "var(--primary-purple)";
-    }
+    });
 }
-// This runs automatically when the page finishes loading
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. First, check the states immediately
-    checkDataStates();
 
-    // 2. Add your existing search listener logic here
-    const searchInput = document.querySelector('.search-input');
-    if (searchInput) {
-        searchInput.addEventListener('keyup', function() {
-            const filter = this.value.toLowerCase();
-            const tableRows = document.querySelectorAll('.transaction-table tbody tr');
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
 
-            tableRows.forEach(row => {
-                const petName = row.cells[1].textContent.toLowerCase();
-                const description = row.cells[2].textContent.toLowerCase();
-                row.style.display = (petName.includes(filter) || description.includes(filter)) ? "" : "none";
-            });
-        });
-    }
-});

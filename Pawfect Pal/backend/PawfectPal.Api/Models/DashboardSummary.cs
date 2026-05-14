@@ -4,7 +4,6 @@ namespace PawfectPal.Api.Models
     {
         public int TotalPets { get; set; }
         public int TotalAppointments { get; set; }
-        public int TotalReminders { get; set; }
-        public int TotalHealthRecords { get; set; }
+        public decimal DueBalance { get; set; }
     }
 }

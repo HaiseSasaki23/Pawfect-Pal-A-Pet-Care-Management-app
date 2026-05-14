@@ -27,7 +27,9 @@ function toggleDrop(id) {
 /* load pets */
 async function loadPets(userId) {
     try {
-        const response = await fetch(`http://localhost:5182/api/Pet/user/${userId}`);
+        const response = await fetch(`http://localhost:5182/api/Pet/user/${userId}`, {
+            headers: getAuthHeaders()
+        });
 
         if (!response.ok) {
             throw new Error(`Failed to load pets. Status: ${response.status}`);
@@ -385,9 +387,7 @@ async function addPet() {
     try {
         const response = await fetch("http://localhost:5182/api/Pet", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(pet)
         });
 
@@ -430,9 +430,7 @@ async function updatePet(id) {
     try {
         const response = await fetch(`http://localhost:5182/api/Pet/${id}`, {
             method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(pet)
         });
 
@@ -458,7 +456,8 @@ async function deletePet() {
 
     try {
         const response = await fetch(`http://localhost:5182/api/Pet/${petToDeleteId}`, {
-            method: "DELETE"
+            method: "DELETE",
+            headers: getAuthHeaders()
         });
 
         const data = await response.json();

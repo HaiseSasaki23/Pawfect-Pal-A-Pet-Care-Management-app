@@ -52,6 +52,7 @@ loginForm.addEventListener("submit", async function (e) {
             return;
         }
 
+        localStorage.setItem("token", data.token);
         localStorage.setItem("userId", data.userId);
         localStorage.setItem("userName", data.userName);
         localStorage.setItem("ownerFName", data.ownerFName);

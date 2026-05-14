@@ -1,93 +1,124 @@
-using PawfectPal.Api.Models;
-using PawfectPal.Api.Repositories;
+    using PawfectPal.Api.Models;
+    using PawfectPal.Api.Repositories;
 
-namespace PawfectPal.Api.Services
-{
-    public class AppointmentService
+    namespace PawfectPal.Api.Services
     {
-        private readonly AppointmentRepository _repo;
-
-        public AppointmentService(AppointmentRepository repo)
+        public class AppointmentService
         {
-            _repo = repo;
-        }
+            private readonly AppointmentRepository _repo;
+            private readonly PetRepository _petRepo;
+            private readonly BillingRepository _billingRepository;
 
-        public List<Appointment> GetAll()
-        {
-            return _repo.GetAllAppointments();
-        }
-
-        public Appointment? GetById(int id)
-        {
-            return _repo.GetAppointmentById(id);
-        }
-
-        public List<dynamic> GetByUserId(int userId)
-        {
-            return _repo.GetAppointmentsByUserId(userId);
-        }
-
-        public void Create(Appointment appointment)
-        {
-            // if (appointment.AppointmentDate < DateTime.Now)
-            // throw new Exception("Cannot book past date.");
-
-            // if (appointment.ServiceIds == null || !appointment.ServiceIds.Any())
-            //     throw new Exception("Select at least one service.");
-
-            appointment.RequestStatus = "Pending";
-            appointment.AppStatus = "Pending";
-
-            int appointmentId = _repo.InsertAppointment(appointment);
-
-            foreach (var serviceId in appointment.ServiceIds)
+            public AppointmentService(
+                AppointmentRepository repo,
+                PetRepository petRepo,
+                BillingRepository billingRepository)
             {
-                _repo.InsertAppointmentService(appointmentId, serviceId);
+                _repo = repo;
+                _petRepo = petRepo;
+                _billingRepository = billingRepository;
+            }
+            public List<Appointment> GetAll()
+            {
+                return _repo.GetAllAppointments();
+            }
+
+            public Appointment? GetById(int id)
+            {
+                return _repo.GetAppointmentById(id);
+            }
+
+            public List<dynamic> GetByUserId(int userId)
+            {
+                return _repo.GetAppointmentsByUserId(userId);
+            }
+
+            public void Create(Appointment appointment)
+            {
+                if (appointment.UserId <= 0)
+                    throw new Exception("User ID is required.");
+
+                if (appointment.PetId <= 0)
+                    throw new Exception("Pet ID is required.");
+
+                if (!_petRepo.PetBelongsToUser(
+                        appointment.PetId,
+                        appointment.UserId))
+                {
+                    throw new Exception("Pet does not belong to this user.");
+                }                
+
+                if (appointment.AppointmentDate < DateTime.Now)
+                    throw new Exception("Cannot book past date.");
+
+                if (appointment.ServiceIds == null || !appointment.ServiceIds.Any())
+                    throw new Exception("Select at least one service.");
+
+                appointment.RequestStatus = "Pending";
+                appointment.AppStatus = "Pending";
+
+                int appointmentId = _repo.InsertAppointment(appointment);
+
+                foreach (var serviceId in appointment.ServiceIds)
+                {
+                    _repo.InsertAppointmentService(appointmentId, serviceId);
+                }
+            }
+
+            public void Update(Appointment appointment)
+            {
+                _repo.UpdateAppointment(appointment);
+            }
+
+            public void UpdateRequestStatus(int id, string status)
+            {
+                var validRequestStatuses = new[]
+                {
+                    "Pending",
+                    "Confirmed",
+                    "Denied"
+                };
+
+                if (!validRequestStatuses.Contains(status))
+                    throw new Exception("Invalid request status.");
+
+                _repo.UpdateRequestStatus(id, status);
+            }
+            public void UpdateAppStatus(int id, string status)
+            {
+                var validAppStatuses = new[]
+                {
+                    "Pending",
+                    "Checked-In",
+                    "In-Progress",
+                    "Completed",
+                    "No-Show"
+                };
+
+                if (!validAppStatuses.Contains(status))
+                    throw new Exception("Invalid appointment status.");
+
+                _repo.UpdateAppStatus(id, status);
+
+                if (status == "Completed")
+                {
+                    bool billingExists = _billingRepository.BillingExists(id);
+
+                    if (!billingExists)
+                    {
+                        decimal total = _repo.CalculateAppointmentTotal(id);
+
+                        if (total > 0)
+                        {
+                            _billingRepository.CreateBilling(id, total);
+                        }
+                    }
+                }
+            }
+
+            public void Delete(int id)
+            {
+                _repo.DeleteAppointment(id);
             }
         }
-
-        public void Update(Appointment appointment)
-        {
-            _repo.UpdateAppointment(appointment);
-        }
-
-        public void UpdateStatus(int id, string status)
-{
-    var valid = new[]
-    {
-        "Pending", "Confirmed", "Denied",
-        "Checked-In", "In-Progress", "Completed"
-    };
-
-    if (!valid.Contains(status))
-        throw new Exception("Invalid status.");
-
-    _repo.UpdateStatus(id, status);
-
-    // CREATE NOTIFICATION
-    string message = $"Your appointment status has been updated to '{status}'.";
-
-    _repo.CreateNotification(id, message, "Appointment");
-}
-
-public void CreateAppointmentReminders()
-{
-    var appointments = _repo.GetTomorrowAppointments();
-
-    foreach (var appointment in appointments)
-    {
-        string message = $"Reminder: You have an appointment tomorrow for {appointment.PetName}.";
-
-        _repo.CreateNotification(
-            appointment.AppointmentId,
-            message,
-            "Reminder"
-        );
     }
-}
-        public void Delete(int id)
-        {
-            _repo.DeleteAppointment(id);
-        }
-    }
-}
