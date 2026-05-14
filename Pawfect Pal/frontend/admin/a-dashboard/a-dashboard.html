@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawfect Pal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preload" as="image" href="../../sidebar/logo.png">
+    <link rel="preload" as="image" href="../../sidebar/active.png">
+    <link rel="preload" as="image" href="../../sidebar/peek.png">
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="../../sidebar/logo.png" alt="Pawfect Pal" class="sidebar-logo-landscape">
+            </div>
+            <nav class="sidebar-nav">
+                <a href="../a-dashboard/a-dashboard.html" class="nav-item active">
+                    <img src="../../sidebar/dashboard-m.png" class="custom-icon-nav"> 
+                    Dashboard 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="../a-pets/a-pets.html" class="nav-item">
+                    <img src="../../sidebar/pets-m.png" class="custom-icon-nav"> 
+                    Pets 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="../a-appointments/a-appointment.html" class="nav-item">
+                    <img src="../../sidebar/appointment-m.png" class="custom-icon-nav"> 
+                    Appointments 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="../a-health/a-health.html" class="nav-item">
+                    <img src="../../sidebar/health-m.png" class="custom-icon-nav"> 
+                    Health Records 
+                    <img src="../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="../a-requests/a-requests.html" class="nav-item">
+                    <img src="../../sidebar/request-m.png" class="custom-icon-nav"> 
+                    Requests
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+                <a href="../a-payments/a-payments.html" class="nav-item">
+                    <img src="../../sidebar/billing-m.png" class="custom-icon-nav"> 
+                    Payment 
+                    <img src="../../sidebar/active.png" class="nav-char">
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <strong class="user-name">
+                        <span id="UserName">User</span>
+                    </strong>
+                    <span class="user-role">Admin</span>
+                </div>
+                <a href="#" class="nav-item logout-item" onclick="triggerLogout()">
+                    <img src="../../sidebar/logout-m.png" class="custom-icon-nav logout-icon" alt="Logout"> 
+                    Logout
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="content-header">
+                <div class="welcome-section">
+                    <h1 id="greetingText">Good morning, <span id="welcomeOwnerFName"></span>! 🐾</h1>
+                    <p class="welcome-subtitle">Here's what's happening with your furry friends today 🐾</p>
+                </div>
+            </header>
+
+            <section class="stats-row stats-row-3">
+                <div class="stat-pill purple-soft">
+                    <div class="pill-icon-circle">
+                        <img src="img-dashboard/pets-d.png" class="img-30x30">
+                    </div>
+                    <div class="pill-data">
+                        <p>Total Pets</p>
+                        <h3 id="TotalPetsCount">0</h3>
+                    </div>
+                </div>
+                <div class="stat-pill green-soft">
+                    <div class="pill-icon-circle">
+                        <img src="img-dashboard/appointment-d.png" class="img-30x30">
+                    </div>
+                    <div class="pill-data">
+                        <p>Upcoming Appointments</p>
+                        <h3 id="AptCount">0</h3>
+                    </div>
+                </div>
+                <div class="stat-pill orange-soft">
+                    <div class="pill-icon-circle">
+                        <img src="img-dashboard/requests-d.png" class="img-30x30">
+                    </div>
+                    <div class="pill-data">
+                        <p>Total Requests</p>
+                        <h3 id="TotalRequestsCount">0</h3>
+                    </div>
+                </div>
+            </section>
+
+            <div class="main-grid-layout">
+                <div class="display-card">
+                    <div class="display-card-header">
+                        <div><span>Requests</span></div>
+                    </div>
+                    
+                    <div class="data-list" id="RequestsList"></div>
+
+                    <div class="empty-state" id="EmptyRequests" style="display:none;">
+                        <img src="img-dashboard/no-requests.png" style="width:140px; height:140px; object-fit:contain;">
+                        <h3>No requests yet</h3>
+                        <p>User requests will appear here once submitted.</p>
+                    </div>
+                    
+                    <a href="../a-requests/a-requests.html" class="view-all-link" id="ViewAllRequests" style="display:none; text-align:left;">View all requests →</a>
+                </div>
+
+                <div class="display-card">
+                    <div class="display-card-header">
+                        <div><span>Upcoming Appointments</span></div>
+                        <button class="add-small-btn" onclick="openActionModal('Appointment')">+ New Appointment</button>
+                    </div>
+                    
+                    <div class="data-list" id="AptList"></div>
+
+                    <div class="empty-state" id="EmptyApt" style="display:none;">
+                        <img src="img-dashboard/no-appointment.png" style="width:140px; height:140px; object-fit:contain;">
+                        <h3>No appointments scheduled</h3>
+                        <p>Scheduled appointments will show up here.</p>
+                    </div>
+                    
+                    <a href="../appointments/appointments.html" class="view-all-link" style="text-align:left;">View all appointments →</a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="mainModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header"><h2 id="modalTitle">Title</h2><button class="close-btn" onclick="closeModal('mainModal')">&times;</button></div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-header" style="justify-content: center; border: none;">
+                <h2 style="color: var(--primary-purple); font-size: 20px;">Confirm Log out</h2>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 25px; color: var(--text-dark);">Are you sure you want to log out?</p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button id="btnConfirmDelete" class="submit-btn" style="margin: 0; background-color: #ff5e78; flex: 1;">Log out</button>
+                    <button onclick="document.getElementById('confirmModal').style.display='none'" class="action-btn view-btn" style="flex: 1; border-radius: 12px; height: 48px;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="addPetModal" class="modal-overlay">
+        <div class="modal-content modal-scrollable">
+            <span class="close-modal" onclick="requestCloseModal('Add Pet')">&times;</span>
+            <h2 class="modal-title">Register Your Pet</h2>
+            <form id="addPetForm" class="pet-form" novalidate>
+
+                <div class="input-group">
+                    <label>Pet Photo</label>
+                    <div class="photo-upload-wrapper">
+                        <div class="pet-photo-preview" id="petPhotoPreview">
+                            <span class="default-pet-emoji" id="defaultPetEmoji">🐾</span>
+                            <img id="petPhotoImg" src="" alt="" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                        </div>
+                        <label for="petPhoto" class="upload-photo-btn">📷 Choose Photo</label>
+                        <input type="file" id="petPhoto" accept="image/*" style="display:none;">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="petName" placeholder="Pet Name" required>
+                    <small class="error-msg" id="nameError">Letters only.</small>
+                </div>
+                <div class="input-group">
+                    <label>Birthday</label>
+                    <input type="date" id="petBirthday" required>
+                </div>
+                <div class="input-group">
+                    <label>Age</label>
+                    <input type="text" id="petAge" placeholder="Age" readonly>
+                </div>
+                <div class="input-group">
+                    <select id="petSpecies" required onchange="toggleOtherSpecies()">
+                        <option value="" disabled selected>Select Species</option>
+                        <option value="Dog">🐶 Dog</option>
+                        <option value="Cat">🐱 Cat</option>
+                        <option value="Others">Others (specify below)</option>
+                    </select>
+                </div>
+                <div class="input-group" id="otherSpeciesGroup" style="display: none;">
+                    <input type="text" id="otherSpeciesInput" placeholder="Please specify species">
+                    <small class="error-msg" id="otherError">Letters only.</small>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="petColor" placeholder="Color" required>
+                </div>         
+                <div class="input-group">
+                    <input type="text" id="petBreed" placeholder="Breed" required>
+                    <small class="error-msg" id="breedError">Letters only.</small>
+                </div>
+                <div class="input-group">
+                    <select id="petGender" required>
+                        <option value="" disabled selected>Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <button type="submit" class="register-btn">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="bookAppointmentModal" class="modal-overlay">
+        <div class="modal-content" style="max-width:500px; padding:32px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                <h2 style="color:var(--primary-purple); font-size:22px; font-weight:700; margin:0;">New Appointment</h2>
+                <button onclick="dashCloseNewApptModal()" style="background:none; border:none; font-size:22px; color:#bbb; cursor:pointer; line-height:1;">&times;</button>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:14px;">
+                <label style="font-size:13px; font-weight:700; color:#4a4a4a;">User ID</label>
+                <select id="apptUserId" onchange="dashOnUserChange()" style="padding:11px 14px; border:1.5px solid #ece9f8; border-radius:12px; background:#fafafa; font-family:Quicksand,sans-serif; font-size:14px; font-weight:500; color:#4a4a4a; width:100%; outline:none;">
+                    <option value="">Select User</option>
+                </select>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:14px;">
+                <label style="font-size:13px; font-weight:700; color:#4a4a4a;">Pet ID</label>
+                <select id="apptPetId" onchange="dashOnFormChange()" style="padding:11px 14px; border:1.5px solid #ece9f8; border-radius:12px; background:#fafafa; font-family:Quicksand,sans-serif; font-size:14px; font-weight:500; color:#4a4a4a; width:100%; outline:none;">
+                    <option value="">Select Pet</option>
+                </select>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:14px;">
+                <label style="font-size:13px; font-weight:700; color:#4a4a4a;">Service Type</label>
+                <div style="position:relative;">
+                    <button type="button" id="dashServiceDropdownBtn" style="display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; padding:11px 14px; border:1.5px solid #ece9f8; border-radius:12px; background:#fafafa; font-family:Quicksand,sans-serif; font-size:14px; font-weight:500; color:#4a4a4a; cursor:pointer; text-align:left;">
+                        <span id="dashServiceDropdownDisplay" style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Select Services</span>
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0; color:#999;"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div id="dashServiceDropdownList" style="display:none; position:absolute; top:calc(100% + 4px); left:0; width:100%; background:white; border:1.5px solid #ece9f8; border-radius:12px; box-shadow:0 8px 24px rgba(157,114,214,0.12); z-index:600; padding:6px;"></div>
+                </div>
+            </div>
+            <div style="display:flex; gap:12px; margin-bottom:14px;">
+                <div style="display:flex; flex-direction:column; gap:6px; flex:1;">
+                    <label style="font-size:13px; font-weight:700; color:#4a4a4a;">Appointment Date</label>
+                    <input type="date" id="apptDate" oninput="dashOnFormChange()" style="padding:11px 14px; border:1.5px solid #ece9f8; border-radius:12px; background:#fafafa; font-family:Quicksand,sans-serif; font-size:14px; font-weight:500; color:#4a4a4a; width:100%; outline:none;">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:6px; flex:1;">
+                    <label style="font-size:13px; font-weight:700; color:#4a4a4a;">Time <span style="font-weight:500; font-size:11px; color:#999;">(7AM–5PM)</span></label>
+                    <select id="apptTime" onchange="dashOnFormChange()" style="padding:11px 14px; border:1.5px solid #ece9f8; border-radius:12px; background:#fafafa; font-family:Quicksand,sans-serif; font-size:14px; font-weight:500; color:#4a4a4a; width:100%; outline:none;">
+                        <option value="">Select Time</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:14px;">
+                <label style="font-size:13px; font-weight:700; color:#4a4a4a;">Notes <span style="font-weight:500; color:#999;">(optional)</span></label>
+                <textarea id="apptNotes" placeholder="Add any notes or special instructions..." oninput="dashOnFormChange()" style="padding:11px 14px; border:1.5px solid #ece9f8; border-radius:12px; background:#fafafa; font-family:Quicksand,sans-serif; font-size:14px; font-weight:500; color:#4a4a4a; width:100%; outline:none; resize:vertical; min-height:90px; line-height:1.5;"></textarea>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#f8f0ff; border-radius:14px; padding:14px 18px; margin-bottom:20px;">
+                <p style="font-size:13px; font-weight:700; color:#999; margin:0;">Total of Services:</p>
+                <h3 id="bookingTotal" style="font-size:18px; font-weight:700; color:#9d72d6; margin:0;">&#x20B1;0</h3>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button onclick="dashCloseNewApptModal()" style="flex:1; padding:14px; background:#ede9f8; color:#9d72d6; border:none; border-radius:14px; font-family:Quicksand,sans-serif; font-size:15px; font-weight:700; cursor:pointer;">Cancel</button>
+                <button onclick="dashOpenBookingConfirm()" class="dash-save-appt-btn" style="flex:1; padding:14px; background:#9d72d6; color:white; border:none; border-radius:14px; font-family:Quicksand,sans-serif; font-size:15px; font-weight:700; cursor:pointer;">Save Appointment</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashApptSavedModal" class="modal-overlay">
+        <div class="modal-content" style="max-width:420px; text-align:center;">
+            <div class="modal-header" style="justify-content:center; border:none; padding-bottom:0;">
+                <div style="font-size:42px; margin-bottom:6px;">🐾</div>
+            </div>
+            <div class="modal-body" style="text-align:center;">
+                <h2 style="color:var(--primary-purple); font-size:20px; margin-bottom:16px;">Appointment Saved!</h2>
+                <button onclick="document.getElementById('dashApptSavedModal').style.display='none'" class="submit-btn" style="margin:20px 0 0; width:100%;">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashAlertModal" class="modal-overlay">
+        <div class="modal-content" style="max-width:380px; text-align:center;">
+            <div class="modal-header" style="justify-content:center; border:none;">
+                <h2 id="dashAlertTitle" style="color:#ff5e78; font-size:20px;">Missing Details</h2>
+            </div>
+            <div class="modal-body">
+                <p id="dashAlertMessage" style="margin-bottom:25px; color:var(--text-dark); line-height:1.8;"></p>
+                <button onclick="document.getElementById('dashAlertModal').style.display='none'" class="submit-btn" style="margin:0; width:100%;">Got it</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="remindersModal" class="modal-overlay">
+        <div class="modal-content modal-content-reminders">
+            <span class="close-modal" onclick="closeActionModal('Reminders')">&times;</span>
+            <h2 class="modal-title">Activity Feed</h2>
+            <div class="reminders-container">
+                <div class="empty-state-reminders">
+                    <img src="user-dashboard/no-reminders.png" class="img-30x30-reminders" alt="No updates">
+                    <p>No recent updates or notifications at the moment.</p>
+                </div>
+            </div>
+            <button class="primary-action-btn full-width" onclick="closeActionModal('Reminders')">
+                Back to Dashboard
+            </button>
+        </div>
+    </div>
+
+    <div id="successModal" class="modal-overlay">
+        <div class="modal-content success-box">
+            <div class="success-icon-wrap"></div>
+            <h2 id="successTitle" class="modal-title">Request Sent</h2>
+            <p id="successMessage" class="welcome-subtitle">Your request is now pending admin confirmation.</p>
+            <button class="primary-action-btn full-width" onclick="closeSuccessModal()">Got it!</button>
+        </div>
+    </div>
+
+    <div id="requestActionModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2 id="requestActionTitle">Confirm Action</h2>
+                <button class="close-btn" onclick="document.getElementById('requestActionModal').style.display='none'">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <div id="actionIcon" style="font-size: 50px; margin-bottom: 15px;"></div>
+                <p id="requestActionMessage" style="margin-bottom: 25px; line-height: 1.5; color: var(--text-dark);"></p>
+                <div style="display: flex; gap: 12px;">
+                    <button id="btnConfirmRequest" class="submit-btn" style="flex: 1;">Proceed</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="unsavedModal" class="modal-overlay">
+        <div class="modal-content" style="max-width:400px;text-align:center;">
+            <div class="modal-header" style="justify-content:center;border:none;padding-bottom:8px;">
+                <h2 style="color:#f59e0b;font-size:20px;">⚠️ Unsaved Changes</h2>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom:25px;color:var(--text-dark);line-height:1.6;">You have unsaved changes. Are you sure you want to close without saving?</p>
+                <div style="display:flex;gap:10px;justify-content:center;">
+                    <button id="unsavedDiscardBtn" class="submit-btn" style="margin:0;flex:1;background:#ff5e78;">Discard Changes</button>
+                    <button id="unsavedContinueBtn" class="action-btn view-btn" style="flex:1;border-radius:12px;height:48px;font-weight:700;font-size:14px;">Keep Editing</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 350px; text-align: center;">
+            <div id="alertIcon" style="font-size: 40px; margin-bottom: 12px;">⚠️</div>
+            <h2 id="alertTitle" style="color: var(--text-dark); font-size: 20px; font-weight: 700; margin-bottom: 10px;">Heads up!</h2>
+            <p id="alertMessage" style="color: var(--text-muted); margin-bottom: 25px; font-size: 14px;"></p>
+            <button class="register-btn" onclick="closeAlertModal()">Got it</button>
+        </div>
+    </div>
+
+    <div id="petSaveConfirmModal" class="modal-overlay">
+        <div class="modal-content" style="max-width:360px; text-align:center; padding:32px 28px;">
+            <div style="font-size:36px; margin-bottom:10px;">🐾</div>
+            <h2 style="color:var(--primary-purple); font-size:18px; margin-bottom:8px;">Save Changes?</h2>
+            <p style="color:var(--text-muted); font-size:13px; margin-bottom:24px; line-height:1.5;">Are you sure you want to save these changes to the pet's profile?</p>
+            <div style="display:flex; gap:10px;">
+                <button onclick="document.getElementById('petSaveConfirmModal').style.display='none'" style="flex:1; padding:12px; background:#ede9f8; color:#9d72d6; border:none; border-radius:12px; font-family:Quicksand,sans-serif; font-size:14px; font-weight:700; cursor:pointer;">Cancel</button>
+                <button id="petSaveConfirmBtn" style="flex:1; padding:12px; background:var(--primary-purple); color:white; border:none; border-radius:12px; font-family:Quicksand,sans-serif; font-size:14px; font-weight:700; cursor:pointer;">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="bookingConfirmModal" class="modal-overlay">
+        <div class="modal-content" style="max-width:360px; text-align:center; padding:32px 28px;">
+            <h2 style="color:var(--primary-purple); font-size:18px; margin-bottom:8px;">Confirm Booking?</h2>
+            <p style="color:var(--text-muted); font-size:13px; margin-bottom:24px; line-height:1.5;">Are you sure you want to book this appointment?</p>
+            <div style="display:flex; gap:10px;">
+                <button onclick="document.getElementById('bookingConfirmModal').style.display='none'" style="flex:1; padding:12px; background:#ede9f8; color:#9d72d6; border:none; border-radius:12px; font-family:Quicksand,sans-serif; font-size:14px; font-weight:700; cursor:pointer;">Cancel</button>
+                <button id="bookingConfirmBtn" style="flex:1; padding:12px; background:var(--primary-purple); color:white; border:none; border-radius:12px; font-family:Quicksand,sans-serif; font-size:14px; font-weight:700; cursor:pointer;">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../data/auth.js"></script>
+    <script src="a-dashboard.js"></script>
+</body>
+</html>
