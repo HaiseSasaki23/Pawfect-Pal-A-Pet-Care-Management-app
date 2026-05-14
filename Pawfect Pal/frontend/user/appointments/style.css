@@ -127,7 +127,7 @@ body {
 .sidebar .nav-item:hover .nav-char {
     width: 40px;
     opacity: 1 !important;
-    content: url('../sidebar/peek.png') !important;
+    content: url('../../sidebar/peek.png') !important;
 }
 
 /* sidebar footer & logout  */
