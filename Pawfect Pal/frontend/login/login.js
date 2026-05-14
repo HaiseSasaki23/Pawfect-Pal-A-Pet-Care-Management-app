@@ -60,7 +60,7 @@ loginForm.addEventListener("submit", async function (e) {
         localStorage.setItem("role", data.role);
 
         if (data.role.toLowerCase() === "admin") {
-            window.location.href = "../admin/dashboard/dashboard.html";
+            window.location.href = "../admin/a-dashboard/a-dashboard.html";
         } else {
             window.location.href = "../user/dashboard/dashboard.html";
         }

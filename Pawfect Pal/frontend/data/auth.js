@@ -126,15 +126,16 @@ function ensureAuthBlurStyle() {
 function requireLogin(expectedRole = null) {
     const user = getCurrentUser();
 
-    if (!user.token || !user.userId || !user.role) {
-        alert("You are not logged in.");
-        window.location.href = "../../login/login.html";
+    const actualRole = (user.role || "").trim().toLowerCase();
+    const requiredRole = (expectedRole || "").trim().toLowerCase();
+
+    if (!user.token || !user.userId || !actualRole) {
+        showAuthRequiredModal();
         return null;
     }
 
-    if (expectedRole && user.role.toLowerCase() !== expectedRole.toLowerCase()) {
+    if (requiredRole && actualRole !== requiredRole) {
         alert("Access denied.");
-        window.location.href = "../../login/login.html";
         return null;
     }
 
@@ -196,14 +197,19 @@ function loadUserDisplay(user = getCurrentUser()) {
     const sidebarLName = document.getElementById("sidebarOwnerLName");
     const welcomeName = document.getElementById("welcomeOwnerFName");
 
+    const adminUserName = document.getElementById("UserName");
+
     if (sidebarFName) sidebarFName.textContent = user.userName || "Guest";
     if (sidebarLName) sidebarLName.textContent = "";
 
     if (welcomeName) {
         welcomeName.textContent = user.ownerFName || user.userName || "User";
     }
-}
 
+    if (adminUserName) {
+        adminUserName.textContent = user.userName || "Admin";
+    }
+}
 function initImageLoading() {
     document.querySelectorAll("img").forEach(img => {
         if (img.complete) {
@@ -250,8 +256,13 @@ function triggerLogout() {
 }
 
 function handleUnauthorized(response) {
-    if (response.status === 401 || response.status === 403) {
+    if (response.status === 401) {
         logoutNow();
+        return true;
+    }
+
+    if (response.status === 403) {
+        alert("Access denied. Your account does not have permission for this action.");
         return true;
     }
 

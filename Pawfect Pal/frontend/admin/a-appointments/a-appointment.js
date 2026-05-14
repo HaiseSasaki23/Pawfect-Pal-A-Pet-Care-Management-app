@@ -1,3 +1,10 @@
+const token = localStorage.getItem("token");
+const role = localStorage.getItem("role");
+
+if (!token || role !== "Admin") {
+    window.location.href = "../../login/login.html";
+}
+
 let appointments = [];
 let apptIdCounter = 1000;
 

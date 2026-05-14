@@ -190,7 +190,7 @@ async function loadPetsForDropdown() {
 
 async function loadAppointments(userId) {
     try {
-        const response = await fetch(`http://localhost:5182/api/Appointment/user/${userId}`, {
+        const response = await fetch(`/api/Appointment/my`, {
             headers: getAuthHeaders()
         });
         if (!response.ok) {

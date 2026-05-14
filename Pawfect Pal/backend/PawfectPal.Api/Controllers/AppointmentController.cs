@@ -139,17 +139,25 @@ namespace PawfectPal.Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
             try
             {
                 _service.Delete(id);
-                return Ok(new { message = "Appointment deleted successfully." });
+
+                return Ok(new
+                {
+                    message = "Appointment deleted successfully."
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
             }
         }
     }
