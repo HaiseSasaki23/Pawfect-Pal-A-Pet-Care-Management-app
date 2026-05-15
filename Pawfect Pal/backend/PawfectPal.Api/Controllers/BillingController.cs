@@ -17,18 +17,43 @@ namespace PawfectPal.Api.Controllers
             _billingService = billingService;
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpGet("unpaid")]
+        public IActionResult GetUnpaidBills()
+        {
+            try
+            {
+                return Ok(_billingService.GetUnpaidBills());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
+            }
+        }
+        
         [HttpGet("my/unpaid")]
         public IActionResult GetMyUnpaidBills()
         {
             try
             {
-                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-                return Ok(_billingService.GetUnpaidBillsByUserId(userId));
+                int userId = int.Parse(
+                    User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+                );
+
+                return Ok(
+                    _billingService.GetUnpaidBillsByUserId(userId)
+                );
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
             }
-        }
+        }        
     }
 }

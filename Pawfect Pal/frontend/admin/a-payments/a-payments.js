@@ -1,5 +1,4 @@
 let currentMethod = 'cash'; 
-const partialBalances = {};
 
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
@@ -235,11 +234,6 @@ function resetForm() {
     document.getElementById('cashPaymentForm').reset();
     document.getElementById('payChange').value = "0.00";
     switchMethod('cash');
-}
-
-/* ---------- GENERATE PAYMENT ID ---------- */
-function generatePaymentId() {
-    return 'PAY-' + Date.now().toString().slice(-6);
 }
 
 document.addEventListener("DOMContentLoaded", () => {

@@ -48,6 +48,78 @@ namespace PawfectPal.Api.Repositories
             return bills;
         }
 
+    public List<dynamic> GetUnpaidBills()
+    {
+        string query = @"
+            SELECT
+                b.BillingID,
+                b.TotalAmount,
+                b.AmountPaid,
+                b.RemainingBalance,
+                b.BillingStatus,
+                b.DueDate,
+
+                a.AppointmentID,
+
+                pet.Name AS PetName,
+
+                u.UserName,
+                u.OwnerFName,
+                u.OwnerLName
+
+            FROM billing b
+
+            INNER JOIN appointment a
+                ON b.AppointmentID = a.AppointmentID
+
+            INNER JOIN pet pet
+                ON a.PetID = pet.PetID
+
+            INNER JOIN user u
+                ON a.UserID = u.UserID
+
+            WHERE b.BillingStatus != 'Paid'
+
+            ORDER BY b.CreatedAt DESC
+        ";
+
+        DataTable dt = _db.ExecuteQuery(query);
+
+        List<dynamic> bills = new();
+
+        foreach (DataRow row in dt.Rows)
+        {
+            bills.Add(new
+            {
+                billingId = Convert.ToInt32(row["BillingID"]),
+
+                appointmentId = Convert.ToInt32(row["AppointmentID"]),
+
+                totalAmount = Convert.ToDecimal(row["TotalAmount"]),
+
+                amountPaid = Convert.ToDecimal(row["AmountPaid"]),
+
+                remainingBalance = Convert.ToDecimal(row["RemainingBalance"]),
+
+                billingStatus = row["BillingStatus"].ToString(),
+
+                dueDate = row["DueDate"] == DBNull.Value
+                    ? (DateTime?)null
+                    : Convert.ToDateTime(row["DueDate"]),
+
+                petName = row["PetName"].ToString(),
+
+                userName = row["UserName"].ToString(),
+
+                ownerFName = row["OwnerFName"].ToString(),
+
+                ownerLName = row["OwnerLName"].ToString()
+            });
+        }
+
+        return bills;
+    }
+
         public void UpdateBillingStatus(int billingId, string status)
         {
             string query = @"

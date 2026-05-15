@@ -3,18 +3,20 @@ const API_BASE_URL = "http://localhost:5182";
 let unpaidBills = [];
 
 document.addEventListener("DOMContentLoaded", async function () {
+
     const user = requireLogin("User");
+
     if (!user) return;
 
-    await loadUnpaidBills(user.userId);
-    await loadPaymentHistory(user.userId);
+    await loadUserUnpaidBills();
+    await loadPaymentHistory();
 
     setupSearch();
 });
 
 const modal = document.getElementById('mainModal');
 
-async function loadUnpaidBills(userId) {
+async function loadUserUnpaidBills(userId) {
     try {
         const response = await fetch(
             `${API_BASE_URL}/api/Billing/my/unpaid`,
@@ -66,7 +68,7 @@ function renderBalanceBanner() {
     const balanceStatus = document.getElementById("balanceStatus");
 
     const total = unpaidBills.reduce(
-        (sum, bill) => sum + Number(bill.totalAmount),
+        (sum, bill) => sum + Number(bill.remainingBalance),
         0
     );
 
@@ -97,7 +99,7 @@ function renderUpcomingPayments() {
                 type="checkbox"
                 class="pay-check"
                 value="${bill.billingId}"
-                data-amount="${bill.totalAmount}">
+                data-amount="${bill.remainingBalance}">
 
             <div style="flex:1;">
                 <strong>Appointment #${bill.appointmentId}</strong>
@@ -107,7 +109,7 @@ function renderUpcomingPayments() {
             </div>
 
             <strong>
-                ₱ ${Number(bill.totalAmount).toLocaleString()}
+                ₱ ${Number(bill.remainingBalance).toLocaleString()}
             </strong>
         </label>
     `).join("");
@@ -282,6 +284,51 @@ function setupSearch() {
                     ? ""
                     : "none";
         });
+    });
+}
+
+function populateAppointmentDropdown() {
+
+    const select =
+        document.getElementById("appointmentSelect");
+
+    select.innerHTML = `
+        <option value="" disabled selected>
+            Search appointment...
+        </option>
+    `;
+
+    unpaidBills.forEach(bill => {
+
+        const option = document.createElement("option");
+
+        option.value = bill.billingId;
+
+        option.textContent =
+            `APT-${bill.appointmentId} • `
+            + `${bill.petName}`;
+
+        option.setAttribute(
+            "data-user",
+            bill.userName
+        );
+
+        option.setAttribute(
+            "data-pet",
+            bill.petName
+        );
+
+        option.setAttribute(
+            "data-amount",
+            bill.remainingBalance
+        );
+
+        option.setAttribute(
+            "data-appointment-id",
+            bill.appointmentId
+        );
+
+        select.appendChild(option);
     });
 }
 

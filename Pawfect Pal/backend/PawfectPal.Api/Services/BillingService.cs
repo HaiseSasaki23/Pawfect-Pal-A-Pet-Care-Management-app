@@ -19,5 +19,9 @@ namespace PawfectPal.Api.Services
 
             return _billingRepository.GetUnpaidBillsByUserId(userId);
         }
+        public List<dynamic> GetUnpaidBills()
+        {
+            return _billingRepository.GetUnpaidBills();
+        }        
     }
 }
