@@ -159,9 +159,15 @@ namespace PawfectPal.Api.Repositories
 
             DeleteAppointmentServices(appointment.AppointmentId);
 
-            foreach (var serviceId in appointment.ServiceIds)
+            if (appointment.ServiceIds != null)
             {
-                InsertAppointmentService(appointment.AppointmentId, serviceId);
+                foreach (var serviceId in appointment.ServiceIds)
+                {
+                    InsertAppointmentService(
+                        appointment.AppointmentId,
+                        serviceId
+                    );
+                }
             }
         }
 

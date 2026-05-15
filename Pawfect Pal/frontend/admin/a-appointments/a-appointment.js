@@ -1,11 +1,62 @@
-const token = localStorage.getItem("token");
-const role = localStorage.getItem("role");
+const user = requireLogin("Admin");
 
-if (!token || role !== "Admin") {
-    window.location.href = "../../login/login.html";
+if (!user) {
+    throw new Error("Unauthorized");
 }
 
-let appointments = [];
+const token = localStorage.getItem("token");
+
+async function loadAppointments() {
+    try {
+        const response = await fetch(
+            "http://localhost:5182/api/Appointment",
+            {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || "Failed to load appointments.");
+        }
+
+        appointments = data.map(a => ({
+            apptId: a.appointmentId,
+            userId: a.userId,
+            petId: a.petId,
+            ownerName: `${a.ownerFName ?? ""} ${a.ownerLName ?? ""}`.trim(),
+            petName: a.petName ?? `Pet ${a.petId}`,
+            services: a.services ?? [],
+            serviceType: (a.services ?? []).join(", "),
+            date: new Date(a.appointmentDate).toLocaleDateString(
+                "en-US",
+                {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric"
+                }
+            ),
+            time: new Date(a.appointmentDate).toLocaleTimeString(
+                "en-US",
+                {
+                    hour: "numeric",
+                    minute: "2-digit"
+                }
+            ),
+            status: a.appStatus,
+            notes: a.notes ?? ""
+        }));
+
+        applyFilters();
+        updateSummaryCards();
+
+    } catch (error) {
+        console.error("Load appointments error:", error);
+    }
+}
 let apptIdCounter = 1000;
 
 const ALL_SERVICES = ['Check-up', 'Vaccination', 'Deworming', 'Grooming'];
@@ -80,15 +131,47 @@ function confirmDeleteAppointment(apptId) {
     document.getElementById('deleteConfirmModal').style.display = 'flex';
 }
 
-function deleteAppointment(apptId) {
-    appointments = appointments.filter(a => a.apptId !== apptId);
-    closeModal('deleteConfirmModal');
-    applyFilters();
-    updateSummaryCards();
+async function deleteAppointment(apptId) {
+    try {
+        const response = await fetch(
+            `http://localhost:5182/api/Appointment/${apptId}`,
+            {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || "Delete failed.");
+        }
+
+        appointments = appointments.filter(
+            a => a.apptId != apptId
+        );
+
+        closeModal('deleteConfirmModal');
+
+        applyFilters();
+        updateSummaryCards();
+
+    } catch (error) {
+        console.error("Delete error:", error);
+        alert(error.message);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const newApptModal = document.getElementById('newAppointmentModal');
+    const userName = localStorage.getItem("userName");
+
+    if (userName) {
+        document.getElementById("UserName").textContent = userName;
+    }
+
+    const newApptModal = document.getElementById('newAppointmentModal');    
     if (newApptModal) {
         newApptModal.addEventListener('click', e => {
             if (e.target === newApptModal) closeNewAppointmentModal();
@@ -154,6 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderTable(appointments);
     updateSummaryCards();
+    loadAppointments();
 });
 
 // 7am–5pm in 30 min slots
