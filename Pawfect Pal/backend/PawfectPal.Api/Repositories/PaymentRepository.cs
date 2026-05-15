@@ -34,6 +34,83 @@ namespace PawfectPal.Api.Repositories
             _db.ExecuteNonQuery(query, parameters);
         }
 
+        public List<dynamic> GetAllPayments()
+        {
+            string query = @"
+                SELECT
+                    p.PaymentID,
+                    p.BillingID,
+                    p.PaymentMethod,
+                    p.ReferenceNumber,
+                    p.PaidAmount,
+                    p.PaidDate,
+
+                    b.AppointmentID,
+
+                    pet.Name AS PetName,
+
+                    u.OwnerFName,
+                    u.OwnerLName
+
+                FROM payment p
+
+                INNER JOIN billing b
+                    ON p.BillingID = b.BillingID
+
+                INNER JOIN appointment a
+                    ON b.AppointmentID = a.AppointmentID
+
+                INNER JOIN pet pet
+                    ON a.PetID = pet.PetID
+
+                INNER JOIN user u
+                    ON a.UserID = u.UserID
+
+                ORDER BY p.PaidDate DESC
+            ";
+
+            DataTable dt = _db.ExecuteQuery(query);
+
+            List<dynamic> payments = new();
+
+            foreach (DataRow row in dt.Rows)
+            {
+                payments.Add(new
+                {
+                    paymentId =
+                        Convert.ToInt32(row["PaymentID"]),
+
+                    billingId =
+                        Convert.ToInt32(row["BillingID"]),
+
+                    appointmentId =
+                        Convert.ToInt32(row["AppointmentID"]),
+
+                    paymentMethod =
+                        row["PaymentMethod"].ToString(),
+
+                    referenceNumber =
+                        row["ReferenceNumber"].ToString(),
+
+                    paidAmount =
+                        Convert.ToDecimal(row["PaidAmount"]),
+
+                    paidDate =
+                        Convert.ToDateTime(row["PaidDate"]),
+
+                    petName =
+                        row["PetName"].ToString(),
+
+                    ownerFName =
+                        row["OwnerFName"].ToString(),
+
+                    ownerLName =
+                        row["OwnerLName"].ToString()
+                });
+            }
+
+            return payments;
+        }
         public List<Payment> GetPaymentsByUserId(int userId)
         {
             string query = @"
