@@ -137,7 +137,10 @@ namespace PawfectPal.Api.Services
 
             if (!password.Any(char.IsDigit))
                 throw new Exception("Password must contain at least one number.");
-        }        
+
+            if (!password.Any(ch => !char.IsLetterOrDigit(ch)))
+                throw new Exception("Password must contain at least one symbol.");
+        }
         public bool ValidateCredentials(LoginDto dto)
         {
             return !string.IsNullOrWhiteSpace(dto.UserName) &&
