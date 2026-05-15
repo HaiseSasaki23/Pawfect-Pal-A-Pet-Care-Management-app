@@ -33,7 +33,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // update default emoji when species changes
     document.getElementById("petSpecies")?.addEventListener("change", updateDefaultEmoji);
 });
 
@@ -48,11 +47,32 @@ function updateStat(id, value) {
 }
 
 async function loadDashboardSummary(userId, role) {
-    const url = role.toLowerCase() === "admin"
-        ? "http://localhost:5182/api/Dashboard/admin-summary"
-        : `http://localhost:5182/api/Dashboard/user-summary/${userId}`;
-
     try {
+        if (role.toLowerCase() === "admin") {
+            // Fetch appointments to count pending requests
+            const appointmentsResponse = await fetch(`http://localhost:5182/api/Appointment`, {
+                headers: getAuthHeaders()
+            });
+            
+            if (appointmentsResponse.ok) {
+                const appointments = await appointmentsResponse.json();
+                const pendingRequestsCount = appointments.filter(apt => 
+                    apt.requestStatus === "Pending" || apt.RequestStatus === "Pending"
+                ).length;
+                
+                console.log("Pending requests count:", pendingRequestsCount);
+                
+                const totalRequestsEl = document.getElementById("TotalRequestsCount");
+                if (totalRequestsEl) {
+                    totalRequestsEl.textContent = pendingRequestsCount;
+                }
+            }
+        }
+        
+        const url = role.toLowerCase() === "admin"
+            ? "http://localhost:5182/api/Dashboard/admin-summary"
+            : `http://localhost:5182/api/Dashboard/user-summary/${userId}`;
+
         const response = await fetch(url, {
             headers: getAuthHeaders()
         });
@@ -61,7 +81,6 @@ async function loadDashboardSummary(userId, role) {
 
         updateStat("TotalPetsCount", data.totalPets);
         updateStat("AptCount", data.totalAppointments);
-        updateStat("TotalRequestsCount", data.totalRequests ?? data.totalAppointments ?? 0);
 
     } catch (error) {
         console.error("Dashboard summary error:", error);
@@ -71,14 +90,19 @@ async function loadDashboardSummary(userId, role) {
 async function loadRequests(userId) {
     try {
         const requests = await fetch(`http://localhost:5182/api/Appointment`, {
-                headers: getAuthHeaders()
-              }).then(r => { if (!r.ok) throw new Error(`Status: ${r.status}`); return r.json(); });
+            headers: getAuthHeaders()
+        }).then(r => { if (!r.ok) throw new Error(`Status: ${r.status}`); return r.json(); });
 
         const container = document.getElementById("RequestsList");
         const empty = document.getElementById("EmptyRequests");
         const viewAll = document.getElementById("ViewAllRequests");
 
-        if (!Array.isArray(requests) || requests.length === 0) {
+        // Filter only pending requests
+        const pendingRequests = requests.filter(req => 
+            req.requestStatus === "Pending" || req.RequestStatus === "Pending"
+        );
+
+        if (!Array.isArray(pendingRequests) || pendingRequests.length === 0) {
             setTimeout(() => {
                 container.innerHTML = "";
                 empty.style.display = "flex";
@@ -91,25 +115,25 @@ async function loadRequests(userId) {
         if (viewAll) viewAll.style.display = "block";
         container.style.opacity = "0";
         setTimeout(() => {
-        window._dashRequests = requests;
-        container.innerHTML = requests.map((req, i) => {
+            window._dashRequests = pendingRequests;
+            container.innerHTML = pendingRequests.map((req, i) => {
                 const id = req.appointmentId || req.petId || 0;
                 return `
                 <div class="request-list-item">
-                    <span style="${req.type === 'pet' ? 'background:#f0e6ff; color:#9d72d6;' : 'background:#e8f5ee; color:#2d6a4f;'} padding:5px 12px; border-radius:8px; font-size:11px; font-weight:700; flex-shrink:0;">${req.type === 'pet' ? 'PET' : 'APPT'}</span>
+                    <span style="background:#e8f5ee; color:#2d6a4f; padding:5px 12px; border-radius:8px; font-size:11px; font-weight:700; flex-shrink:0;">APPT</span>
                     <div class="apt-details-list">
-                        <strong>${req.petName}</strong>
-                        <span style="font-size:12px; color:var(--text-muted);">${req.ownerName || ''}</span>
+                        <strong>${req.petName || 'Unknown Pet'}</strong>
+                        <span style="font-size:12px; color:var(--text-muted);">${req.ownerName || req.ownerFName ? (req.ownerFName + ' ' + req.ownerLName) : 'Unknown Owner'}</span>
                     </div>
                     <div class="request-actions">
                         <button class="dash-action-btn dash-btn-details" title="View" onclick="viewDashRequest(${i})">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
                         </button>
-                        <button class="dash-action-btn dash-btn-approve" title="Approve" onclick="dashConfirmAction('approve', ${id}, '${req.petName}')">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><polyline points="9 11 12 14 22 4"/></svg>
+                        <button class="dash-action-btn dash-btn-approve" title="Approve" onclick="dashConfirmAction('approve', ${req.appointmentId}, '${req.petName}')">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><polyline points="9 11 12 14 22 4"/></svg>
                         </button>
-                        <button class="dash-action-btn dash-btn-decline" title="Decline" onclick="dashConfirmAction('decline', ${id}, '${req.petName}')">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        <button class="dash-action-btn dash-btn-decline" title="Decline" onclick="dashConfirmAction('decline', ${req.appointmentId}, '${req.petName}')">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
                         </button>
                     </div>
                 </div>`;
@@ -592,7 +616,6 @@ async function dashLoadUsersForDropdown() {
     }
 }
 
-// when user changes, repopulate pet ID dropdown — only shows pets owned by the logged-in user
 async function dashOnUserChange() {
     const petSel = document.getElementById('apptPetId');
     if (!petSel) return;
@@ -714,7 +737,6 @@ async function dashSubmitNewAppointment() {
     }
 }
 
-// close service dropdown when clicking outside
 document.addEventListener('click', () => {
     const ddList = document.getElementById('dashServiceDropdownList');
     if (ddList) ddList.style.display = 'none';
@@ -758,16 +780,70 @@ function dashConfirmAction(actionType, id, name) {
     modal.style.display = 'flex';
 }
 
-function dashProcessApproval(petId) {
-    console.log(`Approving Pet ID: ${petId}`);
-    // logic: backend processes PetID -> Adds to 'pet' table -> redirect to pets page
-    window.location.href = "../a-pets/a-pets.html";
+function dashProcessApproval(appointmentId) {
+    console.log(`Approving Appointment ID: ${appointmentId}`);
+    
+    fetch(`http://localhost:5182/api/Appointment/${appointmentId}/request-status`, {
+        method: "PATCH",
+        headers: {
+            ...getAuthHeaders(),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: "Confirmed" })
+    })
+    .then(async response => {
+        if (response.ok) {
+            alert("✅ Request approved successfully!");
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (user.userId) {
+                loadRequests(user.userId);
+                loadDashboardSummary(user.userId, user.role);
+            } else {
+                location.reload();
+            }
+        } else {
+            const error = await response.json();
+            console.error("Error response:", error);
+            alert("❌ Failed to approve request: " + (error.message || error));
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("❌ Error approving request: " + error.message);
+    });
 }
 
-function dashProcessDecline(petId) {
-    console.log(`Declining and deleting Pet ID: ${petId}`);
-    // logic: backend deletes PetID from 'reminder/requests' table
-    location.reload();
+function dashProcessDecline(appointmentId) {
+    console.log(`Declining Appointment ID: ${appointmentId}`);
+    
+    fetch(`http://localhost:5182/api/Appointment/${appointmentId}/request-status`, {
+        method: "PATCH",
+        headers: {
+            ...getAuthHeaders(),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: "Denied" })
+    })
+    .then(async response => {
+        if (response.ok) {
+            alert("❌ Request declined successfully!");
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (user.userId) {
+                loadRequests(user.userId);
+                loadDashboardSummary(user.userId, user.role);
+            } else {
+                location.reload();
+            }
+        } else {
+            const error = await response.json();
+            console.error("Error response:", error);
+            alert("❌ Failed to decline request: " + (error.message || error));
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("❌ Error declining request: " + error.message);
+    });
 }
 
 function viewDashRequest(index) {

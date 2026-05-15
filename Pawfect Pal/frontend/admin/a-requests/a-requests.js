@@ -289,6 +289,7 @@ function viewPetDetails(petData, type) {
     console.log("View details:", petData);
     const modalTitle = document.getElementById('modalTitle');
     const modalBody = document.getElementById('modalBody');
+    const modalContent = document.querySelector('#mainModal .modal-content');
     
     if (!modalTitle || !modalBody) return;
     
@@ -297,16 +298,77 @@ function viewPetDetails(petData, type) {
         `User ${petData.userId || 'Unknown'}`;
     
     modalTitle.innerText = type === 'appt' ? "Appointment Details" : "Pet Information";
-    modalBody.innerHTML = `
-        <div style="padding: 20px;">
-            <p><strong>📋 Appointment ID:</strong> ${petData.AppointmentID}</p>
-            <p><strong>🐾 Pet Name:</strong> ${petData.Name}</p>
-            <p><strong>👤 Owner:</strong> ${ownerDisplay}</p>
-            <p><strong>📅 Date:</strong> ${petData.Date || 'N/A'}</p>
-            <p><strong>🛠️ Services:</strong> ${Array.isArray(petData.Services) && petData.Services.length ? petData.Services.join(', ') : (petData.Services || 'No services listed')}</p>
-            <p><strong>📊 Status:</strong> ${petData.requestStatus || 'Pending'}</p>
-        </div>
-    `;
+    
+    if (type === 'appt') {
+        // Appointment Details View
+        modalBody.innerHTML = `
+            <div class="appointment-summary-view" style="text-align: center; padding: 20px;">
+                <div class="pet-image-container circle-crop" style="width: 120px; height: 120px; margin: 0 auto 20px; border: 3px solid var(--primary-purple); border-radius: 50%; overflow: hidden; background: var(--bg-lavender); display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 48px;">🐾</span>
+                </div>
+                <h2 style="color: var(--primary-purple); font-size: 24px; margin-bottom: 8px;">${petData.Name}</h2>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">Owner: <strong style="color: var(--primary-purple);">${ownerDisplay}</strong></p>
+                
+                <div class="details-section" style="background: var(--bg-lavender); padding: 20px; border-radius: 20px; margin-top: 10px;">
+                    <h3 style="color: var(--primary-purple); font-size: 14px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">Appointment Details</h3>
+                    <div style="display: grid; gap: 12px; text-align: left;">
+                        <div><strong>📅 Date:</strong> ${petData.Date || 'N/A'}</div>
+                        <div><strong>🛠️ Services:</strong> ${Array.isArray(petData.Services) && petData.Services.length ? petData.Services.join(', ') : (petData.Services || 'No services listed')}</div>
+                        <div><strong>📊 Status:</strong> <span class="status-badge pending">${petData.requestStatus || 'Pending'}</span></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else {
+        // Pet Information View - Using CSS classes from request.css
+        const calculatedAge = petData.Birthdate ? calculateAgeString(petData.Birthdate) : "N/A";
+        
+        modalBody.innerHTML = `
+            <div class="edit-grid">
+                <div class="image-section">
+                    <div class="pet-image-container circle-crop" style="width: 200px; height: 200px; margin: 0 auto; border-radius: 50%; overflow: hidden; border: 3px solid var(--primary-purple); background: var(--bg-lavender); display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 80px;">🐾</span>
+                    </div>
+                </div>
+                <div class="details-section">
+                    <div id="detailsContent" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="field">
+                            <strong>Pet Name</strong>
+                            <p>${petData.Name || 'N/A'}</p>
+                        </div>
+                        <div class="field">
+                            <strong>Owner Name</strong>
+                            <p>${ownerDisplay}</p>
+                        </div>
+                        <div class="field">
+                            <strong>Species</strong>
+                            <p>${petData.Species || '—'}</p>
+                        </div>
+                        <div class="field">
+                            <strong>Breed</strong>
+                            <p>${petData.Breed || '—'}</p>
+                        </div>
+                        <div class="field">
+                            <strong>Color</strong>
+                            <p>${petData.Color || 'N/A'}</p>
+                        </div>
+                        <div class="field">
+                            <strong>Gender</strong>
+                            <p>${petData.Gender || '—'}</p>
+                        </div>
+                        <div class="field">
+                            <strong>Birthdate</strong>
+                            <p>${petData.Birthdate || '—'}</p>
+                        </div>
+                        <div class="field">
+                            <strong>Age</strong>
+                            <p>${calculatedAge}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
     
     document.getElementById('mainModal').style.display = 'flex';
 }
@@ -315,6 +377,7 @@ function confirmAction(actionType, appointmentId, petName) {
     const modal = document.getElementById('requestActionModal');
     const title = document.getElementById('requestActionTitle');
     const msg = document.getElementById('requestActionMessage');
+    const icon = document.getElementById('actionIcon');
     const btn = document.getElementById('btnConfirmRequest');
     
     if (!modal) return;
@@ -324,17 +387,49 @@ function confirmAction(actionType, appointmentId, petName) {
     if (actionType === 'approve') {
         title.innerText = "Approve Request";
         title.style.color = "#2d6a4f";
-        msg.innerHTML = `Are you sure you want to approve the request for "${petName}"?`;
+        
+        icon.innerHTML = `
+            <div style="width:70px;height:70px;border-radius:50%;background:#e8f5ee;display:flex;align-items:center;justify-content:center;margin:0 auto;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>
+            </div>
+        `;
+        
+        msg.innerHTML = `
+            <p style="margin-bottom: 10px;">You are about to <strong style="color:#2d6a4f;">approve</strong> the request for:</p>
+            <p style="font-size: 18px; font-weight: 700; color: var(--primary-purple); margin-bottom: 15px;">"${petName}"</p>
+            <p style="font-size: 13px; color: var(--text-muted);">This will process the request and notify the owner.</p>
+        `;
+        
         btn.innerText = "Approve";
+        btn.style.backgroundColor = "#40916c";
         btn.onclick = () => {
             closeModal('requestActionModal');
             processApproval(appointmentId);
         };
+        
     } else {
         title.innerText = "Decline Request";
         title.style.color = "#ff5e78";
-        msg.innerHTML = `Are you sure you want to decline the request for "${petName}"?`;
+        
+        icon.innerHTML = `
+            <div style="width:70px;height:70px;border-radius:50%;background:#fff0f3;display:flex;align-items:center;justify-content:center;margin:0 auto;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff5e78" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </div>
+        `;
+        
+        msg.innerHTML = `
+            <p style="margin-bottom: 10px;">You are about to <strong style="color:#ff5e78;">decline</strong> the request for:</p>
+            <p style="font-size: 18px; font-weight: 700; color: var(--primary-purple); margin-bottom: 15px;">"${petName}"</p>
+            <p style="font-size: 13px; color: var(--text-muted);">This action will remove the request permanently.</p>
+        `;
+        
         btn.innerText = "Decline";
+        btn.style.backgroundColor = "#ff5e78";
         btn.onclick = () => {
             closeModal('requestActionModal');
             processDecline(appointmentId);
@@ -378,7 +473,7 @@ async function processDecline(appointmentId) {
         console.log("Decline result:", result);
         
         alert("❌ Request declined successfully!");
-        loadRequests(); // Refresh the list
+        loadRequests();
         
     } catch (error) {
         console.error("Decline error:", error);
