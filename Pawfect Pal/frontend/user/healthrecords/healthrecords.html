@@ -80,49 +80,15 @@
                         <option value="All">All Species</option>
                         <option value="Dog">Dog</option>
                         <option value="Cat">Cat</option>
-                        <option value="Rabbit">Rabbit</option>
-                        <option value="Bird">Bird</option>
-                        <option value="Hamster">Hamster</option>
                     </select>
                 </div>
             </div>
-
+            <div id="healthRecordsContainer" class="health-records-container"></div>    
             <div id="emptyState" style="display: none; flex-direction: column; align-items: center; justify-content: center; padding: 100px 20px; text-align: center;">
                     <img src="user-health/no-record.png" alt="No results" style="width: 300px; height: 300px; object-fit: contain; margin-bottom: 20px; opacity: 0.6;">
                     <h3 style="color: var(--primary-purple); font-size: 24px; margin-bottom: 8px;">No Pets Found</h3>
                     <p style="color: var(--text-muted); font-size: 16px;">Try searching for a different name or changing the species filter.</p>
             </div>
-
-            <div class="health-card" data-species="">
-                <div class="card-pet-info">
-                    <div class="avatar-container">
-                        <img src="" alt="Pet" class="pet-img" id="displayPetImg">
-                    </div>
-                    <div class="pet-text">
-                        <h3 class="pet-name" id="displayPetName"></h3>
-                        <p class="pet-breed" id="displayPetBreed"></p>
-                        <div class="mini-stats">
-                            <div class="stat-item">
-                                <span class="stat-label">Weight</span>
-                                <span class="stat-val" id="displayWeight">--</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Last Visit</span>
-                                <span class="stat-val" id="displayLastVisit">--</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-health-data">
-                    </div>
-
-                <div class="card-actions">
-                    <button class="view-history-btn" onclick="openFullHistory()">
-                        <span>View Full History</span>
-                        <span class="arrow">›</span>
-                    </button>
-                </div>
             </div>
         </main>
 

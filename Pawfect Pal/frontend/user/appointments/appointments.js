@@ -60,8 +60,18 @@ async function loadAppointments() {
         const petsResponse = await fetch(`${API_BASE_URL}/api/Pet/user/${userId}?t=${Date.now()}`, {
             headers: getAuthHeaders()
         });
-        const pets = await petsResponse.json();
-        
+
+        if (handleUnauthorized(petsResponse)) return;
+
+        const petsText = await petsResponse.text();
+
+        console.log("PETS RESPONSE:", petsText);
+
+        let pets = [];
+
+        if (petsText) {
+            pets = JSON.parse(petsText);
+        }
         const petSpeciesMap = {};
         pets.forEach(pet => {
             const petId = pet.id || pet.petId;

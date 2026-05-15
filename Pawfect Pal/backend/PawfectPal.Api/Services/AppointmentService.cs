@@ -63,6 +63,15 @@ namespace PawfectPal.Api.Services
             {
                 _repo.InsertAppointmentService(appointmentId, serviceId);
             }
+            if (appointment.PaymentMode == "Cash")
+            {
+                decimal total = _repo.CalculateAppointmentTotal(appointmentId);
+
+                if (total > 0)
+                {
+                    _billingRepository.CreateBilling(appointmentId, total);
+                }
+            }          
         }
 
         public void Update(Appointment appointment)
@@ -99,21 +108,6 @@ namespace PawfectPal.Api.Services
                 throw new Exception("Invalid appointment status.");
 
             _repo.UpdateAppStatus(id, status);
-
-            if (status == "Completed")
-            {
-                bool billingExists = _billingRepository.BillingExists(id);
-
-                if (!billingExists)
-                {
-                    decimal total = _repo.CalculateAppointmentTotal(id);
-
-                    if (total > 0)
-                    {
-                        _billingRepository.CreateBilling(id, total);
-                    }
-                }
-            }
         }
 
         public void Delete(int id)

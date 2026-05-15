@@ -35,11 +35,26 @@ namespace PawfectPal.Api.Repositories
         public List<HealthRecord> GetByUserId(int userId)
         {
             string query = @"
-                SELECT hr.*
+                SELECT
+                    hr.*,
+                    p.Name AS PetName,
+                    p.Species,
+                    p.Breed,
+                    p.Age
                 FROM healthrecord hr
                 INNER JOIN pet p ON hr.PetID = p.PetID
+                INNER JOIN (
+                    SELECT
+                        PetID,
+                        MAX(DateRecorded) AS LatestDate
+                    FROM healthrecord
+                    GROUP BY PetID
+                ) latest
+                ON hr.PetID = latest.PetID
+                AND hr.DateRecorded = latest.LatestDate
                 WHERE p.UserID = @UserID
-                ORDER BY hr.DateRecorded DESC";
+                ORDER BY hr.DateRecorded DESC
+            ";
 
             var parameters = new List<MySqlParameter>
             {
@@ -62,11 +77,15 @@ namespace PawfectPal.Api.Repositories
             {
                 RecordId = Convert.ToInt32(row["RecordID"]),
                 PetId = Convert.ToInt32(row["PetID"]),
+                PetName = row["PetName"].ToString() ?? "",
+                Species = row["Species"].ToString() ?? "",
+                Breed = row["Breed"].ToString() ?? "",
+                Age = row["Age"] == DBNull.Value ? null : Convert.ToInt32(row["Age"]),                
                 Weight = row["Weight"] == DBNull.Value ? null : Convert.ToDecimal(row["Weight"]),
                 VaccinationStatus = row["VaccinationStatus"].ToString() ?? string.Empty,
                 Allergies = row["Allergies"].ToString() ?? string.Empty,
                 DateRecorded = row["DateRecorded"] == DBNull.Value ? null : Convert.ToDateTime(row["DateRecorded"]),
-                Notes = row["Notes"].ToString() ?? string.Empty
+                Notes = row["Notes"].ToString() ?? string.Empty,
             };
         }
     }
