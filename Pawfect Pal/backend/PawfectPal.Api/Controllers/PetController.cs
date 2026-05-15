@@ -65,6 +65,7 @@ namespace PawfectPal.Api.Controllers
             }
         }
         
+        [Authorize(Roles = "Admin")]
         [HttpGet("user/{userId}")]
         public IActionResult GetPetsByUserId(int userId)
         {
@@ -84,15 +85,28 @@ namespace PawfectPal.Api.Controllers
         {
             try
             {
+                int userId = int.Parse(
+                    User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+                );
+
+                pet.UserId = userId;
+
                 _petService.AddPet(pet);
-                return Ok(new { message = "Pet added successfully." });
+
+                return Ok(new
+                {
+                    message = "Pet added successfully."
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
             }
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public IActionResult UpdatePet(int id, [FromBody] Pet pet)
         {
@@ -108,6 +122,7 @@ namespace PawfectPal.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public IActionResult DeletePet(int id)
         {
