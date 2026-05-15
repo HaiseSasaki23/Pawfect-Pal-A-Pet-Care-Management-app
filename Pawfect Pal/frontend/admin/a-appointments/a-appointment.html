@@ -8,16 +8,16 @@
     <link rel="stylesheet" href="style.css">
     <style>
         .card-icon {
-            width: 44px;
-            height: 44px;
+            width: 64px;
+            height: 64px;
             flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .card-icon img {
-            width: 44px;
-            height: 44px;
+            width: 64px;
+            height: 64px;
             object-fit: contain;
         }
     </style>
@@ -67,7 +67,7 @@
                     </strong>
                     <span class="user-role">Admin</span>
                 </div>
-                <a href="#" class="nav-item logout-item" onclick="triggerLogout()">
+                <a href="javascript:void(0)" class="nav-item logout-item" onclick="triggerLogout()">
                     <img src="../../sidebar/logout-m.png" class="custom-icon-nav logout-icon" alt="Logout"> 
                     Logout 
                 </a>
@@ -76,7 +76,6 @@
 
         <main class="main-content">
 
-            <!-- SUMMARY CARDS (top) -->
             <div class="summary-grid">
                 <div class="summary-card card-total">
                     <div class="card-icon"><img src="img-appointment/total.png" alt="Total"></div>
@@ -131,6 +130,14 @@
                     </button>
                     <div class="filter-dropdown" id="serviceFilterDropdown" style="display:none; min-width:180px;"></div>
                 </div>
+                <div class="filter-btn-wrapper" style="position:relative;">
+                    <button class="filter-btn" id="btnPaymentFilter" style="width:100%;">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+                        <span id="paymentFilterLabel">All Payments</span>
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div class="filter-dropdown" id="paymentFilterDropdown" style="display:none; min-width:160px;"></div>
+                </div>
                 <button class="new-appt-btn" onclick="openNewAppointmentModal()">
                     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
                     New Appointment
@@ -148,6 +155,7 @@
                             <th>Service Type</th>
                             <th>Date &amp; Time</th>
                             <th>Status</th>
+                            <th>Balance</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -175,9 +183,8 @@
             </div>
         </div>
 
-        <!-- ─── NEW / EDIT APPOINTMENT MODAL ─── -->
         <div id="newAppointmentModal" class="modal-overlay">
-            <div class="modal-content" style="max-width:500px;">
+            <div class="modal-content" style="max-width:500px; max-height:90vh; overflow-y:auto;">
                 <div class="modal-header">
                     <h2 style="color:var(--primary-purple);">New Appointment</h2>
                     <button class="close-btn" onclick="closeNewAppointmentModal()">&times;</button>
@@ -219,8 +226,57 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Notes <span style="color:var(--text-muted);font-weight:500;">(optional)</span></label>
-                        <textarea id="apptNotes" class="form-input form-textarea" placeholder="Add any notes or special instructions..." oninput="onFormChange()"></textarea>
+                        <textarea id="apptNotes" class="form-input form-textarea" placeholder="Add any notes or special instructions..." oninput="onFormChange()" style="min-height:60px;"></textarea>
                     </div>
+
+                    <div style="background:#f8f0ff; border-radius:14px; padding:14px 16px; margin-bottom:14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <span style="font-size:13px; font-weight:700; color:#7c5cbf;">Total of Services</span>
+                            <span id="bookingTotal" style="font-size:17px; font-weight:700; color:#9d72d6;">&#x20B1;0</span>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom:10px;">
+                            <label class="form-label">Payment Method</label>
+                            <div class="payment-method-group">
+                                <label class="payment-method-option">
+                                    <input type="radio" name="paymentMethod" id="pmCash" value="Cash" checked onchange="onPaymentMethodChange(); onFormChange()">
+                                    💵 Cash
+                                </label>
+                                <label class="payment-method-option">
+                                    <input type="radio" name="paymentMethod" id="pmGcash" value="GCash" onchange="onPaymentMethodChange(); onFormChange()">
+                                    📱 GCash
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="gcash-fields form-row" id="gcashFields">
+                            <div class="form-group" style="flex:1; margin-bottom:0;">
+                                <label class="form-label">GCash Name</label>
+                                <input type="text" id="apptGcashName" class="form-input" placeholder="Account name" oninput="onFormChange()" style="padding:10px 14px; background:white;">
+                            </div>
+                            <div class="form-group" style="flex:1; margin-bottom:0;">
+                                <label class="form-label">Reference No.</label>
+                                <input type="text" id="apptGcashRef" class="form-input" placeholder="e.g. 1234567890" oninput="onFormChange()" style="padding:10px 14px; background:white;">
+                            </div>
+                        </div>
+
+                        <div class="form-row" style="margin-bottom:0;">
+                            <div class="form-group" style="flex:1; margin-bottom:0;">
+                                <label class="form-label">Amount Paid <span style="color:var(--text-muted);font-weight:500;">(&#x20B1;)</span></label>
+                                <input type="number" id="apptAmountPaid" class="form-input" min="0" placeholder="0"
+                                       oninput="onFormChange(); updateBookingTotal()" style="padding:10px 14px;">
+                            </div>
+                            <div class="form-group" style="flex:1; margin-bottom:0;">
+                                <label class="form-label">Payment Status</label>
+                                <select id="apptPaymentStatus" class="form-input" onchange="onFormChange()" style="padding:10px 14px;">
+                                    <option value="Unpaid">Unpaid</option>
+                                    <option value="Partial">Partial</option>
+                                    <option value="Paid">Paid</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                     <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px;">
                         <button onclick="closeNewAppointmentModal()" class="action-btn view-btn" style="border-radius:12px; height:46px; padding:0 22px;">Cancel</button>
                         <button onclick="submitNewAppointment()" class="submit-btn save-appt-btn" style="margin:0; padding:0 28px;">Save Appointment</button>
@@ -229,23 +285,21 @@
             </div>
         </div>
 
-        <!-- ─── UNSAVED CHANGES MODAL ─── -->
         <div id="unsavedModal" class="modal-overlay">
-            <div class="modal-content" style="max-width:400px; text-align:center;">
-                <div class="modal-header" style="justify-content:center; border:none;">
-                    <h2 style="color:var(--primary-purple); font-size:20px;">Unsaved Changes</h2>
+            <div class="modal-content" style="max-width:400px;text-align:center;">
+                <div class="modal-header" style="justify-content:center;border:none;padding-bottom:8px;">
+                    <h2 style="color:#f59e0b;font-size:20px;">⚠️ Unsaved Changes</h2>
                 </div>
                 <div class="modal-body">
-                    <p style="margin-bottom:25px; color:var(--text-dark);">You have unsaved changes. Are you sure you want to discard them?</p>
-                    <div style="display:flex; gap:10px; justify-content:center;">
-                        <button onclick="discardAndClose()" class="submit-btn" style="margin:0; background-color:#ff5e78; flex:1;">Discard</button>
-                        <button onclick="closeModal('unsavedModal')" class="action-btn view-btn" style="flex:1; border-radius:12px; height:48px;">Keep Editing</button>
+                    <p style="margin-bottom:25px;color:var(--text-dark);line-height:1.6;">You have unsaved changes. Are you sure you want to close without saving?</p>
+                    <div style="display:flex;gap:10px;justify-content:center;">
+                        <button id="unsavedDiscardBtn" onclick="discardAndClose()" class="submit-btn" style="margin:0;flex:1;background:#ff5e78;">Discard Changes</button>
+                        <button id="unsavedContinueBtn" onclick="closeModal('unsavedModal')" class="action-btn view-btn" style="flex:1;border-radius:12px;height:48px;font-weight:700;font-size:14px;">Keep Editing</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ─── MISSING FIELDS ALERT MODAL ─── -->
         <div id="alertModal" class="modal-overlay">
             <div class="modal-content" style="max-width:380px; text-align:center;">
                 <div class="modal-header" style="justify-content:center; border:none;">
@@ -258,7 +312,6 @@
             </div>
         </div>
 
-        <!-- ─── APPOINTMENT SAVED MODAL ─── -->
         <div id="apptSavedModal" class="modal-overlay">
             <div class="modal-content" style="max-width:420px; text-align:center;">
                 <div class="modal-header" style="justify-content:center; border:none; padding-bottom:0;">
@@ -272,20 +325,25 @@
                         <div class="saved-row"><span class="saved-lbl">Pet</span><span id="savedPet" class="saved-val"></span></div>
                         <div class="saved-row"><span class="saved-lbl">Service</span><span id="savedService" class="saved-val"></span></div>
                         <div class="saved-row"><span class="saved-lbl">Schedule</span><span id="savedDateTime" class="saved-val"></span></div>
+                        <div class="saved-row"><span class="saved-lbl">Total</span><span id="savedTotal" class="saved-val" style="font-weight:700; color:#9d72d6;"></span></div>
+                        <div class="saved-row"><span class="saved-lbl">Payment Method</span><span id="savedPaymentMethod" class="saved-val"></span></div>
+                        <div class="saved-row"><span class="saved-lbl">Amount Paid</span><span id="savedAmountPaid" class="saved-val"></span></div>
+                        <div class="saved-row"><span class="saved-lbl">Payment Status</span><span id="savedPaymentStatus" class="saved-val"></span></div>
+                        <div id="savedGcashRow" class="saved-row" style="display:none;"><span class="saved-lbl">GCash Name</span><span id="savedGcashName" class="saved-val"></span></div>
+                        <div id="savedGcashRefRow" class="saved-row" style="display:none;"><span class="saved-lbl">Reference No.</span><span id="savedGcashRef" class="saved-val"></span></div>
                     </div>
                     <button onclick="closeModal('apptSavedModal')" class="submit-btn" style="margin:20px 0 0; width:100%;">Done</button>
                 </div>
             </div>
         </div>
 
-        <!-- ─── VIEW APPOINTMENT MODAL ─── -->
         <div id="viewAppointmentModal" class="modal-overlay">
-            <div class="modal-content" style="max-width:480px;">
-                <div class="modal-header">
+            <div class="modal-content" style="max-width:480px; max-height:90vh; display:flex; flex-direction:column;">
+                <div class="modal-header" style="flex-shrink:0;">
                     <h2 style="color:var(--primary-purple);">Appointment Details</h2>
                     <button class="close-btn" onclick="closeViewModal()">&times;</button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="overflow-y:auto; flex:1;">
                     <div class="view-detail-grid">
                         <div class="view-row">
                             <span class="view-lbl">Appointment ID</span>
@@ -324,6 +382,38 @@
                                 <option value="Completed">Completed</option>
                             </select>
                         </div>
+                        <div class="view-row">
+                            <span class="view-lbl">Total</span>
+                            <span id="viewTotal" class="view-val" style="font-weight:700; color:#9d72d6;"></span>
+                        </div>
+                        <div class="view-row">
+                            <span class="view-lbl">Amount Paid</span>
+                            <span id="viewAmountPaid" class="view-val"></span>
+                        </div>
+                        <div class="view-row">
+                            <span class="view-lbl">Payment Method</span>
+                            <span id="viewPaymentMethod" class="view-val"></span>
+                        </div>
+                        <div id="viewGcashNameRow" class="view-row" style="display:none;">
+                            <span class="view-lbl">GCash Name</span>
+                            <span id="viewGcashName" class="view-val"></span>
+                        </div>
+                        <div id="viewGcashRefRow" class="view-row" style="display:none;">
+                            <span class="view-lbl">Reference No.</span>
+                            <span id="viewGcashRef" class="view-val"></span>
+                        </div>
+                        <div class="view-row">
+                            <span class="view-lbl">Payment Status</span>
+                            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                                <span id="viewPaymentStatus" class="view-val"></span>
+                                <a id="viewPayNowBtn" href="../a-payments/a-payments.html"
+                                   style="display:inline-flex; align-items:center; gap:5px; padding:5px 14px; background:#9d72d6; color:white; border-radius:10px; font-family:Quicksand,sans-serif; font-size:12px; font-weight:700; text-decoration:none; white-space:nowrap; transition:background 0.15s;"
+                                   onmouseover="this.style.background='#7c5cbf'" onmouseout="this.style.background='#9d72d6'">
+                                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+                                    Pay Now
+                                </a>
+                            </div>
+                        </div>
                         <div class="view-row view-row-notes">
                             <span class="view-lbl">Notes</span>
                             <span id="viewNotes" class="view-val view-notes-text"></span>
@@ -338,7 +428,6 @@
             </div>
         </div>
 
-        <!-- ─── COMPLETED APPOINTMENT MODAL ─── -->
         <div id="completedModal" class="modal-overlay">
             <div class="modal-content" style="max-width:420px; text-align:center;">
                 <div class="modal-header" style="justify-content:center; border:none; padding-bottom:0;">
@@ -353,6 +442,12 @@
                         <div class="saved-row"><span class="saved-lbl">Pet</span><span id="completedPet" class="saved-val"></span></div>
                         <div class="saved-row"><span class="saved-lbl">Service</span><span id="completedService" class="saved-val"></span></div>
                         <div class="saved-row"><span class="saved-lbl">Schedule</span><span id="completedDateTime" class="saved-val"></span></div>
+                        <div class="saved-row"><span class="saved-lbl">Total</span><span id="completedTotal" class="saved-val" style="font-weight:700; color:#9d72d6;"></span></div>
+                        <div class="saved-row"><span class="saved-lbl">Amount Paid</span><span id="completedAmountPaid" class="saved-val"></span></div>
+                        <div class="saved-row"><span class="saved-lbl">Payment Method</span><span id="completedPaymentMethod" class="saved-val"></span></div>
+                        <div class="saved-row"><span class="saved-lbl">Payment Status</span><span id="completedPaymentStatus" class="saved-val"></span></div>
+                        <div id="completedGcashRow" class="saved-row" style="display:none;"><span class="saved-lbl">GCash Name</span><span id="completedGcashName" class="saved-val"></span></div>
+                        <div id="completedGcashRefRow" class="saved-row" style="display:none;"><span class="saved-lbl">Reference No.</span><span id="completedGcashRef" class="saved-val"></span></div>
                         <div class="saved-row"><span class="saved-lbl">Notes</span><span id="completedNotes" class="saved-val"></span></div>
                     </div>
                     <button onclick="closeModal('completedModal')" class="submit-btn" style="margin:20px 0 0; width:100%; background:#2563eb;">Close</button>
@@ -362,15 +457,15 @@
 
         <!-- unsaved changes guard for the view modal edit -->
         <div id="unsavedViewModal" class="modal-overlay">
-            <div class="modal-content" style="max-width:400px; text-align:center;">
-                <div class="modal-header" style="justify-content:center; border:none;">
-                    <h2 style="color:var(--primary-purple); font-size:20px;">Unsaved Changes</h2>
+            <div class="modal-content" style="max-width:400px;text-align:center;">
+                <div class="modal-header" style="justify-content:center;border:none;padding-bottom:8px;">
+                    <h2 style="color:#f59e0b;font-size:20px;">⚠️ Unsaved Changes</h2>
                 </div>
                 <div class="modal-body">
-                    <p style="margin-bottom:25px; color:var(--text-dark);">You have unsaved changes. Are you sure you want to discard them?</p>
-                    <div style="display:flex; gap:10px; justify-content:center;">
-                        <button onclick="discardViewAndClose()" class="submit-btn" style="margin:0; background-color:#ff5e78; flex:1;">Discard</button>
-                        <button onclick="closeModal('unsavedViewModal')" class="action-btn view-btn" style="flex:1; border-radius:12px; height:48px;">Keep Editing</button>
+                    <p style="margin-bottom:25px;color:var(--text-dark);line-height:1.6;">You have unsaved changes. Are you sure you want to close without saving?</p>
+                    <div style="display:flex;gap:10px;justify-content:center;">
+                        <button onclick="discardViewAndClose()" class="submit-btn" style="margin:0;flex:1;background:#ff5e78;">Discard Changes</button>
+                        <button onclick="closeModal('unsavedViewModal')" class="action-btn view-btn" style="flex:1;border-radius:12px;height:48px;font-weight:700;font-size:14px;">Keep Editing</button>
                     </div>
                 </div>
             </div>
@@ -396,7 +491,7 @@
 
     </div>
 
-    <script src="../data/auth.js"></script>
+    <script src="../../data/auth.js"></script>
     <script src="a-appointment.js"></script>
 </body>
 </html>

@@ -417,7 +417,7 @@ body {
     transition: background 0.15s;
 }
 .table-card tbody tr:last-child { border-bottom: none; }
-.table-card tbody tr:hover { background: #faf9ff; }
+.table-card tbody tr:hover { background: var(--bg-lavender); }
 
 .table-card tbody td {
     padding: 13px 18px;
@@ -480,7 +480,7 @@ body {
     cursor: pointer;
     transition: background 0.15s;
 }
-.action-eye:hover { background: #ddd6fe; }
+.action-eye:hover { background: var(--bg-lavender); }
 .action-eye svg { color: var(--primary-purple); }
 
 /* ── New Appointment form ── */
@@ -689,11 +689,138 @@ body {
     background: var(--bg-lavender);
     color: var(--primary-purple);
 }
+/* ── Payment status badges ── */
+.ps-paid {
+    background: #dcfce7;
+    color: #16a34a;
+}
+.ps-partial {
+    background: #fef9c3;
+    color: #a16207;
+}
+.ps-unpaid {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* ── Compact modal form spacing ── */
+#newAppointmentModal .form-group {
+    margin-bottom: 10px;
+}
+#newAppointmentModal .form-input {
+    padding: 9px 12px;
+}
+#newAppointmentModal .modal-body {
+    padding-top: 8px;
+    padding-bottom: 12px;
+}
+
+/* ── Service dropdown item with price ── */
+.svc-dd-item {
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.12s;
+}
+.svc-dd-item:hover {
+    background: var(--bg-lavender);
+    color: var(--primary-purple);
+}
 
 .svc-dd-item input[type=checkbox] {
+    flex-shrink: 0;
     accent-color: var(--primary-purple);
     width: 15px;
     height: 15px;
     cursor: pointer;
+}
+
+/* ── Custom thin scrollbar for modals ── */
+.modal-content::-webkit-scrollbar,
+.modal-body::-webkit-scrollbar {
+    width: 4px;
+}
+.modal-content::-webkit-scrollbar-track,
+.modal-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+.modal-content::-webkit-scrollbar-thumb,
+.modal-body::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.08);
+    border-radius: 10px;
+}
+.modal-content::-webkit-scrollbar-thumb:hover,
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(0,0,0,0.15);
+}
+
+/* ── Table wrapper thin scrollbar ── */
+.table-card::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+}
+.table-card::-webkit-scrollbar-track {
+    background: transparent;
+}
+.table-card::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.08);
+    border-radius: 10px;
+}
+.table-card::-webkit-scrollbar-thumb:hover {
+    background: rgba(0,0,0,0.15);
+}
+
+/* ── Firefox scrollbar ── */
+.modal-body,
+.modal-content,
+.table-card {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.1) transparent;
+}
+/* ── Payment Method (Cash / GCash) ── */
+.payment-method-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.payment-method-option {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border: 1.5px solid #ece9f8;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dark);
+    background: #fafafa;
+    transition: border-color 0.2s, background 0.2s;
+    user-select: none;
+}
+.payment-method-option input[type=radio] {
+    accent-color: var(--primary-purple);
+    width: 15px;
+    height: 15px;
     flex-shrink: 0;
+}
+.payment-method-option:has(input:checked) {
+    border-color: var(--primary-purple);
+    background: #f5f0ff;
+    color: var(--primary-purple);
+}
+.gcash-fields {
+    display: none;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.gcash-fields.visible {
+    display: flex;
 }
