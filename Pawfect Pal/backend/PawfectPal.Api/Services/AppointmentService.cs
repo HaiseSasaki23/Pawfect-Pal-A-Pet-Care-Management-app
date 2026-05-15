@@ -8,17 +8,20 @@ namespace PawfectPal.Api.Services
         private readonly AppointmentRepository _repo;
         private readonly PetRepository _petRepo;
         private readonly BillingRepository _billingRepository;
-
+        private readonly PaymentRepository _paymentRepository; 
         public AppointmentService(
             AppointmentRepository repo,
             PetRepository petRepo,
-            BillingRepository billingRepository)
+            BillingRepository billingRepository,
+            PaymentRepository paymentRepository
+            )
         {
             _repo = repo;
             _petRepo = petRepo;
             _billingRepository = billingRepository;
+            _paymentRepository = paymentRepository;
         }
-        public List<Appointment> GetAll()
+        public List<dynamic> GetAll()
         {
             return _repo.GetAllAppointments();
         }
@@ -63,14 +66,41 @@ namespace PawfectPal.Api.Services
             {
                 _repo.InsertAppointmentService(appointmentId, serviceId);
             }
-            if (appointment.PaymentMode == "Cash")
-            {
-                decimal total = _repo.CalculateAppointmentTotal(appointmentId);
+            if (appointment.PaymentMode == "Cash") {
+                decimal total =
+                    _repo.CalculateAppointmentTotal(
+                        appointmentId
+                    );
 
                 if (total > 0)
                 {
-                    _billingRepository.CreateBilling(appointmentId, total);
+                    _billingRepository.CreateBilling(appointmentId,total);
                 }
+                if (appointment.AmountPaid > 0)
+                {
+                    var billing =_billingRepository.GetBillingByAppointmentId(appointmentId);
+
+                    if (billing != null)
+                    {
+                        var payment = new Payment
+                        {
+                            BillingId = billing.BillingId,
+                            PaymentMethod = appointment.PaymentMethod,
+
+                            ReferenceNumber = appointment.GcashRef,
+
+                            PaidAmount = appointment.AmountPaid
+                        };
+
+                        _paymentRepository.InsertPayment(payment);
+
+                        decimal remaining = total - appointment.AmountPaid;
+
+                        string status = remaining <= 0 ? "Paid" : "Partial";
+
+                        _billingRepository.UpdateBillingBalances(billing.BillingId,appointment.AmountPaid,remaining,status);
+                    }                              
+                }                
             }          
         }
 

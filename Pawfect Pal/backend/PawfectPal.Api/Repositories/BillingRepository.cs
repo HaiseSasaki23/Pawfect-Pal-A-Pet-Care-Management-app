@@ -278,6 +278,69 @@ namespace PawfectPal.Api.Repositories
                 CreatedAt = Convert.ToDateTime(row["CreatedAt"])
             };
         }   
+        public Billing? GetBillingByAppointmentId(
+            int appointmentId
+        )
+        {
+            string query = @"
+                SELECT *
+                FROM billing
+                WHERE AppointmentID = @AppointmentID
+                LIMIT 1
+            ";
+
+            var parameters =
+                new List<MySqlParameter>
+                {
+                    new(
+                        "@AppointmentID",
+                        appointmentId
+                    )
+                };
+
+            DataTable dt =
+                _db.ExecuteQuery(
+                    query,
+                    parameters
+                );
+
+            if (dt.Rows.Count == 0)
+                return null;
+
+            DataRow row = dt.Rows[0];
+
+            return new Billing
+            {
+                BillingId =
+                    Convert.ToInt32(
+                        row["BillingID"]
+                    ),
+
+                AppointmentId =
+                    Convert.ToInt32(
+                        row["AppointmentID"]
+                    ),
+
+                TotalAmount =
+                    Convert.ToDecimal(
+                        row["TotalAmount"]
+                    ),
+
+                AmountPaid =
+                    Convert.ToDecimal(
+                        row["AmountPaid"]
+                    ),
+
+                RemainingBalance =
+                    Convert.ToDecimal(
+                        row["RemainingBalance"]
+                    ),
+
+                BillingStatus =
+                    row["BillingStatus"]
+                        .ToString() ?? ""
+            };
+        }        
         public void UpdateBillingBalances(
             int billingId,
             decimal amountPaid,

@@ -232,5 +232,33 @@ namespace PawfectPal.Api.Repositories
             object? result = _db.ExecuteScalar(query, parameters);
             return Convert.ToInt32(result) > 0;
         }
+
+        public List<User> GetAllUsers()
+        {
+            string query = @"
+                SELECT *
+                FROM user
+                WHERE Role = 'User'
+                ORDER BY OwnerFName ASC
+            ";
+
+            DataTable dt = _db.ExecuteQuery(query);
+
+            List<User> users = new();
+
+            foreach (DataRow row in dt.Rows)
+            {
+                users.Add(new User
+                {
+                    UserId = Convert.ToInt32(row["UserID"]),
+                    OwnerFName = row["OwnerFName"].ToString() ?? "",
+                    OwnerLName = row["OwnerLName"].ToString() ?? "",
+                    Email = row["Email"].ToString() ?? "",
+                    UserName = row["UserName"].ToString() ?? ""
+                });
+            }
+
+            return users;
+        }        
     }
 }
