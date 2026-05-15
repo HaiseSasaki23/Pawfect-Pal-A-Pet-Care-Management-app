@@ -16,30 +16,30 @@ namespace PawfectPal.Api.Repositories
 
         public int InsertAppointment(Appointment appointment)
         {
-        string query = @"
-            INSERT INTO appointment
-            (
-                UserID,
-                PetID,
-                AppointmentDate,
-                RequestStatus,
-                AppStatus,
-                Notes,
-                PaymentMode
-            )
-            VALUES
-            (
-                @UserID,
-                @PetID,
-                @AppointmentDate,
-                @RequestStatus,
-                @AppStatus,
-                @Notes,
-                @PaymentMode
-            );
+            string query = @"
+                INSERT INTO appointment
+                (
+                    UserID,
+                    PetID,
+                    AppointmentDate,
+                    RequestStatus,
+                    AppStatus,
+                    Notes,
+                    PaymentMode
+                )
+                VALUES
+                (
+                    @UserID,
+                    @PetID,
+                    @AppointmentDate,
+                    @RequestStatus,
+                    @AppStatus,
+                    @Notes,
+                    @PaymentMode
+                );
 
-            SELECT LAST_INSERT_ID();
-        ";
+                SELECT LAST_INSERT_ID();
+            ";
 
             var parameters = new List<MySqlParameter>
             {
@@ -76,16 +76,66 @@ namespace PawfectPal.Api.Repositories
             _db.ExecuteNonQuery(query, parameters);
         }
 
-        public List<Appointment> GetAllAppointments()
+        // ── FIXED: JOINs pet and user tables to return pet name + owner name ──
+        public List<dynamic> GetAllAppointments()
         {
-            string query = "SELECT * FROM appointment";
+            string query = @"
+                SELECT
+                    a.AppointmentID,
+                    a.UserID,
+                    a.PetID,
+                    p.Name          AS PetName,
+                    u.OwnerFName,
+                    u.OwnerLName,
+                    a.AppointmentDate,
+                    a.RequestStatus,
+                    a.AppStatus,
+                    a.PaymentMode,
+                    a.Notes,
+                    GROUP_CONCAT(s.ServiceType ORDER BY s.ServiceType SEPARATOR ', ') AS Services,
+                    GROUP_CONCAT(s.ServiceID   ORDER BY s.ServiceType SEPARATOR ',')  AS ServiceIds
+                FROM appointment a
+                JOIN pet  p ON a.PetID  = p.PetID
+                JOIN user u ON a.UserID = u.UserID
+                LEFT JOIN appointment_services aps ON a.AppointmentID = aps.AppointmentID
+                LEFT JOIN service s ON aps.ServiceID = s.ServiceID
+                GROUP BY
+                    a.AppointmentID,
+                    a.UserID,
+                    a.PetID,
+                    p.Name,
+                    u.OwnerFName,
+                    u.OwnerLName,
+                    a.AppointmentDate,
+                    a.RequestStatus,
+                    a.AppStatus,
+                    a.PaymentMode,
+                    a.Notes
+                ORDER BY a.AppointmentDate DESC
+            ";
+
             DataTable dt = _db.ExecuteQuery(query);
 
-            List<Appointment> list = new();
+            List<dynamic> list = new();
 
             foreach (DataRow row in dt.Rows)
             {
-                list.Add(MapAppointment(row));
+                list.Add(new
+                {
+                    appointmentId   = Convert.ToInt32(row["AppointmentID"]),
+                    userId          = Convert.ToInt32(row["UserID"]),
+                    petId           = Convert.ToInt32(row["PetID"]),
+                    petName         = row["PetName"].ToString(),
+                    ownerFName      = row["OwnerFName"].ToString(),
+                    ownerLName      = row["OwnerLName"].ToString(),
+                    appointmentDate = Convert.ToDateTime(row["AppointmentDate"]),
+                    requestStatus   = row["RequestStatus"].ToString(),
+                    appStatus       = row["AppStatus"].ToString(),
+                    paymentMode     = row["PaymentMode"].ToString(),
+                    notes           = row["Notes"] == DBNull.Value ? null : row["Notes"].ToString(),
+                    services        = row["Services"] == DBNull.Value ? "" : row["Services"].ToString(),
+                    serviceIds      = row["ServiceIds"] == DBNull.Value ? "" : row["ServiceIds"].ToString()
+                });
             }
 
             return list;
@@ -142,13 +192,13 @@ namespace PawfectPal.Api.Repositories
             {
                 list.Add(new
                 {
-                    appointmentId = Convert.ToInt32(row["AppointmentID"]),
-                    petId = Convert.ToInt32(row["PetID"]),
-                    petName = row["PetName"].ToString(),
+                    appointmentId   = Convert.ToInt32(row["AppointmentID"]),
+                    petId           = Convert.ToInt32(row["PetID"]),
+                    petName         = row["PetName"].ToString(),
                     appointmentDate = Convert.ToDateTime(row["AppointmentDate"]),
-                    appStatus = row["AppStatus"].ToString(),
-                    services = row["Services"]?.ToString() ?? "",
-                    serviceIds = row["ServiceIds"]?.ToString() ?? ""
+                    appStatus       = row["AppStatus"].ToString(),
+                    services        = row["Services"]?.ToString() ?? "",
+                    serviceIds      = row["ServiceIds"]?.ToString() ?? ""
                 });
             }
 
@@ -181,10 +231,7 @@ namespace PawfectPal.Api.Repositories
             {
                 foreach (var serviceId in appointment.ServiceIds)
                 {
-                    InsertAppointmentService(
-                        appointment.AppointmentId,
-                        serviceId
-                    );
+                    InsertAppointmentService(appointment.AppointmentId, serviceId);
                 }
             }
         }
@@ -205,6 +252,7 @@ namespace PawfectPal.Api.Repositories
 
             _db.ExecuteNonQuery(query, parameters);
         }
+
         public void UpdateAppStatus(int id, string status)
         {
             string query = @"
@@ -221,6 +269,7 @@ namespace PawfectPal.Api.Repositories
 
             _db.ExecuteNonQuery(query, parameters);
         }
+
         public void DeleteAppointment(int id)
         {
             DeleteAppointmentServices(id);
@@ -252,8 +301,7 @@ namespace PawfectPal.Api.Repositories
             string query = @"
                 SELECT SUM(s.Price)
                 FROM appointment_services aps
-                INNER JOIN service s
-                    ON aps.ServiceID = s.ServiceID
+                INNER JOIN service s ON aps.ServiceID = s.ServiceID
                 WHERE aps.AppointmentID = @AppointmentID
             ";
 
@@ -274,34 +322,48 @@ namespace PawfectPal.Api.Repositories
         {
             return new Appointment
             {
-                AppointmentId =
-                    Convert.ToInt32(row["AppointmentID"]),
-
-                UserId =
-                    Convert.ToInt32(row["UserID"]),
-
-                PetId =
-                    Convert.ToInt32(row["PetID"]),
-
-                AppointmentDate =
-                    Convert.ToDateTime(row["AppointmentDate"]),
-
-                RequestStatus =
-                    row["RequestStatus"].ToString() ?? "",
-
-                AppStatus =
-                    row["AppStatus"].ToString() ?? "",
-
-                PaymentMode =
-                    row["PaymentMode"].ToString() ?? "Cash",
-
-                Notes =
-                    row["Notes"] == DBNull.Value
-                        ? null
-                        : row["Notes"].ToString(),
-
-                ServiceIds = new List<int>()
+                AppointmentId   = Convert.ToInt32(row["AppointmentID"]),
+                UserId          = Convert.ToInt32(row["UserID"]),
+                PetId           = Convert.ToInt32(row["PetID"]),
+                AppointmentDate = Convert.ToDateTime(row["AppointmentDate"]),
+                RequestStatus   = row["RequestStatus"].ToString() ?? "",
+                AppStatus       = row["AppStatus"].ToString() ?? "",
+                PaymentMode     = row["PaymentMode"].ToString() ?? "Cash",
+                Notes           = row["Notes"] == DBNull.Value ? null : row["Notes"].ToString(),
+                ServiceIds      = new List<int>()
             };
+        }
+
+        public List<dynamic> GetTomorrowAppointments()
+        {
+            List<dynamic> list = new();
+
+            using var conn = _db.GetConnection();
+
+            string sql = @"
+                SELECT 
+                    a.AppointmentID,
+                    p.Name AS PetName
+                FROM appointment a
+                INNER JOIN pet p ON a.PetID = p.PetID
+                WHERE DATE(a.AppointmentDate) = DATE(DATE_ADD(NOW(), INTERVAL 1 DAY))
+            ";
+
+            using var cmd = new MySqlCommand(sql, conn);
+            conn.Open();
+
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                list.Add(new
+                {
+                    AppointmentId = Convert.ToInt32(reader["AppointmentID"]),
+                    PetName       = reader["PetName"].ToString()
+                });
+            }
+
+            return list;
         }
     }
 }

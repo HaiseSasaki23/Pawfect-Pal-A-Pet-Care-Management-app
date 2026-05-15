@@ -40,20 +40,20 @@ async function loadAppointments() {
         if (handleUnauthorized(response)) return;    
 
         const text = await response.text();
-
         console.log("RAW RESPONSE:", text);
 
         let data = [];
-
         if (text) {
             data = JSON.parse(text);
         }        
 
         const container = document.getElementById("appointmentList");
+        if (!container) return;
+        
         container.innerHTML = "";
 
         if (!data.length) {
-            container.innerHTML = "<p>No appointments found.</p>";
+            container.innerHTML = "<p style='text-align:center; padding:40px;'>No appointments found.</p>";
             return;
         }
 
@@ -64,14 +64,13 @@ async function loadAppointments() {
         if (handleUnauthorized(petsResponse)) return;
 
         const petsText = await petsResponse.text();
-
         console.log("PETS RESPONSE:", petsText);
 
         let pets = [];
-
         if (petsText) {
             pets = JSON.parse(petsText);
         }
+        
         const petSpeciesMap = {};
         pets.forEach(pet => {
             const petId = pet.id || pet.petId;
@@ -82,7 +81,6 @@ async function loadAppointments() {
             const card = document.createElement("div");
             card.className = "appointment-card";
 
-          
             const species = petSpeciesMap[app.petId] || "Unknown";
 
             let servicesText = app.services || "N/A";
@@ -103,19 +101,29 @@ async function loadAppointments() {
             });
             const formattedDate = `${datePart} | ${timePart}`;
 
+            // FIX: Use requestStatus instead of appStatus
+            // The admin updates requestStatus when approving/declining
+            let status = app.requestStatus || app.appStatus || "Pending";
+            
+            // Map status for display
+            let displayStatus = status;
+            let statusClass = status.toLowerCase();
+            
+            console.log(`Appointment ${app.appointmentId} - Status: ${status}`);
+
             card.innerHTML = `
-            <span></span>
-            <span>
-                ${app.petName}<br>
-                <small style="color: #999; font-size: 11px;">${species}</small>
-            </span>
-            <span>${servicesText}</span>
-            <span>${formattedDate}</span>
-            <span class="status-badge ${(app.appStatus || "pending").toLowerCase()}">${app.appStatus || "Pending"}</span>
+                <span></span>
+                <span>
+                    ${app.petName}<br>
+                    <small style="color: #999; font-size: 11px;">${species}</small>
+                </span>
+                <span>${servicesText}</span>
+                <span>${formattedDate}</span>
+                <span class="status-badge ${statusClass}">${displayStatus}</span>
             `;
 
             card.setAttribute("data-pet", (app.petName || "").toLowerCase());
-            card.setAttribute("data-status", (app.appStatus || "").toLowerCase());
+            card.setAttribute("data-status", status.toLowerCase());
             card.setAttribute("data-species", species.toLowerCase());
             
             let serviceIds = app.serviceIds || [];
