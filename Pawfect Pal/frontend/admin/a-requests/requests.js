@@ -1,54 +1,34 @@
 const modal = document.getElementById('mainModal');
 const confirmModal = document.getElementById('confirmModal');
 
-function triggerLogout() {
-    const confirmMessage = document.getElementById("confirmMessage");
-    const confirmBtn = document.getElementById("btnConfirmDelete");
-    const modal = document.getElementById("confirmModal");
-
-    if (!confirmMessage || !confirmBtn || !modal) {
-        if (confirm("Are you sure you want to logout?")) {
-            logoutNow();
-        }
-        return;
-    }
-
-    confirmMessage.innerText = "Are you sure you want to log out of Pawfect Pal?";
-    confirmBtn.innerText = "Logout";
-    confirmBtn.style.backgroundColor = "#ff5e78";
-    confirmBtn.onclick = logoutNow;
-
-    modal.style.display = "flex";
-}
-
-function logoutNow() {
-    localStorage.removeItem("userId");
-    localStorage.removeItem("userName");
-    localStorage.removeItem("ownerFName");
-    localStorage.removeItem("ownerLName");
-    localStorage.removeItem("role");
-
-    window.location.href = "../../login/login.html";
-}
-
 document.addEventListener("DOMContentLoaded", () => {
     if (typeof initImageLoading === "function") initImageLoading();
     
     const userNameEl = document.getElementById('UserName');
     if (userNameEl) userNameEl.textContent = localStorage.getItem("userName") || "Admin User";
 
-    // 2. FORC
-    loadRequestData([]); 
+    const requests = [];
+
+    const pendingEl  = document.getElementById('pendingCount');
+    const approvedEl = document.getElementById('approvedCount');
+    const declineEl  = document.getElementById('declineCount');
+    const totalEl    = document.getElementById('totalRequestCount');
+
+    if (pendingEl)  pendingEl.textContent  = 0;
+    if (approvedEl) approvedEl.textContent = 0;
+    if (declineEl)  declineEl.textContent  = 0;
+    if (totalEl)    totalEl.textContent    = 0;
+
+    loadRequestData(requests);
+    populateOwnerFilter(requests);
 
     const searchInput = document.getElementById('requestSearchInput');
     const ownerFilter = document.getElementById('ownerFilter');
-    const typeFilter = document.getElementById('requestTypeFilter');
+    const typeFilter  = document.getElementById('requestTypeFilter');
 
     if (searchInput) searchInput.addEventListener('keyup', applyAllFilters);
     if (ownerFilter) ownerFilter.addEventListener('change', applyAllFilters);
-    if (typeFilter) typeFilter.addEventListener('change', applyAllFilters);
-    
-    console.log("Empty state forced and listeners attached.");
+    if (typeFilter)  typeFilter.addEventListener('change', applyAllFilters);
 });
 
 
@@ -81,18 +61,14 @@ function applyAllFilters() {
         const fullName = (fName + " " + lName).trim();
         const fullNameLower = fullName.toLowerCase();
 
-        // 1. mandatory type (acts as the primary gatekeeper)
         let matchesType = (typeVal === 'all');
         if (typeVal === 'pet') matchesType = typeText.includes('pet');
         if (typeVal === 'appointment') matchesType = typeText.includes('appt');
 
-        // 2. search (automatically "passes" if search is empty)
         const matchesSearch = searchVal === "" || petName.includes(searchVal) || fullNameLower.includes(searchVal);
 
-        // 3. owner (automatically "passes" if dropdown is empty)
         const matchesOwner = ownerDropdownVal === "" || fullName === ownerDropdownVal;
 
-        // 4. service check
         let matchesService = true;
         if (selectedServices.length > 0) {
             if (typeText.includes('appt')) {
@@ -110,14 +86,6 @@ function applyAllFilters() {
         const shouldShow = matchesType && matchesSearch && matchesOwner && matchesService;
         row.style.display = shouldShow ? "" : "none";
     });
-}
-
-function toggleAppointmentFilters(value) {
-    const appointmentUI = document.getElementById('appointmentFilters');
-    if (appointmentUI) {
-        appointmentUI.style.display = (value === 'appointment') ? 'block' : 'none';
-    }
-    applyAllFilters(); 
 }
 
 function viewPetDetails(petData, type = 'pet') {
@@ -266,7 +234,7 @@ function toggleEditMode() {
         </div>
     `;
     
-    // 2. re-attach image manipulation listeners
+    // re-attach image manipulation listeners
     window.addEventListener('mousemove', dragImage);
     window.addEventListener('mouseup', endDrag);
     calculateAgeString(activePetData.Birthdate);
@@ -331,30 +299,6 @@ function updateImageTransform() {
     if(img) img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${activeScale})`;
 }
 
-function confirmEditAction(actionType) {
-    const modal = document.getElementById('requestActionModal');
-    const title = document.getElementById('requestActionTitle');
-    const msg = document.getElementById('requestActionMessage');
-    const btn = document.getElementById('btnConfirmRequest');
-
-    modal.style.display = 'flex';
-
-    if (actionType === 'save') {
-        title.innerText = "Confirm Update";
-        msg.innerText = "Are you sure you want to save these changes to the pet's profile?";
-        btn.style.backgroundColor = "var(--primary-purple)";
-        btn.onclick = () => { location.reload(); }; 
-    } else {
-        title.innerText = "Discard Changes";
-        msg.innerText = "You have unsaved changes. Are you sure you want to go back?";
-        btn.style.backgroundColor = "#ff5e78";
-        btn.onclick = () => { 
-            closeModal('requestActionModal'); 
-            viewPetDetails(activePetData); 
-        };
-    }
-}
-
 function calculateAgeString(birthdateString) {
     const birthDate = new Date(birthdateString);
     const today = new Date();
@@ -369,7 +313,19 @@ function calculateAgeString(birthdateString) {
 
 function handleCloseEdit() {
     if (hasUnsavedChanges()) {
-        confirmEditAction('cancel'); 
+        const unsavedModal = document.getElementById('unsavedModal');
+        const discardBtn = document.getElementById('unsavedDiscardBtn');
+        const continueBtn = document.getElementById('unsavedContinueBtn');
+
+        unsavedModal.style.display = 'flex';
+
+        discardBtn.onclick = () => {
+            closeModal('unsavedModal');
+            closeModal('mainModal');
+        };
+        continueBtn.onclick = () => {
+            closeModal('unsavedModal');
+        };
     } else {
         closeModal('mainModal');
     }
@@ -425,15 +381,45 @@ function confirmEditAction(actionType) {
             location.reload(); 
         };
     } else {
-        title.innerText = "Discard Changes";
-        title.style.color = "#ff5e78"; 
-        msg.innerText = "You have unsaved changes. Are you sure you want to discard them and go back?";
-        btn.innerText = "Discard Changes";
-        btn.style.backgroundColor = "#ff5e78";
-        btn.onclick = () => { 
-            closeModal('requestActionModal'); 
-            closeModal('mainModal'); 
+        closeModal('requestActionModal');
+        const unsavedModal = document.getElementById('unsavedModal');
+        const discardBtn = document.getElementById('unsavedDiscardBtn');
+        const continueBtn = document.getElementById('unsavedContinueBtn');
+
+        unsavedModal.style.display = 'flex';
+
+        discardBtn.onclick = () => {
+            closeModal('unsavedModal');
+            closeModal('mainModal');
         };
+        continueBtn.onclick = () => {
+            closeModal('unsavedModal');
+        };
+    }
+}
+
+function confirmAction(actionType, petId, petName) {
+    const modal = document.getElementById('requestActionModal');
+    const title = document.getElementById('requestActionTitle');
+    const msg = document.getElementById('requestActionMessage');
+    const btn = document.getElementById('btnConfirmRequest');
+
+    modal.style.display = 'flex';
+
+    if (actionType === 'approve') {
+        title.innerText = "Approve Request";
+        title.style.color = "#2d6a4f";
+        msg.innerText = `Are you sure you want to approve the request for "${petName}"?`;
+        btn.style.backgroundColor = "#40916c";
+        btn.innerText = "Approve";
+        btn.onclick = () => { closeModal('requestActionModal'); processApproval(petId); };
+    } else {
+        title.innerText = "Decline Request";
+        title.style.color = "#ff5e78";
+        msg.innerText = `Are you sure you want to decline the request for "${petName}"? This cannot be undone.`;
+        btn.style.backgroundColor = "#ff5e78";
+        btn.innerText = "Decline";
+        btn.onclick = () => { closeModal('requestActionModal'); processDecline(petId); };
     }
 }
 
@@ -505,7 +491,7 @@ function loadRequestData(dataArray) {
         row.setAttribute('ownerFName', item.ownerFName || "");
         row.setAttribute('ownerLName', item.ownerLName || "");
 
-        // determine if it is a Pet Registration or Appointment
+        // determines if it is a pet registration or appointment
         const typeLabel = item.type === 'pet' ? 'PET' : 'APPT';
         const labelStyle = item.type === 'pet' ? 
             'background: #f0e6ff; color: #9d72d6;' : 
@@ -520,9 +506,21 @@ function loadRequestData(dataArray) {
             <td style="padding: 15px;">${item.Date || 'N/A'}</td>
             <td style="padding: 15px;">
                 <div style="display: flex; gap: 8px;">
-                    <button class="action-btn view-btn" onclick='viewPetDetails(${JSON.stringify(item)}, "${item.type}")'>🔍</button>
-                    <button class="action-btn" style="background: #e8f5ee; color: #2d6a4f;" onclick="confirmAction('approve', ${item.PetID}, '${item.Name}')">✔</button>
-                    <button class="action-btn" style="background: #ffe0e6; color: #ff5e78;" onclick="confirmAction('decline', ${item.PetID}, '${item.Name}')">✖</button>
+                    <button class="action-btn-circle btn-details" onclick='viewPetDetails(${JSON.stringify(item)}, "${item.type}")' title="View Details">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                        </svg>
+                    </button>
+                    <button class="action-btn-circle btn-approve" onclick="confirmAction('approve', ${item.PetID}, '${item.Name}')" title="Approve">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                    </button>
+                    <button class="action-btn-circle btn-decline" onclick="confirmAction('decline', ${item.PetID}, '${item.Name}')" title="Decline">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                        </svg>
+                    </button>
                 </div>
             </td>
         `;

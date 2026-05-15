@@ -1,9 +1,20 @@
+const SERVICE_PRICES = {
+    'Check-up':    500,
+    'Vaccination': 1200,
+    'Deworming':   350,
+    'Grooming':    1500,
+};
+
+function calcTotal(services) {
+    return (services || []).reduce((sum, s) => sum + (SERVICE_PRICES[s] || 0), 0);
+}
+
 let appointments = [];
 let apptIdCounter = 1000;
 
 const ALL_SERVICES = ['Check-up', 'Vaccination', 'Deworming', 'Grooming'];
 
-let activeFilters = { search: '', date: '', status: '', services: [] };
+let activeFilters = { search: '', date: '', status: '', services: [], payment: '' };
 
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
@@ -18,6 +29,14 @@ let viewEditActive = false;
 
 function onFormChange() { formDirty = true; }
 function onViewEditChange() { viewEditDirty = true; }
+
+function onPaymentMethodChange() {
+    const gcash = document.getElementById('pmGcash')?.checked;
+    const gcashFields = document.getElementById('gcashFields');
+    if (gcashFields) {
+        gcashFields.classList.toggle('visible', !!gcash);
+    }
+}
 
 function openNewAppointmentModal() {
     editMode   = false;
@@ -138,6 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     buildStatusDropdown();
     buildServiceFilterDropdown();
+    buildPaymentFilterDropdown();
 
     // no past dates for new appts
     const dateInput = document.getElementById('apptDate');
@@ -181,10 +201,12 @@ function buildServiceDropdown(btnId, listId, displayId, isViewModal) {
     ALL_SERVICES.forEach(s => {
         const item = document.createElement('label');
         item.className = 'svc-dd-item';
-        item.innerHTML = `<input type="checkbox" value="${s}"><span>${s}</span>`;
+        const price = SERVICE_PRICES[s] ? ` <span style="color:#9d72d6;font-size:11px;font-weight:700;margin-left:auto;">₱${SERVICE_PRICES[s].toLocaleString()}</span>` : '';
+        item.innerHTML = `<input type="checkbox" value="${s}"><span style="flex:1;">${s}</span>${price}`;
+        item.style.cssText = 'display:flex;align-items:center;gap:6px;';
         item.querySelector('input').addEventListener('change', () => {
             updateServiceDisplay(btnId, listId, displayId);
-            if (isViewModal) onViewEditChange(); else onFormChange();
+            if (isViewModal) onViewEditChange(); else { onFormChange(); updateBookingTotal(); }
         });
         list.appendChild(item);
     });
@@ -279,7 +301,6 @@ function buildServiceFilterDropdown() {
     dd.innerHTML = '';
     dd.style.padding = '6px 0';
 
-    // "All Services" clear option
     const clearItem = document.createElement('div');
     clearItem.className   = 'filter-dropdown-item svc-filter-clear';
     clearItem.textContent = 'All Services';
@@ -338,6 +359,7 @@ function applyFilters() {
     }
     if (activeFilters.date) data = data.filter(r => r.date === activeFilters.date);
     if (activeFilters.status) data = data.filter(r => r.status === activeFilters.status);
+    if (activeFilters.payment) data = data.filter(r => (r.paymentStatus || 'Unpaid') === activeFilters.payment);
     if (activeFilters.services && activeFilters.services.length > 0) {
         data = data.filter(r => {
             const rowServices = r.services || r.serviceType.split(', ');
@@ -353,7 +375,7 @@ function onUserChange() {
     const userId = document.getElementById('apptUserId').value;
     const petSel = document.getElementById('apptPetId');
     petSel.innerHTML = '<option value="">Select Pet</option>';
-    // TODO: fetch pets by userId from API
+    // todo: fetch pets by userId from API
     onFormChange();
 }
 
@@ -370,6 +392,19 @@ function resetAppointmentForm() {
     if (petSel) petSel.innerHTML = '<option value="">Select Pet</option>';
     clearServicesIn('serviceDropdownList');
     updateServiceDisplay('serviceDropdownBtn', 'serviceDropdownList', 'serviceDropdownDisplay');
+    const paidEl = document.getElementById('apptAmountPaid');
+    if (paidEl) paidEl.value = '';
+    const psEl = document.getElementById('apptPaymentStatus');
+    if (psEl) psEl.value = 'Unpaid';
+    // Reset payment method to Cash
+    const pmCash = document.getElementById('pmCash');
+    if (pmCash) pmCash.checked = true;
+    const gcashNameEl = document.getElementById('apptGcashName');
+    if (gcashNameEl) gcashNameEl.value = '';
+    const gcashRefEl = document.getElementById('apptGcashRef');
+    if (gcashRefEl) gcashRefEl.value = '';
+    onPaymentMethodChange();
+    updateBookingTotal();
 }
 
 function submitNewAppointment() {
@@ -379,6 +414,13 @@ function submitNewAppointment() {
     const date     = document.getElementById('apptDate').value;
     const time     = document.getElementById('apptTime').value;
     const notes    = document.getElementById('apptNotes').value.trim();
+    const totalAmount   = calcTotal(services);
+    const amountPaidRaw = parseFloat(document.getElementById('apptAmountPaid')?.value) || 0;
+    const amountPaid    = Math.min(amountPaidRaw, totalAmount);
+    const paymentStatus = document.getElementById('apptPaymentStatus')?.value || 'Unpaid';
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'Cash';
+    const gcashName     = document.getElementById('apptGcashName')?.value.trim() || '';
+    const gcashRef      = document.getElementById('apptGcashRef')?.value.trim() || '';
 
     const missing = [];
     if (!userId)          missing.push('User ID');
@@ -386,6 +428,10 @@ function submitNewAppointment() {
     if (!services.length) missing.push('Service Type (pick at least one)');
     if (!date)            missing.push('Appointment Date');
     if (!time)            missing.push('Time');
+    if (paymentMethod === 'GCash' && amountPaid > 0) {
+        if (!gcashName) missing.push('GCash Name');
+        if (!gcashRef)  missing.push('GCash Reference Number');
+    }
 
     if (missing.length) { showFieldsAlert(missing); return; }
 
@@ -406,13 +452,13 @@ function submitNewAppointment() {
     if (editMode && editApptId !== null) {
         const idx = appointments.findIndex(a => a.apptId === editApptId);
         if (idx !== -1) {
-            appointments[idx] = { ...appointments[idx], userId, petId, ownerName, petName, services, serviceType, date: dateLabel, time: timeLabel, notes };
+            appointments[idx] = { ...appointments[idx], userId, petId, ownerName, petName, services, serviceType, date: dateLabel, time: timeLabel, notes, totalAmount, amountPaid, paymentStatus, paymentMethod, gcashName, gcashRef };
         }
         showSavedPopup(appointments.find(a => a.apptId === editApptId));
     } else {
         apptIdCounter++;
         const apptId  = 'APT-' + apptIdCounter;
-        const newAppt = { apptId, userId, petId, ownerName, petName, services, serviceType, date: dateLabel, time: timeLabel, status: 'Pending', notes };
+        const newAppt = { apptId, userId, petId, ownerName, petName, services, serviceType, date: dateLabel, time: timeLabel, status: 'Pending', notes, totalAmount, amountPaid, paymentStatus, paymentMethod, gcashName, gcashRef };
         appointments.unshift(newAppt);
         showSavedPopup(newAppt);
     }
@@ -440,6 +486,23 @@ function showSavedPopup(appt) {
     document.getElementById('savedPet').textContent      = appt.petName;
     document.getElementById('savedService').textContent  = appt.serviceType;
     document.getElementById('savedDateTime').textContent = `${appt.date} at ${appt.time}`;
+    document.getElementById('savedTotal').textContent         = '\u20B1' + (appt.totalAmount || 0).toLocaleString();
+    document.getElementById('savedAmountPaid').textContent    = '\u20B1' + (appt.amountPaid || 0).toLocaleString();
+    document.getElementById('savedPaymentStatus').textContent = appt.paymentStatus || 'Unpaid';
+    document.getElementById('savedPaymentMethod').textContent = appt.paymentMethod || 'Cash';
+
+    const gcashRow    = document.getElementById('savedGcashRow');
+    const gcashRefRow = document.getElementById('savedGcashRefRow');
+    if (appt.paymentMethod === 'GCash' && appt.amountPaid > 0) {
+        document.getElementById('savedGcashName').textContent = appt.gcashName || '—';
+        document.getElementById('savedGcashRef').textContent  = appt.gcashRef  || '—';
+        if (gcashRow)    gcashRow.style.display    = '';
+        if (gcashRefRow) gcashRefRow.style.display = '';
+    } else {
+        if (gcashRow)    gcashRow.style.display    = 'none';
+        if (gcashRefRow) gcashRefRow.style.display = 'none';
+    }
+
     document.getElementById('apptSavedModal').style.display = 'flex';
 }
 
@@ -459,6 +522,37 @@ function viewAppointment(apptId) {
     document.getElementById('viewPet').textContent      = appt.petName;
     document.getElementById('viewDateTime').textContent = `${appt.date} at ${appt.time}`;
     document.getElementById('viewNotes').textContent    = appt.notes || '—';
+
+    const balance = (appt.totalAmount || 0) - (appt.amountPaid || 0);
+    document.getElementById('viewTotal').textContent        = '\u20B1' + (appt.totalAmount || 0).toLocaleString();
+    document.getElementById('viewAmountPaid').textContent   = '\u20B1' + (appt.amountPaid || 0).toLocaleString();
+
+    // Payment method
+    const viewPM = document.getElementById('viewPaymentMethod');
+    if (viewPM) viewPM.textContent = appt.paymentMethod || 'Cash';
+
+    // GCash rows
+    const vGcashNameRow = document.getElementById('viewGcashNameRow');
+    const vGcashRefRow  = document.getElementById('viewGcashRefRow');
+    if (appt.paymentMethod === 'GCash' && appt.amountPaid > 0) {
+        if (document.getElementById('viewGcashName')) document.getElementById('viewGcashName').textContent = appt.gcashName || '—';
+        if (document.getElementById('viewGcashRef'))  document.getElementById('viewGcashRef').textContent  = appt.gcashRef  || '—';
+        if (vGcashNameRow) vGcashNameRow.style.display = '';
+        if (vGcashRefRow)  vGcashRefRow.style.display  = '';
+    } else {
+        if (vGcashNameRow) vGcashNameRow.style.display = 'none';
+        if (vGcashRefRow)  vGcashRefRow.style.display  = 'none';
+    }
+
+    const vps = document.getElementById('viewPaymentStatus');
+    vps.textContent  = (appt.paymentStatus || 'Unpaid') + (balance > 0 ? ' — \u20B1' + balance.toLocaleString() + ' due' : '');
+    vps.style.color  = appt.paymentStatus === 'Paid' ? '#16a34a' : appt.paymentStatus === 'Partial' ? '#d97706' : '#dc2626';
+    vps.style.fontWeight = '700';
+    // show pay now only for unpaid / partial (read mode)
+    const payNowBtn = document.getElementById('viewPayNowBtn');
+    if (payNowBtn) {
+        payNowBtn.style.display = (appt.paymentStatus === 'Unpaid' || appt.paymentStatus === 'Partial') ? 'inline-flex' : 'none';
+    }
 
     // render service area as badges (read-only)
     renderViewServices(appt.services || appt.serviceType.split(', '), false, apptId);
@@ -536,6 +630,9 @@ function enableViewEdit(apptId) {
     editBtn.onmouseover = () => editBtn.style.background = 'var(--primary-hover)';
     editBtn.onmouseout  = () => editBtn.style.background = 'var(--primary-purple)';
     editBtn.onclick = () => saveViewChanges(apptId);
+    // hides pay now while in edit mode
+    const payNowBtnEdit = document.getElementById('viewPayNowBtn');
+    if (payNowBtnEdit) payNowBtnEdit.style.display = 'none';
 }
 
 // saves status + services from view modal, then locks back up
@@ -578,6 +675,11 @@ function saveViewChanges(apptId) {
     editBtn.onmouseover = () => editBtn.style.background = '#ddd6fe';
     editBtn.onmouseout  = () => editBtn.style.background = '#ede9fe';
     editBtn.onclick = () => enableViewEdit(apptId);
+    // restore pay now visibility based on current payment status
+    const payNowAfterSave = document.getElementById('viewPayNowBtn');
+    if (payNowAfterSave) {
+        payNowAfterSave.style.display = (appt.paymentStatus === 'Unpaid' || appt.paymentStatus === 'Partial') ? 'inline-flex' : 'none';
+    }
 }
 
 function onViewStatusChange() { /* handled in saveViewChanges */ }
@@ -598,7 +700,7 @@ function openEditMode(apptId) {
 
     const petSel = document.getElementById('apptPetId');
     petSel.innerHTML = '<option value="">Select Pet</option>';
-    // TODO: repopulate pets from API for this user; for now restore the saved pet
+    // todo: repopulate pets from API for this user; for now restore the saved pet
     const opt = document.createElement('option');
     opt.value = appt.petId;
     opt.textContent = `${appt.petId} – ${appt.petName}`;
@@ -636,6 +738,23 @@ function showCompletedPopup(appt) {
     document.getElementById('completedService').textContent  = appt.serviceType;
     document.getElementById('completedDateTime').textContent = `${appt.date} at ${appt.time}`;
     document.getElementById('completedNotes').textContent    = appt.notes || '—';
+    document.getElementById('completedTotal').textContent         = '\u20B1' + (appt.totalAmount || 0).toLocaleString();
+    document.getElementById('completedAmountPaid').textContent    = '\u20B1' + (appt.amountPaid || 0).toLocaleString();
+    document.getElementById('completedPaymentStatus').textContent = appt.paymentStatus || 'Unpaid';
+    document.getElementById('completedPaymentMethod').textContent = appt.paymentMethod || 'Cash';
+
+    const cGcashRow    = document.getElementById('completedGcashRow');
+    const cGcashRefRow = document.getElementById('completedGcashRefRow');
+    if (appt.paymentMethod === 'GCash' && appt.amountPaid > 0) {
+        if (document.getElementById('completedGcashName')) document.getElementById('completedGcashName').textContent = appt.gcashName || '—';
+        if (document.getElementById('completedGcashRef'))  document.getElementById('completedGcashRef').textContent  = appt.gcashRef  || '—';
+        if (cGcashRow)    cGcashRow.style.display    = '';
+        if (cGcashRefRow) cGcashRefRow.style.display = '';
+    } else {
+        if (cGcashRow)    cGcashRow.style.display    = 'none';
+        if (cGcashRefRow) cGcashRefRow.style.display = 'none';
+    }
+
     document.getElementById('completedModal').style.display  = 'flex';
 }
 
@@ -663,18 +782,76 @@ const STATUS_CLASSES = {
     'Pending':     'status-pending',
 };
 
+// payment status filter dropdown
+function buildPaymentFilterDropdown() {
+    const btn = document.getElementById('btnPaymentFilter');
+    const dd  = document.getElementById('paymentFilterDropdown');
+    if (!btn || !dd) return;
+
+    const statuses = ['All Payments', 'Paid', 'Partial', 'Unpaid'];
+    const colors   = { 'Paid': '#16a34a', 'Partial': '#d97706', 'Unpaid': '#dc2626' };
+
+    dd.innerHTML = '';
+    dd.style.padding = '6px 0';
+
+    statuses.forEach(s => {
+        const item = document.createElement('div');
+        item.className = 'filter-dropdown-item';
+        if (s !== 'All Payments') {
+            item.style.cssText = `color:${colors[s]}; font-weight:700;`;
+        } else {
+            item.style.fontWeight = '700';
+        }
+        item.textContent = s;
+        item.addEventListener('click', e => {
+            e.stopPropagation();
+            activeFilters.payment = s === 'All Payments' ? '' : s;
+            document.getElementById('paymentFilterLabel').textContent = s;
+            dd.style.display = 'none';
+            applyFilters();
+        });
+        dd.appendChild(item);
+    });
+
+    btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const isOpen = dd.style.display !== 'none';
+        dd.style.display = isOpen ? 'none' : 'block';
+    });
+
+    dd.addEventListener('click', e => e.stopPropagation());
+    document.addEventListener('click', () => dd.style.display = 'none');
+}
+
+// recalculates the booking total box in the new-appointment modal
+function updateBookingTotal() {
+    const services = getSelectedServicesFrom('serviceDropdownList');
+    const total    = calcTotal(services);
+    const el       = document.getElementById('bookingTotal');
+    if (el) el.textContent = '\u20B1' + total.toLocaleString();
+    // auto-derive payment status from amount paid
+    const paidEl = document.getElementById('apptAmountPaid');
+    const psEl   = document.getElementById('apptPaymentStatus');
+    if (paidEl && psEl) {
+        const paid = parseFloat(paidEl.value) || 0;
+        if (paid <= 0)       psEl.value = 'Unpaid';
+        else if (paid < total) psEl.value = 'Partial';
+        else                   psEl.value = 'Paid';
+    }
+}
+
 function renderTable(data) {
     const tbody = document.getElementById('appointmentTableBody');
     if (!tbody) return;
 
     if (data.length === 0) {
         const empty = appointments.length === 0
-            ? `<tr><td colspan="7" style="text-align:center; padding:40px 20px;">
+            ? `<tr><td colspan="8" style="text-align:center; padding:40px 20px;">
                    <img src="img-appointment/no-appointment.png" alt="No Appointments"
                         style="width:180px; height:auto; object-fit:contain; opacity:0.85; display:block; margin:0 auto 14px;">
                    <div style="color:var(--text-muted); font-size:15px; font-weight:600;">No appointments yet.</div>
                </td></tr>`
-            : `<tr><td colspan="7" style="text-align:center; padding:40px 20px; color:var(--text-muted); font-size:14px; font-weight:600;">No appointments match your filters.</td></tr>`;
+            : `<tr><td colspan="8" style="text-align:center; padding:40px 20px; color:var(--text-muted); font-size:14px; font-weight:600;">No appointments match your filters.</td></tr>`;
         tbody.innerHTML = empty;
         return;
     }
@@ -685,6 +862,10 @@ function renderTable(data) {
             `<span class="service-badge ${SERVICE_CLASSES[s] ?? ''}">${s}</span>`
         ).join(' ');
 
+        const balance     = (row.totalAmount || 0) - (row.amountPaid || 0);
+        const psBadgeClass = row.paymentStatus === 'Paid'    ? 'ps-paid'
+                           : row.paymentStatus === 'Partial' ? 'ps-partial'
+                           : 'ps-unpaid';
         return `
         <tr>
             <td>${row.apptId}</td>
@@ -704,6 +885,14 @@ function renderTable(data) {
                 </div>
             </td>
             <td><span class="status-badge ${STATUS_CLASSES[row.status] ?? ''}">${row.status}</span></td>
+            <td>
+                <div style="display:flex; flex-direction:column; gap:2px;">
+                    <span class="status-badge ${psBadgeClass}" style="font-size:11px; padding:3px 10px;">${row.paymentStatus}</span>
+                    <span style="font-size:11px; color:var(--text-muted); font-weight:600; text-align:center;">
+                        ${balance > 0 ? '\u20B1' + balance.toLocaleString() + ' due' : '\u20B1' + (row.totalAmount||0).toLocaleString()}
+                    </span>
+                </div>
+            </td>
             <td style="white-space:nowrap;">
                 <button class="action-eye" title="View" onclick="viewAppointment('${row.apptId}')">
                     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
