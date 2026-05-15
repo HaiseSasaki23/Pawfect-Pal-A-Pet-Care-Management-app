@@ -1,7 +1,3 @@
-// notifications.js
-// Works with the existing .notif-bell and #RemindDot already in your dashboard.html
-// No changes needed to your bell HTML — this file handles everything automatically.
-
 const NOTIF_API = "http://localhost:5182";
 const POLL_MS   = 60_000; // refresh every 60 seconds
 
@@ -11,8 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setInterval(fetchNotifications, POLL_MS);
 });
 
-// Injects the dropdown into your existing .notif-bell div
-// and removes the old onclick that opened the Reminders modal
 function buildDropdown() {
     const bell = document.querySelector(".notif-bell");
     if (!bell) return;

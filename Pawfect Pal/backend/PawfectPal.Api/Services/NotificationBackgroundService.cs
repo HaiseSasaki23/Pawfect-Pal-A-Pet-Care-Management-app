@@ -3,8 +3,6 @@ using PawfectPal.Api.Repositories;
 
 namespace PawfectPal.Api.Services
 {
-    // Runs silently in the background every 60 seconds.
-    // Checks 3 things and inserts notifications when needed.
     public class NotificationBackgroundService : BackgroundService
     {
         private readonly IServiceScopeFactory _scopeFactory;
@@ -43,7 +41,6 @@ namespace PawfectPal.Api.Services
             }
         }
 
-        // 1. Notify user when admin confirms their appointment
         private void CheckConfirmedAppointments(NotificationRepository repo)
         {
             foreach (var (aptId, userId, aptDate) in repo.GetRecentlyConfirmed())
@@ -63,7 +60,6 @@ namespace PawfectPal.Api.Services
             }
         }
 
-        // 2. Remind user 1 day before their confirmed appointment
         private void CheckTomorrowAppointments(NotificationRepository repo)
         {
             foreach (var (aptId, userId, aptDate) in repo.GetTomorrowAppointments())
@@ -83,7 +79,6 @@ namespace PawfectPal.Api.Services
             }
         }
 
-        // 3. Remind user 1 day before their billing due date
         private void CheckTomorrowBillings(NotificationRepository repo)
         {
             foreach (var (billingId, userId, remaining, dueDate) in repo.GetTomorrowDueBillings())

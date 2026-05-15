@@ -1,11 +1,8 @@
-/* notifications.css — add AFTER style.css in dashboard.html */
-
 .notif-bell {
     position: relative !important;
     cursor: pointer;
 }
 
-/* Dropdown panel */
 .notif-dropdown {
     display: none;
     position: absolute;
@@ -28,7 +25,6 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Header */
 .notif-dropdown-header {
     display: flex;
     justify-content: space-between;
@@ -57,7 +53,6 @@
 }
 .notif-mark-all-btn:hover { background: var(--bg-lavender); }
 
-/* Scrollable list */
 .notif-list {
     max-height: 340px;
     overflow-y: auto;
@@ -65,7 +60,6 @@
 }
 .notif-list::-webkit-scrollbar { display: none; }
 
-/* Individual item */
 .notif-item {
     display: flex;
     align-items: flex-start;
@@ -81,7 +75,6 @@
 .notif-unread          { background: #fdf5ff; }
 .notif-read            { background: #fff; }
 
-/* Emoji icon bubble */
 .notif-icon {
     font-size: 20px;
     width: 38px;
@@ -94,7 +87,6 @@
     flex-shrink: 0;
 }
 
-/* Text */
 .notif-body  { flex: 1; min-width: 0; }
 
 .notif-title {
@@ -112,10 +104,8 @@
     color: var(--text-muted);
     line-height: 1.4;
 
-    /* Standard property */
     line-clamp: 2;
 
-    /* WebKit support */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -130,7 +120,6 @@
     margin-top: 4px;
 }
 
-/* Pink unread dot on the right */
 .notif-unread-dot {
     width: 8px;
     height: 8px;
@@ -140,7 +129,6 @@
     margin-top: 5px;
 }
 
-/* Empty state */
 .notif-empty {
     padding: 36px 16px;
     text-align: center;

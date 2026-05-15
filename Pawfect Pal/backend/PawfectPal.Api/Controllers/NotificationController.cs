@@ -17,7 +17,6 @@ namespace PawfectPal.Api.Controllers
             _service = service;
         }
 
-        // GET api/Notification — all notifications for logged-in user
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -32,7 +31,6 @@ namespace PawfectPal.Api.Controllers
             }
         }
 
-        // GET api/Notification/unread-count — returns { count: N }
         [HttpGet("unread-count")]
         public IActionResult GetUnreadCount()
         {
@@ -46,7 +44,6 @@ namespace PawfectPal.Api.Controllers
             }
         }
 
-        // PATCH api/Notification/{id}/read — mark one as read
         [HttpPatch("{id}/read")]
         public IActionResult MarkAsRead(int id)
         {
@@ -61,7 +58,6 @@ namespace PawfectPal.Api.Controllers
             }
         }
 
-        // PATCH api/Notification/read-all — mark all as read
         [HttpPatch("read-all")]
         public IActionResult MarkAllAsRead()
         {

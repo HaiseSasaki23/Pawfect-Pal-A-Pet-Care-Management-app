@@ -13,7 +13,6 @@ namespace PawfectPal.Api.Repositories
             _db = db;
         }
 
-        // Get all notifications for a user, newest first
         public List<Notification> GetByUserId(int userId)
         {
             var list = new List<Notification>();
@@ -36,7 +35,6 @@ namespace PawfectPal.Api.Repositories
             return list;
         }
 
-        // Get unread count for the red dot
         public int GetUnreadCount(int userId)
         {
             using var conn = _db.GetConnection();
@@ -50,7 +48,6 @@ namespace PawfectPal.Api.Repositories
             return Convert.ToInt32(cmd.ExecuteScalar());
         }
 
-        // Insert a new notification
         public void Create(Notification n)
         {
             using var conn = _db.GetConnection();
@@ -69,7 +66,6 @@ namespace PawfectPal.Api.Repositories
             cmd.ExecuteNonQuery();
         }
 
-        // Mark one notification as read
         public void MarkAsRead(int notificationId, int userId)
         {
             using var conn = _db.GetConnection();
@@ -85,7 +81,6 @@ namespace PawfectPal.Api.Repositories
             cmd.ExecuteNonQuery();
         }
 
-        // Mark ALL notifications as read for a user
         public void MarkAllAsRead(int userId)
         {
             using var conn = _db.GetConnection();
@@ -99,7 +94,6 @@ namespace PawfectPal.Api.Repositories
             cmd.ExecuteNonQuery();
         }
 
-        // Prevent duplicate notifications within 48 hours
         public bool Exists(int userId, string type, int referenceId)
         {
             using var conn = _db.GetConnection();
@@ -119,7 +113,6 @@ namespace PawfectPal.Api.Repositories
             return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
         }
 
-        // Appointments confirmed by admin (future only)
         public List<(int AppointmentId, int UserId, DateTime AppointmentDate)> GetRecentlyConfirmed()
         {
             var result = new List<(int, int, DateTime)>();
@@ -143,7 +136,6 @@ namespace PawfectPal.Api.Repositories
             return result;
         }
 
-        // Confirmed appointments happening tomorrow
         public List<(int AppointmentId, int UserId, DateTime AppointmentDate)> GetTomorrowAppointments()
         {
             var result = new List<(int, int, DateTime)>();
@@ -167,7 +159,6 @@ namespace PawfectPal.Api.Repositories
             return result;
         }
 
-        // Unpaid billings due tomorrow
         public List<(int BillingId, int UserId, decimal RemainingBalance, DateTime DueDate)> GetTomorrowDueBillings()
         {
             var result = new List<(int, int, decimal, DateTime)>();
