@@ -1,11 +1,14 @@
-public class Notification
+namespace PawfectPal.Api.Models
 {
-    public int NotificationID { get; set; }
-    public int UserID { get; set; }
-    public string Title { get; set; }
-    public string Message { get; set; }
-    public string Type { get; set; }
-    public int? ReferenceID { get; set; }
-    public bool IsRead { get; set; }
-    public DateTime CreatedAt { get; set; }
+    public class Notification
+    {
+        public int NotificationId { get; set; }
+        public int UserId { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public string? Type { get; set; }
+        public int? ReferenceId { get; set; }
+        public bool IsRead { get; set; } = false;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+    }
 }
