@@ -194,13 +194,29 @@
                 <div id="actionIcon" style="font-size: 50px; margin-bottom: 15px;"></div>
                 <p id="requestActionMessage" style="margin-bottom: 25px; line-height: 1.5; color: var(--text-dark);"></p>
                 <div style="display: flex; gap: 12px;">
-                    <button id="btnConfirmRequest" class="submit-btn" style="flex: 1;">Proceed</button>
-                    <button onclick="closeModal('requestActionModal')" class="action-btn view-btn" style="flex: 1; border-radius: 12px;">Go Back</button>
+                    <button id="btnConfirmRequest" class="submit-btn" style="flex: 1; margin: 0; height: 48px;">Proceed</button>
+                    <button onclick="closeModal('requestActionModal')" class="action-btn view-btn" style="flex: 1; border-radius: 12px; height: 48px; font-weight: 700; font-size: 14px;">Go Back</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <div id="unsavedModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-header" style="justify-content: center; border: none; padding-bottom: 8px;">
+                <h2 style="color: #f59e0b; font-size: 20px;">⚠️ Unsaved Changes</h2>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 25px; color: var(--text-dark); line-height: 1.6;">You have unsaved changes. Are you sure you want to close without saving?</p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button id="unsavedDiscardBtn" class="submit-btn" style="margin: 0; flex: 1; background: #ff5e78; height: 48px;">Discard Changes</button>
+                    <button id="unsavedContinueBtn" class="action-btn view-btn" style="flex: 1; border-radius: 12px; height: 48px; font-weight: 700; font-size: 14px;">Keep Editing</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../data/auth.js"></script>
     <script src="requests.js"></script>
 
 </body>
