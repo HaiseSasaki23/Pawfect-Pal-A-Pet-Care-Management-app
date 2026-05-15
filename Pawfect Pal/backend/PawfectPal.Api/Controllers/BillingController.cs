@@ -1,8 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PawfectPal.Api.Services;
+using System.Security.Claims;
 
 namespace PawfectPal.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class BillingController : ControllerBase
@@ -14,17 +17,43 @@ namespace PawfectPal.Api.Controllers
             _billingService = billingService;
         }
 
-        [HttpGet("user/{userId}/unpaid")]
-        public IActionResult GetUnpaidBillsByUserId(int userId)
+        [Authorize(Roles = "Admin")]
+        [HttpGet("unpaid")]
+        public IActionResult GetUnpaidBills()
         {
             try
             {
-                return Ok(_billingService.GetUnpaidBillsByUserId(userId));
+                return Ok(_billingService.GetUnpaidBills());
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
             }
         }
+        
+        [HttpGet("my/unpaid")]
+        public IActionResult GetMyUnpaidBills()
+        {
+            try
+            {
+                int userId = int.Parse(
+                    User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+                );
+
+                return Ok(
+                    _billingService.GetUnpaidBillsByUserId(userId)
+                );
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
+            }
+        }        
     }
 }

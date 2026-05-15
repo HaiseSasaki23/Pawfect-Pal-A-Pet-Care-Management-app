@@ -1,9 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PawfectPal.Api.Models;
 using PawfectPal.Api.Services;
+using System.Security.Claims;
 
 namespace PawfectPal.Api.Controllers
 {
+    
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class AppointmentController : ControllerBase
@@ -15,6 +19,7 @@ namespace PawfectPal.Api.Controllers
             _service = service;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -28,6 +33,20 @@ namespace PawfectPal.Api.Controllers
             }
         }
 
+        [HttpGet("my")]
+        public IActionResult GetMyAppointments()
+        {
+            try
+            {
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+                return Ok(_service.GetByUserId(userId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+        
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
@@ -64,6 +83,9 @@ namespace PawfectPal.Api.Controllers
         {
             try
             {
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+                appointment.UserId = userId;
+
                 _service.Create(appointment);
                 return Ok(new { message = "Appointment created successfully." });
             }
@@ -88,6 +110,7 @@ namespace PawfectPal.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{id}/request-status")]
         public IActionResult UpdateRequestStatus(int id, [FromBody] string status)
         {
@@ -102,6 +125,7 @@ namespace PawfectPal.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{id}/app-status")]
         public IActionResult UpdateAppStatus(int id, [FromBody] string status)
         {
@@ -115,17 +139,25 @@ namespace PawfectPal.Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
             try
             {
                 _service.Delete(id);
-                return Ok(new { message = "Appointment deleted successfully." });
+
+                return Ok(new
+                {
+                    message = "Appointment deleted successfully."
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
             }
         }
     }

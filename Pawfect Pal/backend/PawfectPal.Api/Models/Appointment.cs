@@ -8,6 +8,7 @@ namespace PawfectPal.Api.Models
         public DateTime AppointmentDate { get; set; }
         public string RequestStatus { get; set; } = "Pending";
         public string AppStatus { get; set; } = "Pending";
+        public string PaymentMode { get; set; } = "Cash";
         public string? Notes { get; set; }
         public List<int> ServiceIds { get; set; } = new List<int>();
         

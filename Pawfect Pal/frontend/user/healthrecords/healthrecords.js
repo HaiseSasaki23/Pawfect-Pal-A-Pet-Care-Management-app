@@ -1,7 +1,51 @@
+const API_BASE_URL = "http://localhost:5182";
+
+document.addEventListener("DOMContentLoaded", async function () {
+
+    const user = requireLogin("User");
+
+    if (!user) return;
+
+    await loadHealthRecords();
+});
+
+async function loadHealthRecords() {
+
+    try {
+
+        const userId = localStorage.getItem("userId");
+
+        const response = await fetch(
+            `${API_BASE_URL}/api/HealthRecord/user/${userId}`,
+            {
+                headers: getAuthHeaders()
+            }
+        );
+
+        if (handleUnauthorized(response)) return;
+
+        if (!response.ok) {
+            throw new Error("Failed to load health records.");
+        }
+
+        const records = await response.json();
+
+        renderHealthRecords(records);
+
+    } catch (error) {
+
+        console.error(
+            "Health record error:",
+            error
+        );
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     const user = requireLogin("User");
     if (!user) return;
 
+    loadHealthRecords();
 });
 
 /* global gui elements */
@@ -66,4 +110,232 @@ function openFullHistory() {
 
 function closeModal(modalId) { 
     document.getElementById(modalId).style.display = 'none'; 
+}
+
+function renderHealthRecords(records) {
+
+    const container =
+        document.getElementById(
+            "healthRecordsContainer"
+        );
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    if (!records.length) {
+
+        document.getElementById(
+            "emptyState"
+        ).style.display = "flex";
+
+        return;
+    }
+
+    document.getElementById(
+        "emptyState"
+    ).style.display = "none";
+
+    records.forEach(record => {
+
+        const card =
+            document.createElement("div");
+
+        card.className = "health-card";
+
+        card.setAttribute(
+            "data-species",
+            record.species || ""
+        );
+
+        card.innerHTML = `
+
+            <div class="card-pet-info">
+
+                <div class="avatar-container">
+
+                    <img
+                        src="../assets/default-pet.png"
+                        alt="Pet"
+                        class="pet-img"
+                    >
+
+                </div>
+
+                <div class="pet-text">
+
+                    <h3 class="pet-name">
+                        ${record.petName || "Unknown"}
+                    </h3>
+
+                    <p class="pet-breed">
+
+                        ${record.breed || "Unknown Breed"}
+                        •
+                        ${record.age || "--"} years old
+
+                    </p>
+
+                    <div class="mini-stats">
+
+                        <div class="stat-item">
+
+                            <span class="stat-label">
+                                WEIGHT
+                            </span>
+
+                            <span class="stat-val">
+                                ${record.weight || "--"} kg
+                            </span>
+
+                        </div>
+
+                        <div class="stat-item">
+
+                            <span class="stat-label">
+                                LAST VISIT
+                            </span>
+
+                            <span class="stat-val">
+
+                                ${
+                                    record.dateRecorded
+                                    ? new Date(
+                                        record.dateRecorded
+                                    ).toLocaleDateString()
+                                    : "--"
+                                }
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card-health-data">
+
+                <div class="data-row">
+
+                    <div class="data-label">
+
+                        <img
+                            src="user-health/vaccine.png"
+                            class="label-icon"
+                        >
+
+                        <span>
+                            Vaccination Status
+                        </span>
+
+                    </div>
+
+                    <div class="status-pill completed">
+
+                        ${record.vaccinationStatus || "--"}
+
+                    </div>
+
+                </div>
+
+                <div class="data-row">
+
+                    <div class="data-label">
+
+                        <img
+                            src="user-health/allergies.png"
+                            class="label-icon"
+                        >
+
+                        <span>
+                            Allergies
+                        </span>
+
+                    </div>
+
+                    <div class="data-val">
+
+                        ${record.allergies || "None"}
+
+                    </div>
+
+                </div>
+
+                <div class="data-row">
+
+                    <div class="data-label">
+
+                        <img
+                            src="user-health/date.png"
+                            class="label-icon"
+                        >
+
+                        <span>
+                            Date Recorded
+                        </span>
+
+                    </div>
+
+                    <div class="data-val">
+
+                        ${
+                            record.dateRecorded
+                            ? new Date(
+                                record.dateRecorded
+                            ).toLocaleDateString()
+                            : "--"
+                        }
+
+                    </div>
+
+                </div>
+
+                <div class="data-row">
+
+                    <div class="data-label">
+
+                        <img
+                            src="user-health/notes.png"
+                            class="label-icon"
+                        >
+
+                        <span>
+                            Notes
+                        </span>
+
+                    </div>
+
+                    <div class="data-val">
+
+                        ${record.notes || "None"}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card-actions">
+
+                <button
+                    class="view-history-btn"
+                    onclick="openFullHistory()">
+
+                    <span>
+                        View Full History
+                    </span>
+
+                    <span class="arrow">
+                        ›
+                    </span>
+
+                </button>
+
+            </div>
+        `;
+        container.appendChild(card);
+    });
 }

@@ -35,12 +35,15 @@ document.addEventListener("DOMContentLoaded", function () {
 async function loadDashboardSummary(userId, role) {
     const url = role.toLowerCase() === "admin"
         ? "http://localhost:5182/api/Dashboard/admin-summary"
-        : `http://localhost:5182/api/Dashboard/user-summary/${userId}`;
+        : `http://localhost:5182/api/Dashboard/my-summary`;
 
     try {
         const response = await fetch(url, {
             headers: getAuthHeaders()
         });
+
+        if (handleUnauthorized(response)) return;
+
         if (!response.ok) throw new Error("Failed to load dashboard summary.");
         const data = await response.json();
 
@@ -187,7 +190,7 @@ async function loadPetsForDropdown() {
 
 async function loadAppointments(userId) {
     try {
-        const response = await fetch(`http://localhost:5182/api/Appointment/user/${userId}`, {
+        const response = await fetch(`/api/Appointment/my`, {
             headers: getAuthHeaders()
         });
         if (!response.ok) {

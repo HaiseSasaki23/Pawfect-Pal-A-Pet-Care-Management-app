@@ -14,14 +14,44 @@ namespace PawfectPal.Api.Repositories
             _db = db;
         }
 
-        public List<Billing> GetUnpaidBillsByUserId(int userId)
+        public List<dynamic> GetUnpaidBillsByUserId(int userId)
         {
             string query = @"
-                SELECT b.*
+                SELECT
+                    b.BillingID,
+                    b.AppointmentID,
+                    b.TotalAmount,
+                    b.BillingStatus,
+                    b.CreatedAt,
+
+                    a.PaymentMode,
+
+                    p.Name AS PetName,
+
+                    COALESCE(SUM(py.PaidAmount), 0)
+                        AS TotalPaid
+
                 FROM billing b
-                INNER JOIN appointment a ON b.AppointmentID = a.AppointmentID
+
+                INNER JOIN appointment a
+                    ON b.AppointmentID = a.AppointmentID
+
+                INNER JOIN pet p
+                    ON a.PetID = p.PetID
+
+                LEFT JOIN payment py
+                    ON b.BillingID = py.BillingID
+
                 WHERE a.UserID = @UserID
-                AND b.BillingStatus = 'Unpaid'
+
+                GROUP BY
+                    b.BillingID,
+                    b.AppointmentID,
+                    b.TotalAmount,
+                    b.BillingStatus,
+                    b.CreatedAt,
+                    a.PaymentMode,
+                    p.Name
             ";
 
             var parameters = new List<MySqlParameter>
@@ -31,22 +61,121 @@ namespace PawfectPal.Api.Repositories
 
             DataTable dt = _db.ExecuteQuery(query, parameters);
 
-            List<Billing> bills = new();
+            List<dynamic> bills = new();
 
             foreach (DataRow row in dt.Rows)
             {
-                bills.Add(new Billing
+                decimal totalAmount =
+                    Convert.ToDecimal(row["TotalAmount"]);
+
+                decimal totalPaid =
+                    Convert.ToDecimal(row["TotalPaid"]);
+
+                decimal remaining =
+                    totalAmount - totalPaid;
+
+                bills.Add(new
                 {
-                    BillingId = Convert.ToInt32(row["BillingID"]),
-                    AppointmentId = Convert.ToInt32(row["AppointmentID"]),
-                    TotalAmount = Convert.ToDecimal(row["TotalAmount"]),
-                    BillingStatus = row["BillingStatus"].ToString() ?? "Unpaid",
-                    CreatedAt = Convert.ToDateTime(row["CreatedAt"])
+                    billingId =
+                        Convert.ToInt32(row["BillingID"]),
+
+                    appointmentId =
+                        Convert.ToInt32(row["AppointmentID"]),
+
+                    totalAmount = totalAmount,
+
+                    totalPaid = totalPaid,
+
+                    remainingBalance = remaining,
+
+                    billingStatus =
+                        row["BillingStatus"].ToString(),
+
+                    paymentMode =
+                        row["PaymentMode"].ToString(),
+
+                    petName =
+                        row["PetName"].ToString(),
+
+                    createdAt =
+                        Convert.ToDateTime(row["CreatedAt"])
                 });
             }
 
             return bills;
         }
+
+    public List<dynamic> GetUnpaidBills()
+    {
+        string query = @"
+            SELECT
+                b.BillingID,
+                b.TotalAmount,
+                b.AmountPaid,
+                b.RemainingBalance,
+                b.BillingStatus,
+                b.DueDate,
+
+                a.AppointmentID,
+
+                pet.Name AS PetName,
+
+                u.UserName,
+                u.OwnerFName,
+                u.OwnerLName
+
+            FROM billing b
+
+            INNER JOIN appointment a
+                ON b.AppointmentID = a.AppointmentID
+
+            INNER JOIN pet pet
+                ON a.PetID = pet.PetID
+
+            INNER JOIN user u
+                ON a.UserID = u.UserID
+
+            WHERE b.BillingStatus != 'Paid'
+
+            ORDER BY b.CreatedAt DESC
+        ";
+
+        DataTable dt = _db.ExecuteQuery(query);
+
+        List<dynamic> bills = new();
+
+        foreach (DataRow row in dt.Rows)
+        {
+            bills.Add(new
+            {
+                billingId = Convert.ToInt32(row["BillingID"]),
+
+                appointmentId = Convert.ToInt32(row["AppointmentID"]),
+
+                totalAmount = Convert.ToDecimal(row["TotalAmount"]),
+
+                amountPaid = Convert.ToDecimal(row["AmountPaid"]),
+
+                remainingBalance = Convert.ToDecimal(row["RemainingBalance"]),
+
+                billingStatus = row["BillingStatus"].ToString(),
+
+                dueDate = row["DueDate"] == DBNull.Value
+                    ? (DateTime?)null
+                    : Convert.ToDateTime(row["DueDate"]),
+
+                petName = row["PetName"].ToString(),
+
+                userName = row["UserName"].ToString(),
+
+                ownerFName = row["OwnerFName"].ToString(),
+
+                ownerLName = row["OwnerLName"].ToString()
+            });
+        }
+
+        return bills;
+    }
 
         public void UpdateBillingStatus(int billingId, string status)
         {
@@ -87,10 +216,23 @@ namespace PawfectPal.Api.Repositories
         {
             string query = @"
                 INSERT INTO billing
-                (AppointmentID, TotalAmount, BillingStatus)
+                (
+                    AppointmentID,
+                    TotalAmount,
+                    AmountPaid,
+                    RemainingBalance,
+                    BillingStatus,
+                    DueDate
+                )
                 VALUES
-                (@AppointmentID, @TotalAmount, 'Unpaid')
-            ";
+                (
+                    @AppointmentID,
+                    @TotalAmount,
+                    0.00,
+                    @TotalAmount,
+                    'Unpaid',
+                    DATE_ADD(NOW(), INTERVAL 7 DAY)
+                )";
 
             var parameters = new List<MySqlParameter>
             {
@@ -100,5 +242,66 @@ namespace PawfectPal.Api.Repositories
 
             _db.ExecuteNonQuery(query, parameters);
         }
+
+        public Billing? GetBillingById(int billingId)
+        {
+            string query = @"
+                SELECT *
+                FROM billing
+                WHERE BillingID = @BillingID
+                LIMIT 1
+            ";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@BillingID", billingId)
+            };
+
+            DataTable dt = _db.ExecuteQuery(query, parameters);
+
+            if (dt.Rows.Count == 0)
+                return null;
+
+            DataRow row = dt.Rows[0];
+
+            return new Billing
+            {
+                BillingId = Convert.ToInt32(row["BillingID"]),
+                AppointmentId = Convert.ToInt32(row["AppointmentID"]),
+                TotalAmount = Convert.ToDecimal(row["TotalAmount"]),
+                AmountPaid = Convert.ToDecimal(row["AmountPaid"]),
+                RemainingBalance = Convert.ToDecimal(row["RemainingBalance"]),
+                BillingStatus = row["BillingStatus"].ToString() ?? "Unpaid",
+                DueDate = row["DueDate"] == DBNull.Value
+                    ? null
+                    : Convert.ToDateTime(row["DueDate"]),
+                CreatedAt = Convert.ToDateTime(row["CreatedAt"])
+            };
+        }   
+        public void UpdateBillingBalances(
+            int billingId,
+            decimal amountPaid,
+            decimal remainingBalance,
+            string status)
+        {
+            string query = @"
+                UPDATE billing
+                SET
+                    AmountPaid = @AmountPaid,
+                    RemainingBalance = @RemainingBalance,
+                    BillingStatus = @Status
+                WHERE BillingID = @BillingID
+            ";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@AmountPaid", amountPaid),
+                new("@RemainingBalance", remainingBalance),
+                new("@Status", status),
+                new("@BillingID", billingId)
+            };
+
+            _db.ExecuteNonQuery(query, parameters);
+        }             
     }
 }

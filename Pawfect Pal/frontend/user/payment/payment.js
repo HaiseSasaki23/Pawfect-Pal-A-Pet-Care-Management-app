@@ -3,21 +3,23 @@ const API_BASE_URL = "http://localhost:5182";
 let unpaidBills = [];
 
 document.addEventListener("DOMContentLoaded", async function () {
+
     const user = requireLogin("User");
+
     if (!user) return;
 
-    await loadUnpaidBills(user.userId);
-    await loadPaymentHistory(user.userId);
+    await loadUserUnpaidBills();
+    await loadPaymentHistory();
 
     setupSearch();
 });
 
 const modal = document.getElementById('mainModal');
 
-async function loadUnpaidBills(userId) {
+async function loadUserUnpaidBills(userId) {
     try {
         const response = await fetch(
-            `${API_BASE_URL}/api/Billing/user/${userId}/unpaid`,
+            `${API_BASE_URL}/api/Billing/my/unpaid`,
             {
                 headers: getAuthHeaders()
             }
@@ -40,11 +42,13 @@ async function loadUnpaidBills(userId) {
 async function loadPaymentHistory(userId) {
     try {
         const response = await fetch(
-            `${API_BASE_URL}/api/Payment/user/${userId}/history`,
+            `${API_BASE_URL}/api/Payment/my/history`,
             {
                 headers: getAuthHeaders()
             }
         );
+
+        if (handleUnauthorized(response)) return;
 
         if (!response.ok) {
             throw new Error("Failed to load payment history.");
@@ -64,7 +68,7 @@ function renderBalanceBanner() {
     const balanceStatus = document.getElementById("balanceStatus");
 
     const total = unpaidBills.reduce(
-        (sum, bill) => sum + Number(bill.totalAmount),
+        (sum, bill) => sum + Number(bill.remainingBalance),
         0
     );
 
@@ -80,7 +84,9 @@ function renderBalanceBanner() {
 }
 
 function renderUpcomingPayments() {
-    const selectionList = document.querySelector(".selection-list");
+
+    const selectionList =
+        document.querySelector(".selection-list");
 
     if (!selectionList) return;
 
@@ -89,26 +95,71 @@ function renderUpcomingPayments() {
         return;
     }
 
-    selectionList.innerHTML = unpaidBills.map(bill => `
-        <label class="selection-item">
-            <input
-                type="checkbox"
-                class="pay-check"
-                value="${bill.billingId}"
-                data-amount="${bill.totalAmount}">
+    selectionList.innerHTML =
+        unpaidBills.map(bill => {
 
-            <div style="flex:1;">
-                <strong>Appointment #${bill.appointmentId}</strong>
-                <div style="font-size:13px;color:#999;">
-                    Billing ID: ${bill.billingId}
-                </div>
-            </div>
+            const isCash =
+                bill.paymentMode === "Cash";
 
-            <strong>
-                ₱ ${Number(bill.totalAmount).toLocaleString()}
-            </strong>
-        </label>
-    `).join("");
+            return `
+                <label class="selection-item">
+
+                    ${
+                        isCash
+                        ? `
+                            <input
+                                type="checkbox"
+                                disabled
+                            >
+                        `
+                        : `
+                            <input
+                                type="checkbox"
+                                class="pay-check"
+                                value="${bill.billingId}"
+                                data-amount="${bill.remainingBalance}">
+                        `
+                    }
+
+                    <div style="flex:1;">
+
+                        <strong>
+                            Appointment #${bill.appointmentId}
+                        </strong>
+
+                        <div style="
+                            font-size:13px;
+                            color:#999;
+                        ">
+                            ${bill.petName}
+                        </div>
+
+                        <div style="
+                            font-size:12px;
+                            margin-top:5px;
+                            color:
+                                ${isCash ? "#e67e22" : "#38b2ac"};
+                        ">
+
+                            ${
+                                isCash
+                                ? "Pay at Clinic (Cash)"
+                                : "Online Payment (GCash)"
+                            }
+
+                        </div>
+
+                    </div>
+
+                    <strong>
+                        ₱ ${Number(
+                            bill.remainingBalance
+                        ).toLocaleString()}
+                    </strong>
+
+                </label>
+            `;
+        }).join("");
 }
 
 function renderTransactionTable(payments) {
@@ -180,14 +231,20 @@ function toggleTransactions() {
 }
 
 async function processPayment() {
-    const modalBody = document.getElementById('modalBody');
 
-    const nameInput = modalBody.querySelector('#gcashName');
-    const refInput = modalBody.querySelector('#gcashRef');
+    const modalBody =
+        document.getElementById('modalBody');
 
-    if (!nameInput.checkValidity() ||
-        !refInput.checkValidity()) {
+    const nameInput =
+        modalBody.querySelector('#gcashName');
 
+    const refInput =
+        modalBody.querySelector('#gcashRef');
+
+    if (
+        !nameInput.checkValidity() ||
+        !refInput.checkValidity()
+    ) {
         alert("Please fix the errors first.");
         return;
     }
@@ -206,30 +263,53 @@ async function processPayment() {
         for (const bill of selectedBills) {
 
             const paymentData = {
-                billingId: parseInt(bill.value),
+
+                billingId:
+                    parseInt(bill.value),
+
                 paymentMethod: "GCash",
-                referenceNumber: refInput.value.trim(),
-                paidAmount: parseFloat(bill.dataset.amount)
+
+                referenceNumber:
+                    refInput.value.trim(),
+
+                paidAmount:
+                    parseFloat(
+                        bill.dataset.amount
+                    )
             };
 
             const response = await fetch(
                 `${API_BASE_URL}/api/Payment`,
                 {
                     method: "POST",
+
                     headers: getAuthHeaders(),
+
                     body: JSON.stringify(paymentData)
                 }
             );
 
+            if (handleUnauthorized(response)) return;
+
+            const data = await response.json();
+
             if (!response.ok) {
-                throw new Error("Payment failed.");
+                throw new Error(
+                    data.message || "Payment failed."
+                );
             }
         }
 
         modalBody.innerHTML = `
             <div style="text-align:center;padding:20px;">
-                <img src="user-payment/confirm.png"
-                     style="width:40px;height:40px;margin-bottom:15px;">
+
+                <img
+                    src="user-payment/confirm.png"
+                    style="
+                        width:40px;
+                        height:40px;
+                        margin-bottom:15px;
+                    ">
 
                 <h3 style="margin-bottom:10px;">
                     Payment Successful
@@ -242,7 +322,10 @@ async function processPayment() {
                 <button
                     onclick="location.reload()"
                     class="submit-btn"
-                    style="width:100%;margin-top:20px;">
+                    style="
+                        width:100%;
+                        margin-top:20px;
+                    ">
 
                     Done
                 </button>
@@ -250,8 +333,12 @@ async function processPayment() {
         `;
 
     } catch (error) {
+
         console.error(error);
-        alert("Payment failed.");
+
+        alert(
+            error.message || "Payment failed."
+        );
     }
 }
 
@@ -280,6 +367,51 @@ function setupSearch() {
                     ? ""
                     : "none";
         });
+    });
+}
+
+function populateAppointmentDropdown() {
+
+    const select =
+        document.getElementById("appointmentSelect");
+
+    select.innerHTML = `
+        <option value="" disabled selected>
+            Search appointment...
+        </option>
+    `;
+
+    unpaidBills.forEach(bill => {
+
+        const option = document.createElement("option");
+
+        option.value = bill.billingId;
+
+        option.textContent =
+            `APT-${bill.appointmentId} • `
+            + `${bill.petName}`;
+
+        option.setAttribute(
+            "data-user",
+            bill.userName
+        );
+
+        option.setAttribute(
+            "data-pet",
+            bill.petName
+        );
+
+        option.setAttribute(
+            "data-amount",
+            bill.remainingBalance
+        );
+
+        option.setAttribute(
+            "data-appointment-id",
+            bill.appointmentId
+        );
+
+        select.appendChild(option);
     });
 }
 

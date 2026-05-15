@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const user = requireLogin("User");
+    const user = requireLogin("Admin");
     if (!user) return;
 
     const nameEl = document.getElementById("welcomeOwnerFName");
@@ -70,7 +70,7 @@ async function loadDashboardSummary(userId, role) {
 
 async function loadRequests(userId) {
     try {
-        const requests = await fetch(`http://localhost:5182/api/Appointment/user/${userId}`, {
+        const requests = await fetch(`http://localhost:5182/api/Appointment`, {
                 headers: getAuthHeaders()
               }).then(r => { if (!r.ok) throw new Error(`Status: ${r.status}`); return r.json(); });
 
@@ -134,7 +134,7 @@ async function loadPetsForDropdown() {
     select.innerHTML = `<option value="" disabled selected>Loading pets...</option>`;
 
     try {
-        const response = await fetch(`http://localhost:5182/api/Pet/user/${userId}?t=${Date.now()}`, {
+        const response = await fetch(`http://localhost:5182/api/Pet?t=${Date.now()}`, {
             headers: getAuthHeaders()
         });
 

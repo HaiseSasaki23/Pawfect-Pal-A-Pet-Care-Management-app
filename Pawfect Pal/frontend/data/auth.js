@@ -64,6 +64,7 @@ function getAuthHeaders() {
     };
 }
 
+
 function getAuthHeaderOnly() {
     const token = localStorage.getItem("token");
 
@@ -125,13 +126,16 @@ function ensureAuthBlurStyle() {
 function requireLogin(expectedRole = null) {
     const user = getCurrentUser();
 
-    if (!user.userId || !user.role) {
+    const actualRole = (user.role || "").trim().toLowerCase();
+    const requiredRole = (expectedRole || "").trim().toLowerCase();
+
+    if (!user.token || !user.userId || !actualRole) {
         showAuthRequiredModal();
         return null;
     }
 
-    if (expectedRole && user.role.toLowerCase() !== expectedRole.toLowerCase()) {
-        showAuthRequiredModal();
+    if (requiredRole && actualRole !== requiredRole) {
+        alert("Access denied.");
         return null;
     }
 
@@ -193,15 +197,19 @@ function loadUserDisplay(user = getCurrentUser()) {
     const sidebarLName = document.getElementById("sidebarOwnerLName");
     const welcomeName = document.getElementById("welcomeOwnerFName");
 
+    const adminUserName = document.getElementById("UserName");
+
     if (sidebarFName) sidebarFName.textContent = user.userName || "Guest";
     if (sidebarLName) sidebarLName.textContent = "";
 
     if (welcomeName) {
-        const fullName = `${user.ownerFName || ""}`.trim();
-        welcomeName.textContent = fullName || user.userName || "User";
+        welcomeName.textContent = user.ownerFName || user.userName || "User";
+    }
+
+    if (adminUserName) {
+        adminUserName.textContent = user.userName || "Admin";
     }
 }
-
 function initImageLoading() {
     document.querySelectorAll("img").forEach(img => {
         if (img.complete) {
@@ -245,6 +253,20 @@ function triggerLogout() {
     confirmBtn.onclick = logoutNow;
 
     modal.style.display = "flex";
+}
+
+function handleUnauthorized(response) {
+    if (response.status === 401) {
+        logoutNow();
+        return true;
+    }
+
+    if (response.status === 403) {
+        alert("Access denied. Your account does not have permission for this action.");
+        return true;
+    }
+
+    return false;
 }
 
 function logoutNow() {

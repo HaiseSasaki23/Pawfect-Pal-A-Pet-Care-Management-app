@@ -12,12 +12,16 @@ namespace PawfectPal.Api.Services
             _billingRepository = billingRepository;
         }
 
-        public List<Billing> GetUnpaidBillsByUserId(int userId)
+        public List<dynamic> GetUnpaidBillsByUserId(int userId)
         {
             if (userId <= 0)
                 throw new Exception("Invalid user ID.");
 
             return _billingRepository.GetUnpaidBillsByUserId(userId);
         }
+        public List<dynamic> GetUnpaidBills()
+        {
+            return _billingRepository.GetUnpaidBills();
+        }        
     }
 }

@@ -37,12 +37,11 @@ registerForm.addEventListener("submit", async function (e) {
                 ownerFName,
                 ownerLName,
                 contactNum,
-                address,
                 email,
+                address,
                 password
             })
         });
-
         const data = await response.json();
 
         if (response.ok) {

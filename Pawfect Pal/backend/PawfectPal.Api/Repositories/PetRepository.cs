@@ -91,8 +91,7 @@ namespace PawfectPal.Api.Repositories
         {
             string query = @"
                 UPDATE pet
-                SET UserID = @UserID,
-                    Name = @Name,
+                SET Name = @Name,
                     Species = @Species,
                     Color = @Color,
                     Breed = @Breed,
@@ -103,7 +102,6 @@ namespace PawfectPal.Api.Repositories
             var parameters = new List<MySqlParameter>
             {
                 new("@PetID", pet.PetId),
-                new("@UserID", pet.UserId),
                 new("@Name", pet.Name),
                 new("@Species", pet.Species),
                 new("@Color", pet.Color),
