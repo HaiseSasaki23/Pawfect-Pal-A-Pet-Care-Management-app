@@ -6,7 +6,6 @@ using System.Security.Claims;
 
 namespace PawfectPal.Api.Controllers
 {
-    
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
@@ -19,6 +18,7 @@ namespace PawfectPal.Api.Controllers
             _service = service;
         }
 
+        // Returns all appointments with petName, ownerFName, ownerLName included
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetAll()
@@ -46,17 +46,15 @@ namespace PawfectPal.Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        
+
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
             try
             {
                 var data = _service.GetById(id);
-
                 if (data == null)
                     return NotFound(new { message = "Appointment not found." });
-
                 return Ok(data);
             }
             catch (Exception ex)
@@ -85,7 +83,6 @@ namespace PawfectPal.Api.Controllers
             {
                 int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
                 appointment.UserId = userId;
-
                 _service.Create(appointment);
                 return Ok(new { message = "Appointment created successfully." });
             }
@@ -139,6 +136,7 @@ namespace PawfectPal.Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
@@ -146,18 +144,11 @@ namespace PawfectPal.Api.Controllers
             try
             {
                 _service.Delete(id);
-
-                return Ok(new
-                {
-                    message = "Appointment deleted successfully."
-                });
+                return Ok(new { message = "Appointment deleted successfully." });
             }
             catch (Exception ex)
             {
-                return BadRequest(new
-                {
-                    message = ex.Message
-                });
+                return BadRequest(new { message = ex.Message });
             }
         }
     }
