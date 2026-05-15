@@ -221,33 +221,31 @@ async function loadServices() {
 /* modal control functions */
 function openModal(id) {
     const modal = document.getElementById(id);
-
     if (modal) {
         modal.style.display = "flex";
     }
+    document.body.classList.add("page-blurred");
 }
 
 function closeModal(id) {
     const modal = document.getElementById(id);
-
     if (modal) {
         modal.style.display = "none";
 
         const form = modal.querySelector("form");
-
         if (form) {
             form.reset();
-
             const gcashBox = document.getElementById("gcashDetails");
-            if (gcashBox) {
-                gcashBox.style.display = "none";
-            }
-
+            if (gcashBox) gcashBox.style.display = "none";
             const totalText = document.getElementById("bookingTotal");
-            if (totalText) {
-                totalText.innerText = "₱0";
-            }
+            if (totalText) totalText.innerText = "₱0";
         }
+    }
+
+    // Only remove blur if NO other modals are still open
+    const anyOpen = document.querySelector('.modal-overlay[style*="flex"]');
+    if (!anyOpen) {
+        document.body.classList.remove("page-blurred");
     }
 }
 
@@ -490,3 +488,6 @@ function setupOutsideClickClose() {
     });
 }
 
+function triggerLogout() {
+    openModal('confirmModal');
+}
