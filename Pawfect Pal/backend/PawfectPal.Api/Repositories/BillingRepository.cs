@@ -87,10 +87,23 @@ namespace PawfectPal.Api.Repositories
         {
             string query = @"
                 INSERT INTO billing
-                (AppointmentID, TotalAmount, BillingStatus)
+                (
+                    AppointmentID,
+                    TotalAmount,
+                    AmountPaid,
+                    RemainingBalance,
+                    BillingStatus,
+                    DueDate
+                )
                 VALUES
-                (@AppointmentID, @TotalAmount, 'Unpaid')
-            ";
+                (
+                    @AppointmentID,
+                    @TotalAmount,
+                    0.00,
+                    @TotalAmount,
+                    'Unpaid',
+                    DATE_ADD(NOW(), INTERVAL 7 DAY)
+                )";
 
             var parameters = new List<MySqlParameter>
             {
@@ -100,5 +113,66 @@ namespace PawfectPal.Api.Repositories
 
             _db.ExecuteNonQuery(query, parameters);
         }
+
+        public Billing? GetBillingById(int billingId)
+        {
+            string query = @"
+                SELECT *
+                FROM billing
+                WHERE BillingID = @BillingID
+                LIMIT 1
+            ";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@BillingID", billingId)
+            };
+
+            DataTable dt = _db.ExecuteQuery(query, parameters);
+
+            if (dt.Rows.Count == 0)
+                return null;
+
+            DataRow row = dt.Rows[0];
+
+            return new Billing
+            {
+                BillingId = Convert.ToInt32(row["BillingID"]),
+                AppointmentId = Convert.ToInt32(row["AppointmentID"]),
+                TotalAmount = Convert.ToDecimal(row["TotalAmount"]),
+                AmountPaid = Convert.ToDecimal(row["AmountPaid"]),
+                RemainingBalance = Convert.ToDecimal(row["RemainingBalance"]),
+                BillingStatus = row["BillingStatus"].ToString() ?? "Unpaid",
+                DueDate = row["DueDate"] == DBNull.Value
+                    ? null
+                    : Convert.ToDateTime(row["DueDate"]),
+                CreatedAt = Convert.ToDateTime(row["CreatedAt"])
+            };
+        }   
+        public void UpdateBillingBalances(
+            int billingId,
+            decimal amountPaid,
+            decimal remainingBalance,
+            string status)
+        {
+            string query = @"
+                UPDATE billing
+                SET
+                    AmountPaid = @AmountPaid,
+                    RemainingBalance = @RemainingBalance,
+                    BillingStatus = @Status
+                WHERE BillingID = @BillingID
+            ";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@AmountPaid", amountPaid),
+                new("@RemainingBalance", remainingBalance),
+                new("@Status", status),
+                new("@BillingID", billingId)
+            };
+
+            _db.ExecuteNonQuery(query, parameters);
+        }             
     }
 }

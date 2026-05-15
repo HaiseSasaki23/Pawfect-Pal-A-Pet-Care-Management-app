@@ -35,11 +35,50 @@ namespace PawfectPal.Api.Services
             if (payment.PaidAmount <= 0)
                 throw new Exception("Paid amount must be greater than zero.");
 
-            if (payment.PaymentMethod == "GCash" && string.IsNullOrWhiteSpace(payment.ReferenceNumber))
+            if (
+                payment.PaymentMethod == "GCash" &&
+                string.IsNullOrWhiteSpace(payment.ReferenceNumber)
+            )
+            {
                 throw new Exception("GCash reference number is required.");
+            }
+
+            var billing = _billingRepository.GetBillingById(payment.BillingId);
+
+            if (billing == null)
+                throw new Exception("Billing not found.");
+
+            if (billing.BillingStatus == "Paid")
+                throw new Exception("Billing already fully paid.");
+
+            decimal newAmountPaid =
+                billing.AmountPaid + payment.PaidAmount;
+
+            decimal remainingBalance =
+                billing.TotalAmount - newAmountPaid;
+
+            if (remainingBalance < 0)
+                throw new Exception("Payment exceeds remaining balance.");
+
+            string newStatus;
+
+            if (remainingBalance == 0)
+                newStatus = "Paid";
+
+            else if (newAmountPaid > 0)
+                newStatus = "Partial";
+
+            else
+                newStatus = "Unpaid";
 
             _paymentRepository.InsertPayment(payment);
-            _billingRepository.UpdateBillingStatus(payment.BillingId, "Paid");
+
+            _billingRepository.UpdateBillingBalances(
+                billing.BillingId,
+                newAmountPaid,
+                remainingBalance,
+                newStatus
+            );
         }
     }
 }
