@@ -16,7 +16,19 @@ namespace PawfectPal.Api.Repositories
 
         public List<HealthRecord> GetByPetId(int petId)
         {
-            string query = "SELECT * FROM healthrecord WHERE PetID = @PetID ORDER BY DateRecorded DESC";
+            string query = @"
+                SELECT
+                    hr.*,
+                    p.Name AS PetName,
+                    p.Species,
+                    p.Breed,
+                    p.BirthDate
+                FROM healthrecord hr
+                INNER JOIN pet p
+                    ON hr.PetID = p.PetID
+                WHERE hr.PetID = @PetID
+                ORDER BY hr.DateRecorded DESC
+            ";
 
             var parameters = new List<MySqlParameter>
             {
@@ -24,6 +36,7 @@ namespace PawfectPal.Api.Repositories
             };
 
             DataTable dt = _db.ExecuteQuery(query, parameters);
+
             List<HealthRecord> records = new();
 
             foreach (DataRow row in dt.Rows)
@@ -40,7 +53,7 @@ namespace PawfectPal.Api.Repositories
                     p.Name AS PetName,
                     p.Species,
                     p.Breed,
-                    p.Age
+                    p.BirthDate
                 FROM healthrecord hr
                 INNER JOIN pet p ON hr.PetID = p.PetID
                 INNER JOIN (
@@ -69,7 +82,7 @@ namespace PawfectPal.Api.Repositories
                 records.Add(MapHealthRecord(row));
 
             return records;
-        }        
+        }
 
         private HealthRecord MapHealthRecord(DataRow row)
         {
@@ -79,9 +92,9 @@ namespace PawfectPal.Api.Repositories
                 PetId = Convert.ToInt32(row["PetID"]),
                 PetName = row["PetName"].ToString() ?? "",
                 Species = row["Species"].ToString() ?? "",
-                Breed = row["Breed"].ToString() ?? "",
-                Age = row["Age"] == DBNull.Value ? null : Convert.ToInt32(row["Age"]),                
+                Breed = row["Breed"].ToString() ?? "",             
                 Weight = row["Weight"] == DBNull.Value ? null : Convert.ToDecimal(row["Weight"]),
+                BirthDate = row["BirthDate"] == DBNull.Value ? null : Convert.ToDateTime(row["BirthDate"]),
                 VaccinationStatus = row["VaccinationStatus"].ToString() ?? string.Empty,
                 Allergies = row["Allergies"].ToString() ?? string.Empty,
                 DateRecorded = row["DateRecorded"] == DBNull.Value ? null : Convert.ToDateTime(row["DateRecorded"]),

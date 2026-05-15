@@ -102,12 +102,12 @@ document.getElementById("failedModal").addEventListener("click", function (e) {
 
 loginForm.addEventListener("submit", async function (e) {
     e.preventDefault();
-
-    const userName = usernameInput.value.trim();
+    
+    const login = usernameInput.value.trim();
     const password = passInput.value.trim();
 
-    if (!userName || !password) {
-        alert("Username and password are required.");
+    if (!login || !password) {
+        alert("Email/Username and password are required.");
         return;
     }
 
@@ -117,7 +117,7 @@ loginForm.addEventListener("submit", async function (e) {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ userName, password })
+            body: JSON.stringify({ login, password })
         });
 
         const data = await response.json();

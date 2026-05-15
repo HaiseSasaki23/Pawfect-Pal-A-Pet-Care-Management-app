@@ -34,6 +34,42 @@ namespace PawfectPal.Api.Repositories
 
             _db.ExecuteNonQuery(query, parameters);
         }
+
+        public User? GetUserByUserNameOrEmail(string login)
+        {
+            string query = @"
+                SELECT *
+                FROM user
+                WHERE UserName = @Login
+                OR Email = @Login
+                LIMIT 1
+            ";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@Login", login)
+            };
+
+            DataTable dt = _db.ExecuteQuery(query, parameters);
+
+            if (dt.Rows.Count == 0)
+                return null;
+
+            DataRow row = dt.Rows[0];
+
+            return new User
+            {
+                UserId = Convert.ToInt32(row["UserID"]),
+                UserName = row["UserName"].ToString() ?? string.Empty,
+                OwnerFName = row["OwnerFName"].ToString() ?? string.Empty,
+                OwnerLName = row["OwnerLName"].ToString() ?? string.Empty,
+                ContactNum = row["ContactNum"].ToString() ?? string.Empty,
+                Email = row["Email"].ToString() ?? string.Empty,
+                Address = row["Address"].ToString() ?? string.Empty,
+                Password = row["Password"].ToString() ?? string.Empty,
+                Role = row["Role"].ToString() ?? "User"
+            };
+        }        
         public User? GetUserByEmail(string email)
         {
             string query = "SELECT * FROM user WHERE Email = @Email LIMIT 1";

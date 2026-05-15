@@ -19,7 +19,7 @@ namespace PawfectPal.Api.Services
 
         public User? LoginAndGetUser(LoginDto dto)
         {
-            User? existingUser = _userRepository.GetUserByUserName(dto.UserName);
+            User? existingUser = _userRepository.GetUserByUserNameOrEmail(dto.Login);
 
             if (existingUser == null)
                 return null;
@@ -143,7 +143,7 @@ namespace PawfectPal.Api.Services
         }
         public bool ValidateCredentials(LoginDto dto)
         {
-            return !string.IsNullOrWhiteSpace(dto.UserName) &&
+            return !string.IsNullOrWhiteSpace(dto.Login) &&
                    !string.IsNullOrWhiteSpace(dto.Password);
         }
     }

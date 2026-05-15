@@ -23,7 +23,8 @@ body {
     min-height: 100vh;
     color: var(--text-dark);
     opacity: 0;
-    animation: pageFadeIn 0.25s ease-in forwards;    
+    animation: pageFadeIn 0.25s ease-in forwards;
+    overflow-x: hidden;
 }
 
 @keyframes pageFadeIn {
@@ -40,6 +41,16 @@ body {
 .dashboard-container {
     display: flex;
     width: 100%;
+    min-height: 100vh;
+}
+
+/* Blur both the container AND the fixed sidebar when modal is open */
+body.page-blurred .dashboard-container,
+body.page-blurred .sidebar {
+    filter: blur(6px);
+    transition: filter 0.2s ease;
+    pointer-events: none;
+    user-select: none;
 }
 
 /* sidebar (layout & header) */
@@ -731,3 +742,6 @@ body {
     font-weight: 500;
     cursor: pointer;
 }
+
+
+/* page-blurred is now handled on .dashboard-container.page-blurred above */
