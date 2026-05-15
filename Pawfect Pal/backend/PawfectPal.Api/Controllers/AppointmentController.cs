@@ -108,11 +108,16 @@ namespace PawfectPal.Api.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPatch("{id}/request-status")]
-        public IActionResult UpdateRequestStatus(int id, [FromBody] string status)
+        public IActionResult UpdateRequestStatus(int id, [FromBody] StatusUpdateRequest request)
         {
             try
             {
-                _service.UpdateRequestStatus(id, status);
+                if (request == null || string.IsNullOrWhiteSpace(request.Status))
+                {
+                    return BadRequest(new { message = "Status is required." });
+                }
+                
+                _service.UpdateRequestStatus(id, request.Status);
                 return Ok(new { message = "Request status updated successfully." });
             }
             catch (Exception ex)

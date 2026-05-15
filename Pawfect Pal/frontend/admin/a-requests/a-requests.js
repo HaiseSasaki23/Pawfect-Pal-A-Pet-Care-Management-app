@@ -1,9 +1,7 @@
-// a-requests.js
 const modal = document.getElementById('mainModal');
 const confirmModal = document.getElementById('confirmModal');
 let requests = [];
 
-// Make sure auth functions are available
 function getAuthHeaders() {
     const token = localStorage.getItem('token') || localStorage.getItem('authToken');
     console.log('Token being used:', token ? 'Present (length: ' + token.length + ')' : 'MISSING');
@@ -64,13 +62,11 @@ async function loadRequests() {
             throw new Error("Invalid data format received");
         }
         
-        // Log the first appointment to see all available fields
         if (data.length > 0) {
             console.log("Available fields in appointment:", Object.keys(data[0]));
             console.log("Sample appointment data:", data[0]);
         }
         
-        // Filter for pending requests
         const pendingRequests = data.filter(a => {
             const status = a.requestStatus || a.RequestStatus;
             return status === "Pending";
@@ -78,14 +74,11 @@ async function loadRequests() {
         
         console.log(`Found ${pendingRequests.length} pending requests`);
         
-        // Map requests WITHOUT calling /api/User
         requests = pendingRequests.map(a => {
-            // Try to get owner name from various possible field names
             const firstName = a.ownerFName || a.OwnerFName || a.firstName || a.FirstName || "";
             const lastName = a.ownerLName || a.OwnerLName || a.lastName || a.LastName || "";
             const userId = a.userId || a.UserId;
             
-            // If no owner name, use "User ID: X" or "Pet Owner"
             let ownerDisplay = "";
             if (firstName || lastName) {
                 ownerDisplay = `${firstName} ${lastName}`.trim();
@@ -95,11 +88,9 @@ async function loadRequests() {
                 ownerDisplay = "Pet Owner";
             }
             
-            // Split ownerDisplay into firstName and lastName if needed
             let finalFirstName = firstName;
             let finalLastName = lastName;
             if (!finalFirstName && ownerDisplay !== "Pet Owner") {
-                // If we only have a combined display name, try to split it
                 const nameParts = ownerDisplay.split(' ');
                 finalFirstName = nameParts[0] || "";
                 finalLastName = nameParts.slice(1).join(' ') || "";
@@ -190,14 +181,12 @@ function loadRequestData(dataArray) {
         row.setAttribute('ownerFName', item.ownerFName || "");
         row.setAttribute('ownerLName', item.ownerLName || "");
         
-        // Use ownerDisplay if available, otherwise combine firstName/lastName
         const ownerFullName = item.ownerDisplay || 
             (item.ownerFName + ' ' + item.ownerLName).trim() || 
             `User ${item.userId || 'Unknown'}`;
         
         const escapedName = item.Name.replace(/'/g, "\\'");
         
-        // Format the date nicely if appointmentDate exists
         let displayDate = item.Date || 'N/A';
         if (item.appointmentDate) {
             try {
@@ -245,7 +234,6 @@ function loadRequestData(dataArray) {
 
 function updateRequestSummary() {
     const pending = requests.length;
-    // For now, we only show pending counts since we're only loading pending requests
     const approved = 0;
     const declined = 0;
     
@@ -368,7 +356,7 @@ async function processApproval(appointmentId) {
         console.log("Approval result:", result);
         
         alert("✅ Request approved successfully!");
-        loadRequests(); // Refresh the list
+        loadRequests();
         
     } catch (error) {
         console.error("Approve error:", error);
@@ -410,11 +398,9 @@ function toggleAppointmentFilters(value) {
     }
 }
 
-// Initialize on page load
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Page loaded, initializing...");
     
-    // Check if user is logged in
     const token = localStorage.getItem('token') || localStorage.getItem('authToken');
     if (!token) {
         console.warn("No token found! User may not be logged in");
@@ -429,7 +415,6 @@ document.addEventListener("DOMContentLoaded", () => {
     
     loadRequests();
     
-    // Setup filters
     const searchInput = document.getElementById('requestSearchInput');
     const ownerFilter = document.getElementById('ownerFilter');
     const typeFilter = document.getElementById('requestTypeFilter');
