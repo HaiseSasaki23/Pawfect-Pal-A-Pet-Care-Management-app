@@ -51,7 +51,7 @@
                         <label class="checkbox-label">
                             <input type="checkbox"> Remember me
                         </label>
-                        <a href="../forgot-password/forgot-password.html" class="forgot-link">Forgot Password?</a>
+                        <a href="#" class="forgot-link" id="forgotPasswordLink">Forgot Password?</a>
                     </div>
 
                     <button type="submit" class="btn-primary">Login</button>
@@ -64,7 +64,75 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="forgotModal">
+        <div class="modal-box">
+            <button class="modal-close" id="modalClose">&#x2715;</button>
+
+            <div class="modal-icon-wrapper">
+                <div class="modal-icon-circle">
+                    <img src="login-img/email.png" alt="Email" class="modal-envelope-img">
+                </div>
+                <div class="heart-decor h1">♥</div>
+                <div class="heart-decor h2">♥</div>
+                <div class="heart-decor h3">♥</div>
+            </div>
+
+            <h2 class="modal-title">Forgot Password?</h2>
+            <p class="modal-desc">No worries! Enter your email below and we'll send you a link to reset your password.</p>
+            <div class="modal-divider">— ♥ —</div>
+
+            <label class="modal-label">Email Address <span class="label-heart">♥</span></label>
+            <div class="modal-input-wrapper">
+                <span class="modal-input-icon">✉</span>
+                <input type="email" id="resetEmail" placeholder="Enter your email address" class="modal-input">
+            </div>
+
+            <button class="modal-btn" id="sendResetBtn">Send Reset Link</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-box success-modal-box">
+            <button class="modal-close" id="successModalClose">&#x2715;</button>
+
+            <div class="modal-icon-wrapper">
+                <div class="modal-icon-circle">
+                    <img src="login-img/confirm.png" alt="Confirmed" class="modal-envelope-img">
+                </div>
+                <div class="heart-decor h1">♥</div>
+                <div class="heart-decor h2">♥</div>
+                <div class="heart-decor h3">♥</div>
+            </div>
+
+            <h2 class="modal-title">Email Sent!</h2>
+            <p class="modal-desc">Reset link sent! Please check your email and follow the instructions to reset your password.</p>
+            <div class="modal-divider">— ♥ —</div>
+
+            <button class="modal-btn" id="successModalOkBtn">Got it!</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="failedModal">
+        <div class="modal-box failed-modal-box">
+            <button class="modal-close" id="failedModalClose">&#x2715;</button>
+
+            <div class="modal-icon-wrapper">
+                <div class="modal-icon-circle">
+                    <img src="login-img/failed.png" alt="Failed" class="modal-envelope-img">
+                </div>
+                <div class="heart-decor h1">♥</div>
+                <div class="heart-decor h2">♥</div>
+                <div class="heart-decor h3">♥</div>
+            </div>
+
+            <h2 class="modal-title failed-title">Oops!</h2>
+            <p class="modal-desc" id="failedModalMessage">Failed to send reset link.</p>
+            <div class="modal-divider">— ♥ —</div>
+
+            <button class="modal-btn failed-btn" id="failedModalOkBtn">Try Again</button>
+        </div>
+    </div>
+
     <script src="login.js"></script>
 </body>
 </html>
->
