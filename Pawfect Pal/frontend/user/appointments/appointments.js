@@ -39,7 +39,15 @@ async function loadAppointments() {
 
         if (handleUnauthorized(response)) return;    
 
-        const data = await response.json();
+        const text = await response.text();
+
+        console.log("RAW RESPONSE:", text);
+
+        let data = [];
+
+        if (text) {
+            data = JSON.parse(text);
+        }        
 
         const container = document.getElementById("appointmentList");
         container.innerHTML = "";
@@ -117,7 +125,7 @@ async function loadAppointments() {
         console.error("Error loading appointments:", error);
         const container = document.getElementById("appointmentList");
         if (container) {
-            container.innerHTML = "<p style='text-align:center; padding:40px; color:red;'>Failed to load appointments.<br>Error: ${error.message}</p>";
+            container.innerHTML = `<p style='text-align:center; padding:40px; color:red;'>Failed to load appointments.<br>Error: ${error.message}</p>`;
         }
     }
 }
@@ -310,14 +318,26 @@ function setupBookAppointmentForm() {
         const timePart = timeInput.value;
         const fullDateTime = `${datePart} ${timePart}:00`;
 
+        const paymentMode =
+            document.getElementById("bookingPayment").value;
+
+        if (
+            paymentMode === "GCash" &&
+            !gcashRef.value.trim()
+        ) {
+            alert("GCash reference number is required.");
+            return;
+        }
+
         const appointmentData = {
             userId: parseInt(localStorage.getItem("userId")),
             petId: parseInt(petSelect.value),
-            appointmentDate: fullDateTime.replace(' ','T'),
+            appointmentDate: fullDateTime.replace(' ', 'T'),
             requestStatus: "Pending",
             appStatus: "Pending",
             notes: gcashRef ? gcashRef.value : "",
-            serviceIds: serviceIds
+            serviceIds: serviceIds,
+            paymentMode: paymentMode
         };
 
         try {
@@ -327,7 +347,11 @@ function setupBookAppointmentForm() {
                 body: JSON.stringify(appointmentData)
             });
 
-            const result = await response.json();
+            const text = await response.text();
+
+            console.log("BOOK RESPONSE:", text);
+
+            const result = text ? JSON.parse(text) : {};
 
             if (response.ok) {
                 closeModal("bookAppointmentModal");

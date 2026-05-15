@@ -14,14 +14,44 @@ namespace PawfectPal.Api.Repositories
             _db = db;
         }
 
-        public List<Billing> GetUnpaidBillsByUserId(int userId)
+        public List<dynamic> GetUnpaidBillsByUserId(int userId)
         {
             string query = @"
-                SELECT b.*
+                SELECT
+                    b.BillingID,
+                    b.AppointmentID,
+                    b.TotalAmount,
+                    b.BillingStatus,
+                    b.CreatedAt,
+
+                    a.PaymentMode,
+
+                    p.Name AS PetName,
+
+                    COALESCE(SUM(py.PaidAmount), 0)
+                        AS TotalPaid
+
                 FROM billing b
-                INNER JOIN appointment a ON b.AppointmentID = a.AppointmentID
+
+                INNER JOIN appointment a
+                    ON b.AppointmentID = a.AppointmentID
+
+                INNER JOIN pet p
+                    ON a.PetID = p.PetID
+
+                LEFT JOIN payment py
+                    ON b.BillingID = py.BillingID
+
                 WHERE a.UserID = @UserID
-                AND b.BillingStatus = 'Unpaid'
+
+                GROUP BY
+                    b.BillingID,
+                    b.AppointmentID,
+                    b.TotalAmount,
+                    b.BillingStatus,
+                    b.CreatedAt,
+                    a.PaymentMode,
+                    p.Name
             ";
 
             var parameters = new List<MySqlParameter>
@@ -31,17 +61,44 @@ namespace PawfectPal.Api.Repositories
 
             DataTable dt = _db.ExecuteQuery(query, parameters);
 
-            List<Billing> bills = new();
+            List<dynamic> bills = new();
 
             foreach (DataRow row in dt.Rows)
             {
-                bills.Add(new Billing
+                decimal totalAmount =
+                    Convert.ToDecimal(row["TotalAmount"]);
+
+                decimal totalPaid =
+                    Convert.ToDecimal(row["TotalPaid"]);
+
+                decimal remaining =
+                    totalAmount - totalPaid;
+
+                bills.Add(new
                 {
-                    BillingId = Convert.ToInt32(row["BillingID"]),
-                    AppointmentId = Convert.ToInt32(row["AppointmentID"]),
-                    TotalAmount = Convert.ToDecimal(row["TotalAmount"]),
-                    BillingStatus = row["BillingStatus"].ToString() ?? "Unpaid",
-                    CreatedAt = Convert.ToDateTime(row["CreatedAt"])
+                    billingId =
+                        Convert.ToInt32(row["BillingID"]),
+
+                    appointmentId =
+                        Convert.ToInt32(row["AppointmentID"]),
+
+                    totalAmount = totalAmount,
+
+                    totalPaid = totalPaid,
+
+                    remainingBalance = remaining,
+
+                    billingStatus =
+                        row["BillingStatus"].ToString(),
+
+                    paymentMode =
+                        row["PaymentMode"].ToString(),
+
+                    petName =
+                        row["PetName"].ToString(),
+
+                    createdAt =
+                        Convert.ToDateTime(row["CreatedAt"])
                 });
             }
 

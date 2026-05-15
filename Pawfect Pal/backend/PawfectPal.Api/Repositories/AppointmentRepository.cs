@@ -16,20 +16,38 @@ namespace PawfectPal.Api.Repositories
 
         public int InsertAppointment(Appointment appointment)
         {
-            string query = @"
-                INSERT INTO appointment 
-                (UserID, PetID, AppointmentDate, RequestStatus, AppStatus, Notes)
-                VALUES 
-                (@UserID, @PetID, @Date, @RequestStatus, @AppStatus, @Notes);
-                SELECT LAST_INSERT_ID();
-            ";
+        string query = @"
+            INSERT INTO appointment
+            (
+                UserID,
+                PetID,
+                AppointmentDate,
+                RequestStatus,
+                AppStatus,
+                Notes,
+                PaymentMode
+            )
+            VALUES
+            (
+                @UserID,
+                @PetID,
+                @AppointmentDate,
+                @RequestStatus,
+                @AppStatus,
+                @Notes,
+                @PaymentMode
+            );
+
+            SELECT LAST_INSERT_ID();
+        ";
 
             var parameters = new List<MySqlParameter>
             {
                 new("@UserID", appointment.UserId),
                 new("@PetID", appointment.PetId),
-                new("@Date", appointment.AppointmentDate),
+                new("@AppointmentDate", appointment.AppointmentDate),
                 new("@RequestStatus", appointment.RequestStatus),
+                new("@PaymentMode", appointment.PaymentMode),
                 new("@AppStatus", appointment.AppStatus),
                 new("@Notes", appointment.Notes ?? (object)DBNull.Value)
             };
@@ -256,14 +274,33 @@ namespace PawfectPal.Api.Repositories
         {
             return new Appointment
             {
-                AppointmentId = Convert.ToInt32(row["AppointmentID"]),
-                UserId = Convert.ToInt32(row["UserID"]),
-                PetId = Convert.ToInt32(row["PetID"]),
-                AppointmentDate = Convert.ToDateTime(row["AppointmentDate"]),
-                RequestStatus = row["RequestStatus"].ToString() ?? "",
-                AppStatus = row["AppStatus"].ToString() ?? "",
-                Notes = row["Notes"] == DBNull.Value ? null : row["Notes"].ToString(),
-                ServiceIds = new List<int>() // optional: fetch later
+                AppointmentId =
+                    Convert.ToInt32(row["AppointmentID"]),
+
+                UserId =
+                    Convert.ToInt32(row["UserID"]),
+
+                PetId =
+                    Convert.ToInt32(row["PetID"]),
+
+                AppointmentDate =
+                    Convert.ToDateTime(row["AppointmentDate"]),
+
+                RequestStatus =
+                    row["RequestStatus"].ToString() ?? "",
+
+                AppStatus =
+                    row["AppStatus"].ToString() ?? "",
+
+                PaymentMode =
+                    row["PaymentMode"].ToString() ?? "Cash",
+
+                Notes =
+                    row["Notes"] == DBNull.Value
+                        ? null
+                        : row["Notes"].ToString(),
+
+                ServiceIds = new List<int>()
             };
         }
     }

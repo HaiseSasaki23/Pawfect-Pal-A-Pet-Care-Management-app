@@ -17,7 +17,7 @@ namespace PawfectPal.Api.Controllers
         {
             _petService = petService;
         }
-        
+
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetPets()
@@ -28,24 +28,34 @@ namespace PawfectPal.Api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
             }
         }
 
         [HttpGet("my")]
-            public IActionResult GetMyPets()
+        public IActionResult GetMyPets()
+        {
+            try
             {
-                try
+                int userId = int.Parse(
+                    User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+                );
+
+                var pets = _petService.GetPetsByUserId(userId);
+
+                return Ok(pets);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
                 {
-                    int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-                    var pets = _petService.GetPetsByUserId(userId);
-                    return Ok(pets);
-                }
-                catch (Exception ex)
-                {
-                    return BadRequest(new { message = ex.Message });
-                }
-            }      
+                    message = ex.Message
+                });
+            }
+        }
 
         [HttpGet("{id}")]
         public IActionResult GetPetById(int id)
@@ -55,30 +65,53 @@ namespace PawfectPal.Api.Controllers
                 var pet = _petService.GetPetById(id);
 
                 if (pet == null)
-                    return NotFound(new { message = "Pet not found." });
+                {
+                    return NotFound(new
+                    {
+                        message = "Pet not found."
+                    });
+                }
 
                 return Ok(pet);
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
             }
         }
-        
-        [Authorize(Roles = "Admin")]
+
         [HttpGet("user/{userId}")]
         public IActionResult GetPetsByUserId(int userId)
         {
             try
             {
+                int loggedInUserId = int.Parse(
+                    User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+                );
+
+                string role = User.FindFirst(ClaimTypes.Role)?.Value ?? "";
+
+                // Users can only access their own pets
+                if (role != "Admin" && loggedInUserId != userId)
+                {
+                    return Forbid();
+                }
+
                 var pets = _petService.GetPetsByUserId(userId);
+
                 return Ok(pets);
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
             }
-        }        
+        }
 
         [HttpPost]
         public IActionResult AddPet([FromBody] Pet pet)
@@ -106,6 +139,7 @@ namespace PawfectPal.Api.Controllers
                 });
             }
         }
+
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public IActionResult UpdatePet(int id, [FromBody] Pet pet)
@@ -113,12 +147,20 @@ namespace PawfectPal.Api.Controllers
             try
             {
                 pet.PetId = id;
+
                 _petService.UpdatePet(pet);
-                return Ok(new { message = "Pet updated successfully." });
+
+                return Ok(new
+                {
+                    message = "Pet updated successfully."
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
             }
         }
 
@@ -129,11 +171,18 @@ namespace PawfectPal.Api.Controllers
             try
             {
                 _petService.DeletePet(id);
-                return Ok(new { message = "Pet deleted successfully." });
+
+                return Ok(new
+                {
+                    message = "Pet deleted successfully."
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
             }
         }
     }
