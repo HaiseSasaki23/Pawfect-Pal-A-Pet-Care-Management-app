@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const user = requireLogin("User");
+    const user = requireLogin("Admin");
     if (!user) return;
 
     const nameEl = document.getElementById("welcomeOwnerFName");
