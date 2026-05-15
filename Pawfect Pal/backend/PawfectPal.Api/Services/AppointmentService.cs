@@ -19,7 +19,6 @@ namespace PawfectPal.Api.Services
             _billingRepository = billingRepository;
         }
 
-        // Now returns dynamic so petName + ownerFName/ownerLName come through
         public List<dynamic> GetAll()
         {
             return _repo.GetAllAppointments();

@@ -76,7 +76,6 @@ namespace PawfectPal.Api.Repositories
             _db.ExecuteNonQuery(query, parameters);
         }
 
-        // ── FIXED: JOINs pet and user tables to return pet name + owner name ──
         public List<dynamic> GetAllAppointments()
         {
             string query = @"

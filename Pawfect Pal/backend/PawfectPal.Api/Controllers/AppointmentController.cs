@@ -18,7 +18,6 @@ namespace PawfectPal.Api.Controllers
             _service = service;
         }
 
-        // Returns all appointments with petName, ownerFName, ownerLName included
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetAll()
