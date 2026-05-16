@@ -50,7 +50,7 @@ The application follows a **client-server architecture**, with a responsive HTML
 
 ## 📐 UML Diagram
 
-
+![Pawfect Pal UML](Pawfect%20Pal/docs/UML/uml.png)
 
 ---
 
@@ -113,6 +113,141 @@ The application follows a **client-server architecture**, with a responsive HTML
 - Passwords stored as hashed values (never plain text)
 - JWT authentication with configurable secret key and expiry
 - Swagger UI available for API exploration and testing during development
+
+</details>
+
+---
+
+## 🧠 OOP Principles
+
+Pawfect Pal's C# backend is built around the four core principles of Object-Oriented Programming. Click each principle to expand it.
+
+<details>
+<summary>🔒 <b>Encapsulation</b></summary>
+<br>
+
+Encapsulation restricts direct access to an object's data by bundling it with the methods that operate on it, exposing only what is necessary through controlled interfaces.
+
+In Pawfect Pal, model classes like `User`, `Pet`, and `Appointment` expose data only through `{ get; set; }` properties. Service and repository dependencies are hidden behind `private readonly` fields, and sensitive business rules such as password validation and pet data checks are locked inside `private` methods — preventing them from being bypassed externally.
+
+```csharp
+public class User
+{
+    public int UserId { get; set; }
+    public string UserName { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public string Role { get; set; } = "User";
+}
+
+public class AuthService : BaseService
+{
+    private readonly UserRepository _userRepository; // hidden dependency
+
+    private void ValidatePassword(string password) // locked business rule
+    {
+        if (password.Length < 8)
+            throw new Exception("Must be at least 8 characters.");
+        if (!password.Any(char.IsDigit))
+            throw new Exception("Password must contain at least one number.");
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>🧬 <b>Inheritance</b></summary>
+<br>
+
+Inheritance allows a class to acquire the properties and behaviors of a parent class, promoting code reuse and establishing a logical hierarchy between related classes.
+
+A service hierarchy is built around the abstract `BaseService` class, from which `PetService`, `AuthService`, and `PetCareService` inherit shared behavior. At the framework level, all controllers inherit from ASP.NET Core's `ControllerBase` for built-in HTTP response helpers, and `NotificationBackgroundService` inherits from `BackgroundService` to implement its 60-second polling loop.
+
+```csharp
+public abstract class BaseService         // parent
+{
+    public virtual void Validate() { }
+}
+
+public class PetService : BaseService { }     // child
+public class AuthService : BaseService { }    // child
+public class PetCareService : BaseService { } // child
+
+// Framework inheritance
+public class PetController : ControllerBase { }
+
+public class NotificationBackgroundService : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            CheckConfirmedAppointments(repo);
+            await Task.Delay(_interval, stoppingToken);
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>🔀 <b>Polymorphism</b></summary>
+<br>
+
+Polymorphism allows the same method name to behave differently depending on context — either through overloading (same name, different parameters) or overriding (redefining a parent method in a child class).
+
+`DatabaseHelper` overloads `ExecuteQuery`, `ExecuteNonQuery`, and `ExecuteScalar` using optional parameters, allowing the same method to be called with or without SQL parameters. `NotificationBackgroundService` overrides `ExecuteAsync` from the abstract `BackgroundService`, replacing the stub with custom notification logic. `BaseService` also declares `Validate()` as `virtual`, opening an overridable hook for child classes.
+
+```csharp
+// Method overloading via optional parameters
+public DataTable ExecuteQuery(string query, List<MySqlParameter>? parameters = null) { }
+public int ExecuteNonQuery(string query, List<MySqlParameter>? parameters = null) { }
+public object? ExecuteScalar(string query, List<MySqlParameter>? parameters = null) { }
+
+// Method overriding
+public abstract class BaseService
+{
+    public virtual void Validate() { } // overridable hook
+}
+
+// Overrides the abstract stub from BackgroundService
+protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+{
+    while (!stoppingToken.IsCancellationRequested) { ... }
+}
+```
+
+</details>
+
+<details>
+<summary>🧩 <b>Abstraction</b></summary>
+<br>
+
+Abstraction simplifies complexity by exposing only the essential details of a system while hiding the underlying implementation, allowing components to interact through clean, high-level interfaces.
+
+`BaseService` defines a `Validate()` contract without revealing its implementation. `DatabaseHelper` completely hides all MySQL connection and adapter logic, so repositories interact with the database through simple method calls. Controllers communicate only with service classes and have no awareness of repositories or SQL — forming a clean three-layer architecture: **Controller → Service → Repository**.
+
+```csharp
+public abstract class BaseService
+{
+    public virtual void Validate() { } // contract, not implementation
+}
+
+// Repositories call clean methods — no MySqlConnection, no adapter
+public List<Pet> GetAllPets()
+{
+    DataTable dt = _db.ExecuteQuery("SELECT * FROM pet");
+    // ...
+}
+
+// Controllers only see services — no SQL, no repository logic
+public IActionResult AddPet([FromBody] Pet pet)
+{
+    _petService.AddPet(pet);
+    return Ok(new { message = "Pet added successfully." });
+}
+```
 
 </details>
 
