@@ -111,11 +111,13 @@ async function loadAppointments() {
             </span>
             <span>${servicesText}</span>
             <span>${formattedDate}</span>
-            <span class="status-badge ${(app.appStatus || "pending").toLowerCase()}">${app.appStatus || "Pending"}</span>
+            <span class="status-badge ${((app.requestStatus || app.appStatus || "pending").toLowerCase())}">
+                ${app.requestStatus || app.appStatus || "Pending"}
+            </span>
             `;
 
             card.setAttribute("data-pet", (app.petName || "").toLowerCase());
-            card.setAttribute("data-status", (app.appStatus || "").toLowerCase());
+            card.setAttribute("data-status", (app.requestStatus || app.appStatus || "").toLowerCase());
             card.setAttribute("data-species", species.toLowerCase());
             
             let serviceIds = app.serviceIds || [];
@@ -432,13 +434,13 @@ function filterAppointments() {
                 return cardServicesArray.includes(id);
             });
 
-        if (matchesSearch && matchesSpecies && matchesStatus && matchesService) {
-            card.style.display = "grid";
-        } else {
-            card.style.display = "none";
-        }
+        card.style.display =
+            matchesSearch && matchesSpecies && matchesStatus && matchesService
+                ? "grid"
+                : "none";
     });
 }
+
 
 /* clear all filters logic */
 function clearAllFilters() {

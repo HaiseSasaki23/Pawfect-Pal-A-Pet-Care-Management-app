@@ -9,7 +9,7 @@ async function loadRequests() {
         const response = await fetch(
             "http://localhost:5182/api/Appointment",
             {
-                headers: getAuthHeaderOnly()
+                headers: getAuthHeaders()
             }
         );
 
@@ -54,31 +54,39 @@ async function loadRequests() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+    const admin = requireLogin("Admin");
+    if (!admin) return;
+
+    const userNameEl = document.getElementById("UserName");
+    if (userNameEl) {
+        userNameEl.textContent =
+            admin.userName ||
+            localStorage.getItem("userName") ||
+            "Admin";
+    }
+
     if (typeof initImageLoading === "function") initImageLoading();
-    
-    const userNameEl = document.getElementById('UserName');
-    if (userNameEl) userNameEl.textContent = localStorage.getItem("userName") || "Admin User";
 
-    const pendingEl  = document.getElementById('pendingCount');
-    const approvedEl = document.getElementById('approvedCount');
-    const declineEl  = document.getElementById('declineCount');
-    const totalEl    = document.getElementById('totalRequestCount');
+    const pendingEl  = document.getElementById("pendingCount");
+    const approvedEl = document.getElementById("approvedCount");
+    const declineEl  = document.getElementById("declineCount");
+    const totalEl    = document.getElementById("totalRequestCount");
 
-    if (pendingEl)  pendingEl.textContent  = 0;
+    if (pendingEl)  pendingEl.textContent = 0;
     if (approvedEl) approvedEl.textContent = 0;
-    if (declineEl)  declineEl.textContent  = 0;
-    if (totalEl)    totalEl.textContent    = 0;
+    if (declineEl)  declineEl.textContent = 0;
+    if (totalEl)    totalEl.textContent = 0;
 
-    loadRequests();
+    const searchInput = document.getElementById("requestSearchInput");
+    const ownerFilter = document.getElementById("ownerFilter");
+    const typeFilter  = document.getElementById("requestTypeFilter");
 
-    const searchInput = document.getElementById('requestSearchInput');
-    const ownerFilter = document.getElementById('ownerFilter');
-    const typeFilter  = document.getElementById('requestTypeFilter');
+    if (searchInput) searchInput.addEventListener("keyup", applyAllFilters);
+    if (ownerFilter) ownerFilter.addEventListener("change", applyAllFilters);
+    if (typeFilter) typeFilter.addEventListener("change", applyAllFilters);
 
-    if (searchInput) searchInput.addEventListener('keyup', applyAllFilters);
-    if (ownerFilter) ownerFilter.addEventListener('change', applyAllFilters);
-    if (typeFilter)  typeFilter.addEventListener('change', applyAllFilters);
+    await loadRequests();
 });
 
 
@@ -615,7 +623,7 @@ function loadRequestData(dataArray) {
             <td style="padding: 15px;">
                 <span style="${labelStyle} padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 700;">${typeLabel}</span>
             </td>
-            <td style="padding: 15px;">${item.Name} (${item.Breed || item.Species})</td>
+            <td style="padding: 15px;">${item.Name} (${item.Species || "Unknown"})</td>
             <td style="padding: 15px;">${(item.ownerFName + ' ' + item.ownerLName).trim()}</td>
             <td style="padding: 15px;">${item.Date || 'N/A'}</td>
             <td style="padding: 15px;">
@@ -625,12 +633,12 @@ function loadRequestData(dataArray) {
                             <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
                         </svg>
                     </button>
-                    <button class="action-btn-circle btn-approve" onclick="confirmAction('approve', ${item.PetID}, '${item.Name}')" title="Approve">
+                    <button class="action-btn-circle btn-approve" onclick="confirmAction('approve', ${item.AppointmentID}, '${item.Name}')" title="Approve">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="20 6 9 17 4 12"/>
                         </svg>
                     </button>
-                    <button class="action-btn-circle btn-decline" onclick="confirmAction('decline', ${item.PetID}, '${item.Name}')" title="Decline">
+                    <button class="action-btn-circle btn-decline" onclick="confirmAction('decline', ${item.AppointmentID}, '${item.Name}')" title="Decline">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
                         </svg>

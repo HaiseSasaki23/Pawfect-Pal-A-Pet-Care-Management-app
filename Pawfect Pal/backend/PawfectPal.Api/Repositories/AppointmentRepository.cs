@@ -189,13 +189,16 @@ namespace PawfectPal.Api.Repositories
                     a.PetID,
                     p.Name AS PetName,
                     a.AppointmentDate,
+                    a.RequestStatus,
                     a.AppStatus,
                     GROUP_CONCAT(s.ServiceType) AS Services,
                     GROUP_CONCAT(s.ServiceID) AS ServiceIds
                 FROM appointment a
                 JOIN pet p ON a.PetID = p.PetID
-                LEFT JOIN appointment_services aps ON a.AppointmentID = aps.AppointmentID
-                LEFT JOIN service s ON aps.ServiceID = s.ServiceID
+                LEFT JOIN appointment_services aps 
+                    ON a.AppointmentID = aps.AppointmentID
+                LEFT JOIN service s 
+                    ON aps.ServiceID = s.ServiceID
                 WHERE a.UserID = @UserID
                 GROUP BY a.AppointmentID
                 ORDER BY a.AppointmentDate DESC
@@ -218,7 +221,11 @@ namespace PawfectPal.Api.Repositories
                     petId = Convert.ToInt32(row["PetID"]),
                     petName = row["PetName"].ToString(),
                     appointmentDate = Convert.ToDateTime(row["AppointmentDate"]),
+
+                    requestStatus = row["RequestStatus"].ToString(),
+
                     appStatus = row["AppStatus"].ToString(),
+
                     services = row["Services"]?.ToString() ?? "",
                     serviceIds = row["ServiceIds"]?.ToString() ?? ""
                 });
