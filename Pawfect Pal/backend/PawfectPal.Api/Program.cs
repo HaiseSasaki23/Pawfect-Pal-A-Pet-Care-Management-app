@@ -80,6 +80,7 @@ builder.Services.AddScoped<ServiceRepository>();
 builder.Services.AddScoped<BillingRepository>();
 builder.Services.AddScoped<PaymentRepository>();
 builder.Services.AddScoped<NotificationRepository>();
+builder.Services.AddScoped<UserRepository>();
 
 builder.Services.AddHostedService<NotificationBackgroundService>();
 
@@ -94,6 +95,7 @@ builder.Services.AddScoped<BillingService>();
 builder.Services.AddScoped<PaymentService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<UserService>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
