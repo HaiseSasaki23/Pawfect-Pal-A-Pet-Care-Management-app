@@ -20,41 +20,17 @@ function getAuthHeaders() {
 }
 
 async function loadRequests() {
-    console.log("Loading requests...");
-    
-    const tableBody = document.getElementById('requestTableBody');
-    if (tableBody) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="5" style="padding: 50px; text-align: center;">
-                    <div>🔄 Loading requests...</div>
-                </td>
-            </tr>
-        `;
-    }
-    
     try {
-        const url = "http://localhost:5182/api/Appointment";
-        console.log("Fetching from:", url);
-        
-        const headers = getAuthHeaders();
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: headers
-        });
-        
-        console.log("Response status:", response.status);
-        
-        if (response.status === 401 || response.status === 403) {
-            console.error("Authentication failed!");
-            showErrorInTable("Authentication failed. Please log in again.", true);
-            return;
-        }
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
+
+        const response = await fetch(
+            "http://localhost:5182/api/Appointment",
+            {
+                headers: getAuthHeaderOnly()
+            }
+        );
+
+        if (handleUnauthorized(response)) return;
+
         const data = await response.json();
         console.log("Data received:", data);
         
@@ -134,138 +110,45 @@ async function loadRequests() {
     }
 }
 
-function showErrorInTable(message, isAuthError = false) {
-    const tableBody = document.getElementById('requestTableBody');
-    if (tableBody) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="5" style="padding: 50px; text-align: center;">
-                    <div style="color: #ff5e78; margin-bottom: 10px;">❌ Error: ${message}</div>
-                    ${isAuthError ? 
-                        '<button onclick="window.location.href=\'../login/login.html\'" style="padding: 10px 20px; background: var(--primary-purple); color: white; border: none; border-radius: 8px; cursor: pointer;">Go to Login</button>' :
-                        '<button onclick="loadRequests()" style="padding: 10px 20px; background: var(--primary-purple); color: white; border: none; border-radius: 8px; cursor: pointer;">Retry</button>'
-                    }
-                </td>
-            </tr>
-        `;
-    }
-}
+document.addEventListener("DOMContentLoaded", () => {
+    if (typeof initImageLoading === "function") initImageLoading();
+    
+    const userNameEl = document.getElementById('UserName');
+    if (userNameEl) userNameEl.textContent = localStorage.getItem("userName") || "Admin User";
 
-function showEmptyState() {
-    const tableBody = document.getElementById('requestTableBody');
-    if (tableBody) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="5" style="padding: 80px 0; text-align: center;">
-                    <div class="empty-state-container">
-                        <img src="img-request/no-requests.png" alt="No Requests" 
-                             style="width: 280px; height: 280px; object-fit: contain; margin-bottom: 25px; opacity: 0.7;">
-                        <h3 style="color: var(--primary-purple); font-size: 22px; margin-bottom: 10px;">No Pending Requests</h3>
-                        <p style="color: var(--text-muted); font-size: 15px;">There are no pending appointment requests at this time.</p>
-                    </div>
-                </td>
-            </tr>
-        `;
-    }
-}
+    const pendingEl  = document.getElementById('pendingCount');
+    const approvedEl = document.getElementById('approvedCount');
+    const declineEl  = document.getElementById('declineCount');
+    const totalEl    = document.getElementById('totalRequestCount');
 
-function loadRequestData(dataArray) {
-    const tableBody = document.getElementById('requestTableBody');
-    if (!tableBody) return;
-    
-    tableBody.innerHTML = '';
-    
-    dataArray.forEach(item => {
-        const row = document.createElement('tr');
-        row.style.borderBottom = "1px solid #f9f9f9";
-        row.setAttribute('ownerFName', item.ownerFName || "");
-        row.setAttribute('ownerLName', item.ownerLName || "");
-        
-        const ownerFullName = item.ownerDisplay || 
-            (item.ownerFName + ' ' + item.ownerLName).trim() || 
-            `User ${item.userId || 'Unknown'}`;
-        
-        const escapedName = item.Name.replace(/'/g, "\\'");
-        
-        let displayDate = item.Date || 'N/A';
-        if (item.appointmentDate) {
-            try {
-                const date = new Date(item.appointmentDate);
-                displayDate = date.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                });
-            } catch(e) {
-                displayDate = item.Date || 'N/A';
-            }
-        }
-        
-        row.innerHTML = `
-            <td style="padding: 15px;">
-                <span style="background: #e8f5ee; color: #2d6a4f; padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 700;">APPT</span>
-            </td>
-            <td style="padding: 15px; font-weight: 500;">
-                ${item.Name}
-            </td>
-            <td style="padding: 15px;">
-                <strong>${ownerFullName}</strong>
-            </td>
-            <td style="padding: 15px;">${displayDate}</td>
-            <td style="padding: 15px;">
-                <div style="display: flex; gap: 8px;">
-                    <button class="action-btn-circle btn-details" onclick='viewPetDetails(${JSON.stringify(item)}, "appt")' title="View Details" style="cursor: pointer; background: #ede3ff; border: none; border-radius: 8px; padding: 8px;">
-                        📋
-                    </button>
-                    <button class="action-btn-circle btn-approve" onclick="confirmAction('approve', ${item.AppointmentID}, '${escapedName}')" title="Approve" style="cursor: pointer; background: #e8f5ee; border: none; border-radius: 8px; padding: 8px;">
-                        ✅
-                    </button>
-                    <button class="action-btn-circle btn-decline" onclick="confirmAction('decline', ${item.AppointmentID}, '${escapedName}')" title="Decline" style="cursor: pointer; background: #fff0f3; border: none; border-radius: 8px; padding: 8px;">
-                        ❌
-                    </button>
-                </div>
-            </td>
-        `;
-        tableBody.appendChild(row);
-    });
-    
-    console.log(`Rendered ${dataArray.length} requests`);
-}
+    if (pendingEl)  pendingEl.textContent  = 0;
+    if (approvedEl) approvedEl.textContent = 0;
+    if (declineEl)  declineEl.textContent  = 0;
+    if (totalEl)    totalEl.textContent    = 0;
 
-function updateRequestSummary() {
-    const pending = requests.length;
-    const approved = 0;
-    const declined = 0;
-    
-    const pendingEl = document.getElementById("pendingCount");
-    const approvedEl = document.getElementById("approvedCount");
-    const declineEl = document.getElementById("declineCount");
-    const totalEl = document.getElementById("totalRequestCount");
-    
-    if (pendingEl) pendingEl.textContent = pending;
-    if (approvedEl) approvedEl.textContent = approved;
-    if (declineEl) declineEl.textContent = declined;
-    if (totalEl) totalEl.textContent = requests.length;
-}
+    loadRequests();
 
-function populateOwnerFilter(dataArray) {
+    const searchInput = document.getElementById('requestSearchInput');
     const ownerFilter = document.getElementById('ownerFilter');
-    if (!ownerFilter) return;
-    
-    const uniqueOwners = [...new Set(dataArray.map(item => 
-        item.ownerDisplay || (item.ownerFName + ' ' + item.ownerLName).trim() || `User ${item.userId}`
-    ))];
-    
-    ownerFilter.innerHTML = '<option value="">All Owners</option>';
-    uniqueOwners.sort().forEach(owner => {
-        if (owner && owner.trim()) {
-            const option = document.createElement('option');
-            option.value = owner;
-            option.textContent = owner;
-            ownerFilter.appendChild(option);
-        }
-    });
+    const typeFilter  = document.getElementById('requestTypeFilter');
+
+    if (searchInput) searchInput.addEventListener('keyup', applyAllFilters);
+    if (ownerFilter) ownerFilter.addEventListener('change', applyAllFilters);
+    if (typeFilter)  typeFilter.addEventListener('change', applyAllFilters);
+});
+
+
+function closeModal(modalId) { 
+    document.getElementById(modalId).style.display = 'none'; 
 }
+
+let activeScale = 1;
+let translateX = 0;
+let translateY = 0;
+let isDragging = false;
+let activePetData = null;
+let currentViewType = 'pet';
+
 
 function applyAllFilters() {
     const searchVal = (document.getElementById('requestSearchInput')?.value || "").toLowerCase().trim();
@@ -502,15 +385,71 @@ document.addEventListener("DOMContentLoaded", () => {
         showErrorInTable("Please log in to view requests", true);
         return;
     }
-    
-    const userNameEl = document.getElementById('UserName');
-    if (userNameEl) {
-        userNameEl.textContent = localStorage.getItem("userName") || "Admin User";
-    }
-    
-    loadRequests();
-    
-    const searchInput = document.getElementById('requestSearchInput');
+
+    dataArray.forEach(item => {
+        const row = document.createElement('tr');
+        row.style.borderBottom = "1px solid #f9f9f9";
+        row.setAttribute('ownerFName', item.ownerFName || "");
+        row.setAttribute('ownerLName', item.ownerLName || "");
+
+        // determines if it is a pet registration or appointment
+        const typeLabel = item.type === 'pet' ? 'PET' : 'APPT';
+        const labelStyle = item.type === 'pet' ? 
+            'background: #f0e6ff; color: #9d72d6;' : 
+            'background: #e8f5ee; color: #2d6a4f;';
+
+        row.innerHTML = `
+            <td style="padding: 15px;">
+                <span style="${labelStyle} padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 700;">${typeLabel}</span>
+            </td>
+            <td style="padding: 15px;">${item.Name} (${item.Breed || item.Species})</td>
+            <td style="padding: 15px;">${(item.ownerFName + ' ' + item.ownerLName).trim()}</td>
+            <td style="padding: 15px;">${item.Date || 'N/A'}</td>
+            <td style="padding: 15px;">
+                <div style="display: flex; gap: 8px;">
+                    <button class="action-btn-circle btn-details" onclick='viewPetDetails(${JSON.stringify(item)}, "${item.type}")' title="View Details">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                        </svg>
+                    </button>
+                    <button class="action-btn-circle btn-approve" onclick="confirmAction('approve', ${item.PetID}, '${item.Name}')" title="Approve">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                    </button>
+                    <button class="action-btn-circle btn-decline" onclick="confirmAction('decline', ${item.PetID}, '${item.Name}')" title="Decline">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                        </svg>
+                    </button>
+                </div>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+function updateRequestSummary() {
+
+    const pending = requests.filter(
+        r => r.requestStatus === "Pending"
+    ).length;
+
+    const approved = requests.filter(
+        r => r.requestStatus === "Confirmed"
+    ).length;
+
+    const declined = requests.filter(
+        r => r.requestStatus === "Denied"
+    ).length;
+
+    document.getElementById("pendingCount").textContent = pending;
+    document.getElementById("approvedCount").textContent = approved;
+    document.getElementById("declineCount").textContent = declined;
+    document.getElementById("totalRequestCount").textContent = requests.length;
+}
+
+function populateOwnerFilter(dataArray) {
     const ownerFilter = document.getElementById('ownerFilter');
     const typeFilter = document.getElementById('requestTypeFilter');
     

@@ -32,6 +32,23 @@ namespace PawfectPal.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin/history")]
+        public IActionResult GetAllPayments()
+        {
+            try
+            {
+                return Ok(_paymentService.GetAllPayments());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
+            }
+        }
+
         [HttpPost]
         public IActionResult CreatePayment([FromBody] Payment payment)
         {

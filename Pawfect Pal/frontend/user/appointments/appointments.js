@@ -91,18 +91,18 @@ async function loadAppointments() {
             const displayStatus = getDisplayStatus(app);
 
             card.innerHTML = `
-                <span></span>
-                <span>
-                    ${app.petName}<br>
-                    <small style="color: #999; font-size: 11px;">${species}</small>
-                </span>
-                <span>${servicesText}</span>
-                <span>${formattedDate}</span>
-                <span class="status-badge ${displayStatus.className}">${displayStatus.text}</span>
+            <span></span>
+            <span>
+                ${app.petName}<br>
+                <small style="color: #999; font-size: 11px;">${species}</small>
+            </span>
+            <span>${servicesText}</span>
+            <span>${formattedDate}</span>
+            <span class="status-badge ${(app.appStatus || "pending").toLowerCase()}">${app.appStatus || "Pending"}</span>
             `;
 
             card.setAttribute("data-pet", (app.petName || "").toLowerCase());
-            card.setAttribute("data-status", displayStatus.className);
+            card.setAttribute("data-status", (app.appStatus || "").toLowerCase());
             card.setAttribute("data-species", species.toLowerCase());
             
             let serviceIds = app.serviceIds || [];
@@ -410,13 +410,13 @@ function filterAppointments() {
                 return cardServicesArray.includes(id);
             });
 
-        if (matchesSearch && matchesSpecies && matchesStatus && matchesService) {
-            card.style.display = "grid";
-        } else {
-            card.style.display = "none";
-        }
+        card.style.display =
+            matchesSearch && matchesSpecies && matchesStatus && matchesService
+                ? "grid"
+                : "none";
     });
 }
+
 
 function clearAllFilters() {
     const searchInput = document.getElementById("appSearch");

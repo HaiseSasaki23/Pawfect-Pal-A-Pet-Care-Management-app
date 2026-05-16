@@ -203,6 +203,107 @@ body {
     color: var(--primary-purple); 
 }
 
+.service-chip-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.service-badge,
+.status-badge,
+.payment-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.svc-checkup {
+    background: #d9fbe8;
+    color: #00a651;
+}
+
+.svc-vaccination {
+    background: #ede7ff;
+    color: #7c3cff;
+}
+
+.svc-deworming {
+    background: #ffe7c7;
+    color: #ff5c00;
+}
+
+.svc-grooming {
+    background: #ffe1f0;
+    color: #e91e75;
+}
+
+.status-checkedin {
+    background: #d9fbe8;
+    color: #00a651;
+}
+
+.status-inprogress {
+    background: #ffe4bd;
+    color: #ff5c00;
+}
+
+.status-completed {
+    background: #d8e8ff;
+    color: #2563eb;
+}
+
+.status-pending {
+    background: #f1f2f5;
+    color: #64748b;
+}
+
+.payment-paid {
+    background: #d9fbe8;
+    color: #00a651;
+}
+
+.payment-partial {
+    background: #fff8b8;
+    color: #c58b00;
+}
+
+.payment-unpaid {
+    background: #ffd9d9;
+    color: #ff2f4f;
+}
+
+.balance-small {
+    margin-top: 5px;
+    font-size: 13px;
+    color: #8b8b8b;
+    font-weight: 700;
+}
+
+.icon-action {
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 17px;
+    margin-right: 8px;
+}
+
+.view-action {
+    background: #efe7ff;
+    color: #9d72d6;
+}
+
+.delete-action {
+    background: #ffecef;
+    color: #ff5e78;
+}
+
 .modal-form {
     display: flex;
     flex-direction: column;
@@ -824,3 +925,4 @@ body {
 .gcash-fields.visible {
     display: flex;
 }
+

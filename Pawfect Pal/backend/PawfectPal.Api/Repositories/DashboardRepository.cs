@@ -80,14 +80,31 @@ namespace PawfectPal.Api.Repositories
                     new("@UserID", userId)
                 }));
         }
+
         public decimal GetDueBalanceByUserId(int userId)
         {
             string query = @"
-                SELECT COALESCE(SUM(b.TotalAmount), 0)
+                SELECT COALESCE(SUM(
+                    b.TotalAmount - COALESCE(py.TotalPaid, 0)
+                ), 0)
+
                 FROM billing b
-                INNER JOIN appointment a ON b.AppointmentID = a.AppointmentID
+
+                INNER JOIN appointment a
+                    ON b.AppointmentID = a.AppointmentID
+
+                LEFT JOIN
+                (
+                    SELECT
+                        BillingID,
+                        SUM(PaidAmount) AS TotalPaid
+                    FROM payment
+                    GROUP BY BillingID
+                ) py
+                    ON b.BillingID = py.BillingID
+
                 WHERE a.UserID = @UserID
-                AND b.BillingStatus = 'Unpaid'
+                AND b.BillingStatus != 'Paid'
             ";
 
             var parameters = new List<MySqlParameter>
@@ -103,9 +120,23 @@ namespace PawfectPal.Api.Repositories
         public decimal GetTotalDueBalance()
         {
             string query = @"
-                SELECT COALESCE(SUM(TotalAmount), 0)
-                FROM billing
-                WHERE BillingStatus = 'Unpaid'
+                SELECT COALESCE(SUM(
+                    b.TotalAmount - COALESCE(py.TotalPaid, 0)
+                ), 0)
+
+                FROM billing b
+
+                LEFT JOIN
+                (
+                    SELECT
+                        BillingID,
+                        SUM(PaidAmount) AS TotalPaid
+                    FROM payment
+                    GROUP BY BillingID
+                ) py
+                    ON b.BillingID = py.BillingID
+
+                WHERE b.BillingStatus != 'Paid'
             ";
 
             object? result = _db.ExecuteScalar(query);

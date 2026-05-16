@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PawfectPal.Api.Models;
-using PawfectPal.Api.Services;
+using PawfectPal.Api.Repositories;
 
 namespace PawfectPal.Api.Controllers
 {
@@ -10,11 +10,11 @@ namespace PawfectPal.Api.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly UserService _userService;
+        private readonly UserRepository _userRepository;
 
-        public UserController(UserService userService)
+        public UserController(UserRepository userRepository)
         {
-            _userService = userService;
+            _userRepository = userRepository;
         }
 
         [HttpGet]
@@ -22,12 +22,18 @@ namespace PawfectPal.Api.Controllers
         {
             try
             {
-                var users = _userService.GetAllUsers();
+                var users = _userRepository.GetAllUsers();
+
                 return Ok(users);
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(
+                    new
+                    {
+                        message = ex.Message
+                    }
+                );
             }
         }
 
@@ -36,43 +42,90 @@ namespace PawfectPal.Api.Controllers
         {
             try
             {
-                var user = _userService.GetUserById(id);
+                var user =
+                    _userRepository.GetUserById(id);
+
                 if (user == null)
-                    return NotFound(new { message = "User not found." });
+                {
+                    return NotFound(
+                        new
+                        {
+                            message =
+                                "User not found."
+                        }
+                    );
+                }
+
                 return Ok(user);
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(
+                    new
+                    {
+                        message = ex.Message
+                    }
+                );
             }
         }
 
         [HttpPost]
-        public IActionResult CreateUser([FromBody] User user)
+        public IActionResult CreateUser(
+            [FromBody] User user)
         {
             try
             {
-                _userService.CreateUser(user);
-                return Ok(new { message = "User created successfully.", userId = user.UserId });
+                _userRepository.CreateUser(user);
+
+                return Ok(
+                    new
+                    {
+                        message =
+                            "User created successfully.",
+
+                        userId =
+                            user.UserId
+                    }
+                );
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(
+                    new
+                    {
+                        message = ex.Message
+                    }
+                );
             }
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateUser(int id, [FromBody] User user)
+        public IActionResult UpdateUser(
+            int id,
+            [FromBody] User user)
         {
             try
             {
                 user.UserId = id;
-                _userService.UpdateUser(user);
-                return Ok(new { message = "User updated successfully." });
+
+                _userRepository.UpdateUser(user);
+
+                return Ok(
+                    new
+                    {
+                        message =
+                            "User updated successfully."
+                    }
+                );
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(
+                    new
+                    {
+                        message = ex.Message
+                    }
+                );
             }
         }
 
@@ -81,12 +134,24 @@ namespace PawfectPal.Api.Controllers
         {
             try
             {
-                _userService.DeleteUser(id);
-                return Ok(new { message = "User deleted successfully." });
+                _userRepository.DeleteUser(id);
+
+                return Ok(
+                    new
+                    {
+                        message =
+                            "User deleted successfully."
+                    }
+                );
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(
+                    new
+                    {
+                        message = ex.Message
+                    }
+                );
             }
         }
     }

@@ -91,6 +91,20 @@ namespace PawfectPal.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpPost("admin")]
+        public IActionResult AdminCreate([FromBody] Appointment appointment)
+        {
+            try
+            {
+                _service.Create(appointment);
+                return Ok(new { message = "Appointment created successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
         [HttpPut("{id}")]
         public IActionResult Update(int id, [FromBody] Appointment appointment)
         {

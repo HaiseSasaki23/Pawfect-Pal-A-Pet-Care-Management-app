@@ -415,14 +415,52 @@ body.page-blurred .sidebar {
 }
 
 .status-badge {
-    padding-top: 8px;
-    padding-bottom: 8px;
-    padding-left: 16px;
-    padding-right: 16px;
-    border-radius: 10px;
-    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 170px;
+    height: 46px;
+    padding: 0 20px;
+    border-radius: 14px;
+    font-size: 14px;
     font-weight: 700;
     text-align: center;
+    white-space: nowrap;
+}
+
+.status-badge.pending {
+    background-color: #fff4e5;
+    color: #ffab00;
+}
+
+.status-badge.confirmed {
+    background-color: #e8f5ee;
+    color: #2d9c5f;
+}
+
+.status-badge.denied {
+    background-color: #ffe5e9;
+    color: #ff5e78;
+}
+
+.status-badge.checked-in {
+    background-color: #e5f6fd;
+    color: #03a9f4;
+}
+
+.status-badge.in-progress {
+    background-color: #f3e5f5;
+    color: #9c27b0;
+}
+
+.status-badge.completed {
+    background-color: #e8f5e9;
+    color: #4caf50;
+}
+
+.status-badge.no-show {
+    background-color: #eeeeee;
+    color: #777;
 }
 
 .upcoming {

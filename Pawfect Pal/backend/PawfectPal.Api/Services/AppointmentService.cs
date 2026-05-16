@@ -8,17 +8,19 @@ namespace PawfectPal.Api.Services
         private readonly AppointmentRepository _repo;
         private readonly PetRepository _petRepo;
         private readonly BillingRepository _billingRepository;
-
+        private readonly PaymentRepository _paymentRepository; 
         public AppointmentService(
             AppointmentRepository repo,
             PetRepository petRepo,
-            BillingRepository billingRepository)
+            BillingRepository billingRepository,
+            PaymentRepository paymentRepository
+            )
         {
             _repo = repo;
             _petRepo = petRepo;
             _billingRepository = billingRepository;
+            _paymentRepository = paymentRepository;
         }
-
         public List<dynamic> GetAll()
         {
             return _repo.GetAllAppointments();
@@ -60,6 +62,15 @@ namespace PawfectPal.Api.Services
             {
                 _repo.InsertAppointmentService(appointmentId, serviceId);
             }
+            if (appointment.PaymentMode == "Cash")
+            {
+                decimal total = _repo.CalculateAppointmentTotal(appointmentId);
+
+                if (total > 0)
+                {
+                    _billingRepository.CreateBilling(appointmentId, total);
+                }
+            }          
         }
 
         public void Update(Appointment appointment)
