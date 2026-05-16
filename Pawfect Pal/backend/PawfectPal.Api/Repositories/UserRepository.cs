@@ -14,22 +14,127 @@ namespace PawfectPal.Api.Repositories
             _db = db;
         }
 
-        public void InsertUser(User user)
+        public List<User> GetAllUsers()
         {
             string query = @"
-                INSERT INTO user (UserName, OwnerFName, OwnerLName, ContactNum, Email, Address, Password, Role)
-                VALUES (@UserName, @OwnerFName, @OwnerLName, @ContactNum, @Email, @Address, @Password, @Role)";
+                SELECT *
+                FROM user
+                WHERE Role = 'User'
+                ORDER BY OwnerFName ASC, OwnerLName ASC
+            ";
+
+            DataTable dt = _db.ExecuteQuery(query);
+
+            return dt.Rows
+                .Cast<DataRow>()
+                .Select(MapUser)
+                .ToList();
+        }
+
+        public User? GetUserById(int id)
+        {
+            string query = @"
+                SELECT *
+                FROM user
+                WHERE UserID = @UserID
+                LIMIT 1
+            ";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@UserID", id)
+            };
+
+            DataTable dt = _db.ExecuteQuery(query, parameters);
+
+            if (dt.Rows.Count == 0)
+                return null;
+
+            return MapUser(dt.Rows[0]);
+        }
+
+        public void CreateUser(User user)
+        {
+            string query = @"
+                INSERT INTO user
+                (
+                    UserName,
+                    OwnerFName,
+                    OwnerLName,
+                    Email,
+                    Password,
+                    Role,
+                    ContactNum,
+                    Address
+                )
+                VALUES
+                (
+                    @UserName,
+                    @OwnerFName,
+                    @OwnerLName,
+                    @Email,
+                    @Password,
+                    @Role,
+                    @ContactNum,
+                    @Address
+                )
+            ";
 
             var parameters = new List<MySqlParameter>
             {
                 new("@UserName", user.UserName),
                 new("@OwnerFName", user.OwnerFName),
                 new("@OwnerLName", user.OwnerLName),
-                new("@ContactNum", user.ContactNum),
                 new("@Email", user.Email),
-                new("@Address", user.Address),
                 new("@Password", user.Password),
-                new("@Role", user.Role)
+                new("@Role", string.IsNullOrWhiteSpace(user.Role) ? "User" : user.Role),
+                new("@ContactNum", string.IsNullOrWhiteSpace(user.ContactNum) ? DBNull.Value : user.ContactNum),
+                new("@Address", string.IsNullOrWhiteSpace(user.Address) ? DBNull.Value : user.Address)
+            };
+
+            _db.ExecuteNonQuery(query, parameters);
+        }
+
+        public void UpdateUser(User user)
+        {
+            string query = @"
+                UPDATE user
+                SET
+                    UserName = @UserName,
+                    OwnerFName = @OwnerFName,
+                    OwnerLName = @OwnerLName,
+                    Email = @Email,
+                    ContactNum = @ContactNum,
+                    Address = @Address,
+                    Role = @Role
+                WHERE UserID = @UserID
+            ";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@UserID", user.UserId),
+                new("@UserName", user.UserName),
+                new("@OwnerFName", user.OwnerFName),
+                new("@OwnerLName", user.OwnerLName),
+                new("@Email", user.Email),
+                new("@ContactNum", string.IsNullOrWhiteSpace(user.ContactNum) ? DBNull.Value : user.ContactNum),
+                new("@Address", string.IsNullOrWhiteSpace(user.Address) ? DBNull.Value : user.Address),
+                new("@Role", string.IsNullOrWhiteSpace(user.Role) ? "User" : user.Role)
+            };
+
+            _db.ExecuteNonQuery(query, parameters);
+        }
+
+        public void DeleteUser(int id)
+        {
+            string query = @"
+                DELETE FROM user
+                WHERE UserID = @UserID
+            ";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@UserID", id)
             };
 
             _db.ExecuteNonQuery(query, parameters);
@@ -40,8 +145,7 @@ namespace PawfectPal.Api.Repositories
             string query = @"
                 SELECT *
                 FROM user
-                WHERE UserName = @Login
-                OR Email = @Login
+                WHERE UserName = @Login OR Email = @Login
                 LIMIT 1
             ";
 
@@ -55,24 +159,17 @@ namespace PawfectPal.Api.Repositories
             if (dt.Rows.Count == 0)
                 return null;
 
-            DataRow row = dt.Rows[0];
+            return MapUser(dt.Rows[0]);
+        }
 
-            return new User
-            {
-                UserId = Convert.ToInt32(row["UserID"]),
-                UserName = row["UserName"].ToString() ?? string.Empty,
-                OwnerFName = row["OwnerFName"].ToString() ?? string.Empty,
-                OwnerLName = row["OwnerLName"].ToString() ?? string.Empty,
-                ContactNum = row["ContactNum"].ToString() ?? string.Empty,
-                Email = row["Email"].ToString() ?? string.Empty,
-                Address = row["Address"].ToString() ?? string.Empty,
-                Password = row["Password"].ToString() ?? string.Empty,
-                Role = row["Role"].ToString() ?? "User"
-            };
-        }        
         public User? GetUserByEmail(string email)
         {
-            string query = "SELECT * FROM user WHERE Email = @Email LIMIT 1";
+            string query = @"
+                SELECT *
+                FROM user
+                WHERE Email = @Email
+                LIMIT 1
+            ";
 
             var parameters = new List<MySqlParameter>
             {
@@ -84,48 +181,109 @@ namespace PawfectPal.Api.Repositories
             if (dt.Rows.Count == 0)
                 return null;
 
-            DataRow row = dt.Rows[0];
-
-            return new User
-            {
-                UserId = Convert.ToInt32(row["UserID"]),
-                UserName = row["UserName"].ToString() ?? string.Empty,
-                OwnerFName = row["OwnerFName"].ToString() ?? string.Empty,
-                OwnerLName = row["OwnerLName"].ToString() ?? string.Empty,
-                ContactNum = row["ContactNum"].ToString() ?? string.Empty,
-                Email = row["Email"].ToString() ?? string.Empty,
-                Address = row["Address"].ToString() ?? string.Empty,
-                Password = row["Password"].ToString() ?? string.Empty,
-                Role = row["Role"].ToString() ?? "User"
-            };
+            return MapUser(dt.Rows[0]);
         }
 
-        public void SavePasswordResetToken(int userId, string token, DateTime expiryDate)
+        public bool UserNameExists(string userName)
         {
             string query = @"
-                INSERT INTO password_reset_token (UserID, Token, ExpiryDate, IsUsed)
-                VALUES (@UserID, @Token, @ExpiryDate, FALSE)";
+                SELECT COUNT(*)
+                FROM user
+                WHERE UserName = @UserName
+            ";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@UserName", userName)
+            };
+
+            object? result = _db.ExecuteScalar(query, parameters);
+
+            return Convert.ToInt32(result) > 0;
+        }
+
+        public void InsertUser(User user)
+        {
+            CreateUser(user);
+        }
+
+        public void UpdatePassword(int userId, string hashedPassword)
+        {
+            string query = @"
+                UPDATE user
+                SET Password = @Password
+                WHERE UserID = @UserID
+            ";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@Password", hashedPassword),
+                new("@UserID", userId)
+            };
+
+            _db.ExecuteNonQuery(query, parameters);
+        }
+
+        public void SavePasswordResetToken(int userId, string hashedToken, DateTime expiryDate)
+        {
+            string query = @"
+                INSERT INTO password_reset_token
+                (
+                    UserID,
+                    Token,
+                    ExpiryDate,
+                    IsUsed,
+                    CreatedAt
+                )
+                VALUES
+                (
+                    @UserID,
+                    @Token,
+                    @ExpiryDate,
+                    0,
+                    NOW()
+                )
+            ";
 
             var parameters = new List<MySqlParameter>
             {
                 new("@UserID", userId),
-                new("@Token", token),
+                new("@Token", hashedToken),
                 new("@ExpiryDate", expiryDate)
             };
 
             _db.ExecuteNonQuery(query, parameters);
         }
 
-        public PasswordResetToken? GetPasswordResetToken(string token)
+        public void ExpireOldResetTokens(int userId)
         {
             string query = @"
-                SELECT * FROM password_reset_token
-                WHERE Token = @Token
-                LIMIT 1";
+                UPDATE password_reset_token
+                SET IsUsed = 1
+                WHERE UserID = @UserID
+                AND IsUsed = 0
+            ";
 
             var parameters = new List<MySqlParameter>
             {
-                new("@Token", token)
+                new("@UserID", userId)
+            };
+
+            _db.ExecuteNonQuery(query, parameters);
+        }
+
+        public PasswordResetToken? GetPasswordResetToken(string hashedToken)
+        {
+            string query = @"
+                SELECT *
+                FROM password_reset_token
+                WHERE Token = @Token
+                LIMIT 1
+            ";
+
+            var parameters = new List<MySqlParameter>
+            {
+                new("@Token", hashedToken)
             };
 
             DataTable dt = _db.ExecuteQuery(query, parameters);
@@ -139,126 +297,42 @@ namespace PawfectPal.Api.Repositories
             {
                 ResetTokenId = Convert.ToInt32(row["ResetTokenID"]),
                 UserId = Convert.ToInt32(row["UserID"]),
-                Token = row["Token"].ToString() ?? string.Empty,
+                Token = row["Token"].ToString() ?? "",
                 ExpiryDate = Convert.ToDateTime(row["ExpiryDate"]),
                 IsUsed = Convert.ToBoolean(row["IsUsed"])
             };
         }
 
-        public void UpdatePassword(int userId, string hashedPassword)
-        {
-            string query = @"
-                UPDATE user
-                SET Password = @Password
-                WHERE UserID = @UserID";
-
-            var parameters = new List<MySqlParameter>
-            {
-                new("@UserID", userId),
-                new("@Password", hashedPassword)
-            };
-
-            _db.ExecuteNonQuery(query, parameters);
-        }
-
-        public void ExpireOldResetTokens(int userId)
+        public void MarkResetTokenAsUsed(string hashedToken)
         {
             string query = @"
                 UPDATE password_reset_token
-                SET IsUsed = TRUE
-                WHERE UserID = @UserID AND IsUsed = FALSE";
+                SET IsUsed = 1
+                WHERE Token = @Token
+            ";
 
             var parameters = new List<MySqlParameter>
             {
-                new("@UserID", userId)
-            };
-
-            _db.ExecuteNonQuery(query, parameters);
-        }
-        public void MarkResetTokenAsUsed(string token)
-        {
-            string query = @"
-                UPDATE password_reset_token
-                SET IsUsed = TRUE
-                WHERE Token = @Token";
-
-            var parameters = new List<MySqlParameter>
-            {
-                new("@Token", token)
+                new("@Token", hashedToken)
             };
 
             _db.ExecuteNonQuery(query, parameters);
         }
 
-        public User? GetUserByUserName(string userName)
+        private User MapUser(DataRow row)
         {
-            string query = "SELECT * FROM user WHERE UserName = @UserName LIMIT 1";
-
-            var parameters = new List<MySqlParameter>
-            {
-                new("@UserName", userName)
-            };
-
-            DataTable dt = _db.ExecuteQuery(query, parameters);
-
-            if (dt.Rows.Count == 0)
-                return null;
-
-            DataRow row = dt.Rows[0];
-
             return new User
             {
                 UserId = Convert.ToInt32(row["UserID"]),
-                UserName = row["UserName"].ToString() ?? string.Empty,
-                OwnerFName = row["OwnerFName"].ToString() ?? string.Empty,
-                OwnerLName = row["OwnerLName"].ToString() ?? string.Empty,
-                ContactNum = row["ContactNum"].ToString() ?? string.Empty,
-                Email = row["Email"].ToString() ?? string.Empty,
-                Address = row["Address"].ToString() ?? string.Empty,
-                Password = row["Password"].ToString() ?? string.Empty,
-                Role = row["Role"].ToString() ?? "User"
+                UserName = row["UserName"]?.ToString() ?? "",
+                OwnerFName = row["OwnerFName"]?.ToString() ?? "",
+                OwnerLName = row["OwnerLName"]?.ToString() ?? "",
+                Email = row["Email"]?.ToString() ?? "",
+                Password = row["Password"]?.ToString() ?? "",
+                Role = row["Role"]?.ToString() ?? "User",
+                ContactNum = row["ContactNum"]?.ToString(),
+                Address = row["Address"]?.ToString()
             };
         }
-
-        public bool UserNameExists(string userName)
-        {
-            string query = "SELECT COUNT(*) FROM user WHERE UserName = @UserName";
-
-            var parameters = new List<MySqlParameter>
-            {
-                new("@UserName", userName)
-            };
-
-            object? result = _db.ExecuteScalar(query, parameters);
-            return Convert.ToInt32(result) > 0;
-        }
-
-        public List<User> GetAllUsers()
-        {
-            string query = @"
-                SELECT *
-                FROM user
-                WHERE Role = 'User'
-                ORDER BY OwnerFName ASC
-            ";
-
-            DataTable dt = _db.ExecuteQuery(query);
-
-            List<User> users = new();
-
-            foreach (DataRow row in dt.Rows)
-            {
-                users.Add(new User
-                {
-                    UserId = Convert.ToInt32(row["UserID"]),
-                    OwnerFName = row["OwnerFName"].ToString() ?? "",
-                    OwnerLName = row["OwnerLName"].ToString() ?? "",
-                    Email = row["Email"].ToString() ?? "",
-                    UserName = row["UserName"].ToString() ?? ""
-                });
-            }
-
-            return users;
-        }        
     }
 }

@@ -87,7 +87,10 @@ builder.Services.AddScoped<HealthRecordRepository>();
 builder.Services.AddScoped<ServiceRepository>();
 builder.Services.AddScoped<BillingRepository>();
 builder.Services.AddScoped<PaymentRepository>();
+builder.Services.AddScoped<NotificationRepository>();
+builder.Services.AddScoped<UserRepository>();
 
+builder.Services.AddHostedService<NotificationBackgroundService>();
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PetService>();
@@ -99,6 +102,8 @@ builder.Services.AddScoped<PetCareService>();
 builder.Services.AddScoped<BillingService>();
 builder.Services.AddScoped<PaymentService>();
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<UserService>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
@@ -113,5 +118,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var appointmentService = scope.ServiceProvider.GetRequiredService<AppointmentService>();
+
+}
 
 app.Run();

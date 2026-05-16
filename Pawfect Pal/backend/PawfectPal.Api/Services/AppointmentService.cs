@@ -44,12 +44,8 @@ namespace PawfectPal.Api.Services
             if (appointment.PetId <= 0)
                 throw new Exception("Pet ID is required.");
 
-            if (!_petRepo.PetBelongsToUser(
-                    appointment.PetId,
-                    appointment.UserId))
-            {
+            if (!_petRepo.PetBelongsToUser(appointment.PetId, appointment.UserId))
                 throw new Exception("Pet does not belong to this user.");
-            }                
 
             if (appointment.AppointmentDate < DateTime.Now)
                 throw new Exception("Cannot book past date.");
@@ -58,7 +54,7 @@ namespace PawfectPal.Api.Services
                 throw new Exception("Select at least one service.");
 
             appointment.RequestStatus = "Pending";
-            appointment.AppStatus = "Pending";
+            appointment.AppStatus     = "Pending";
 
             int appointmentId = _repo.InsertAppointment(appointment);
 
@@ -66,41 +62,14 @@ namespace PawfectPal.Api.Services
             {
                 _repo.InsertAppointmentService(appointmentId, serviceId);
             }
-            if (appointment.PaymentMode == "Cash") {
-                decimal total =
-                    _repo.CalculateAppointmentTotal(
-                        appointmentId
-                    );
+            if (appointment.PaymentMode == "Cash")
+            {
+                decimal total = _repo.CalculateAppointmentTotal(appointmentId);
 
                 if (total > 0)
                 {
-                    _billingRepository.CreateBilling(appointmentId,total);
+                    _billingRepository.CreateBilling(appointmentId, total);
                 }
-                if (appointment.AmountPaid > 0)
-                {
-                    var billing =_billingRepository.GetBillingByAppointmentId(appointmentId);
-
-                    if (billing != null)
-                    {
-                        var payment = new Payment
-                        {
-                            BillingId = billing.BillingId,
-                            PaymentMethod = appointment.PaymentMethod,
-
-                            ReferenceNumber = appointment.GcashRef,
-
-                            PaidAmount = appointment.AmountPaid
-                        };
-
-                        _paymentRepository.InsertPayment(payment);
-
-                        decimal remaining = total - appointment.AmountPaid;
-
-                        string status = remaining <= 0 ? "Paid" : "Partial";
-
-                        _billingRepository.UpdateBillingBalances(billing.BillingId,appointment.AmountPaid,remaining,status);
-                    }                              
-                }                
             }          
         }
 
@@ -111,30 +80,17 @@ namespace PawfectPal.Api.Services
 
         public void UpdateRequestStatus(int id, string status)
         {
-            var validRequestStatuses = new[]
-            {
-                "Pending",
-                "Confirmed",
-                "Denied"
-            };
-
-            if (!validRequestStatuses.Contains(status))
+            var valid = new[] { "Pending", "Confirmed", "Denied" };
+            if (!valid.Contains(status))
                 throw new Exception("Invalid request status.");
 
             _repo.UpdateRequestStatus(id, status);
         }
+
         public void UpdateAppStatus(int id, string status)
         {
-            var validAppStatuses = new[]
-            {
-                "Pending",
-                "Checked-In",
-                "In-Progress",
-                "Completed",
-                "No-Show"
-            };
-
-            if (!validAppStatuses.Contains(status))
+            var valid = new[] { "Pending", "Checked-In", "In-Progress", "Completed", "No-Show" };
+            if (!valid.Contains(status))
                 throw new Exception("Invalid appointment status.");
 
             _repo.UpdateAppStatus(id, status);

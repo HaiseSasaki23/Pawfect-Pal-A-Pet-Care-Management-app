@@ -28,7 +28,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // update default emoji when species changes
     document.getElementById("petSpecies")?.addEventListener("change", updateDefaultEmoji);
 });
 
@@ -76,7 +75,6 @@ async function loadDashboardSummary(userId, role) {
             }, 120);
         }
 
-        // check appointments for overdue (2 weeks after completed)
         if (data.appointments) {
             markOverdueBalances(data.appointments);
         }
@@ -86,7 +84,6 @@ async function loadDashboardSummary(userId, role) {
     }
 }
 
-// mark due balance red if appointment was completed >2 weeks ago and unpaid
 function markOverdueBalances(appointments) {
     const now = new Date();
     const twoWeeksMs = 14 * 24 * 60 * 60 * 1000;
@@ -437,7 +434,6 @@ function toggleGcashDetails() {
     if (gcashBox) gcashBox.style.display = payment === 'GCash' ? 'block' : 'none';
 }
 
-// service price calculation
 document.querySelectorAll('input[name="services"]').forEach(cb => {
     cb.addEventListener('change', () => {
         let total = 0;

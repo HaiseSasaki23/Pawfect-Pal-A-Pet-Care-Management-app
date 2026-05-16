@@ -14,10 +14,8 @@ function initAppointmentPage() {
     loadAppointments();
 }
 
-/* API Configuration*/
 const API_BASE_URL = 'http://localhost:5182';
 
-/* date limit */
 function setMinimumBookingDate() {
     const today = new Date().toISOString().split("T")[0];
     const bookingDate = document.getElementById("bookingDate");
@@ -27,7 +25,6 @@ function setMinimumBookingDate() {
     }
 }
 
-/* Load pets */
 async function loadAppointments() {
     const userId = localStorage.getItem("userId");
     if (!userId) return;
@@ -39,21 +36,16 @@ async function loadAppointments() {
 
         if (handleUnauthorized(response)) return;    
 
-        const text = await response.text();
-
-        console.log("RAW RESPONSE:", text);
-
-        let data = [];
-
-        if (text) {
-            data = JSON.parse(text);
-        }        
+        const data = await response.json();
+        console.log("All appointments:", data);
 
         const container = document.getElementById("appointmentList");
+        if (!container) return;
+        
         container.innerHTML = "";
 
         if (!data.length) {
-            container.innerHTML = "<p>No appointments found.</p>";
+            container.innerHTML = "<p style='text-align:center; padding:40px;'>No appointments found.</p>";
             return;
         }
 
@@ -61,17 +53,11 @@ async function loadAppointments() {
             headers: getAuthHeaders()
         });
 
-        if (handleUnauthorized(petsResponse)) return;
-
-        const petsText = await petsResponse.text();
-
-        console.log("PETS RESPONSE:", petsText);
-
         let pets = [];
-
-        if (petsText) {
-            pets = JSON.parse(petsText);
+        if (petsResponse.ok) {
+            pets = await petsResponse.json();
         }
+        
         const petSpeciesMap = {};
         pets.forEach(pet => {
             const petId = pet.id || pet.petId;
@@ -82,7 +68,6 @@ async function loadAppointments() {
             const card = document.createElement("div");
             card.className = "appointment-card";
 
-          
             const species = petSpeciesMap[app.petId] || "Unknown";
 
             let servicesText = app.services || "N/A";
@@ -103,6 +88,8 @@ async function loadAppointments() {
             });
             const formattedDate = `${datePart} | ${timePart}`;
 
+            const displayStatus = getDisplayStatus(app);
+
             card.innerHTML = `
             <span></span>
             <span>
@@ -111,13 +98,11 @@ async function loadAppointments() {
             </span>
             <span>${servicesText}</span>
             <span>${formattedDate}</span>
-            <span class="status-badge ${((app.requestStatus || app.appStatus || "pending").toLowerCase())}">
-                ${app.requestStatus || app.appStatus || "Pending"}
-            </span>
+            <span class="status-badge ${(app.appStatus || "pending").toLowerCase()}">${app.appStatus || "Pending"}</span>
             `;
 
             card.setAttribute("data-pet", (app.petName || "").toLowerCase());
-            card.setAttribute("data-status", (app.requestStatus || app.appStatus || "").toLowerCase());
+            card.setAttribute("data-status", (app.appStatus || "").toLowerCase());
             card.setAttribute("data-species", species.toLowerCase());
             
             let serviceIds = app.serviceIds || [];
@@ -220,40 +205,35 @@ async function loadServices() {
     }
 }
 
-/* modal control functions */
 function openModal(id) {
     const modal = document.getElementById(id);
-
     if (modal) {
         modal.style.display = "flex";
     }
+    document.body.classList.add("page-blurred");
 }
 
 function closeModal(id) {
     const modal = document.getElementById(id);
-
     if (modal) {
         modal.style.display = "none";
 
         const form = modal.querySelector("form");
-
         if (form) {
             form.reset();
-
             const gcashBox = document.getElementById("gcashDetails");
-            if (gcashBox) {
-                gcashBox.style.display = "none";
-            }
-
+            if (gcashBox) gcashBox.style.display = "none";
             const totalText = document.getElementById("bookingTotal");
-            if (totalText) {
-                totalText.innerText = "₱0";
-            }
+            if (totalText) totalText.innerText = "₱0";
         }
+    }
+
+    const anyOpen = document.querySelector('.modal-overlay[style*="flex"]');
+    if (!anyOpen) {
+        document.body.classList.remove("page-blurred");
     }
 }
 
-/* service calculation logic */
 function setupServiceCalculation() {
     const serviceCheckboxes = document.querySelectorAll('input[name="services"]');
 
@@ -277,7 +257,6 @@ function setupServiceCalculation() {
     });
 }
 
-/* gcash detail toggle */
 function toggleGcashDetails() {
     const paymentSelect = document.getElementById("bookingPayment");
     const gcashBox = document.getElementById("gcashDetails");
@@ -291,7 +270,6 @@ function toggleGcashDetails() {
     }
 }
 
-/* form submission logic with backend connection */
 function setupBookAppointmentForm() {
     const bookAppointmentForm = document.getElementById("bookAppointmentForm");
 
@@ -379,7 +357,6 @@ function setupBookAppointmentForm() {
     });
 }
 
-/* success message  */
 function showSuccessMessage() {
     const successToast = document.getElementById("successToast");
 
@@ -396,7 +373,6 @@ function hideSuccessMessage() {
     }
 }
 
-/* unified filter logic */
 function filterAppointments() {
     const searchInput = document.getElementById("appSearch");
     const speciesFilter = document.getElementById("speciesFilter");
@@ -442,7 +418,6 @@ function filterAppointments() {
 }
 
 
-/* clear all filters logic */
 function clearAllFilters() {
     const searchInput = document.getElementById("appSearch");
     const speciesFilter = document.getElementById("speciesFilter");
@@ -467,7 +442,6 @@ function clearAllFilters() {
     filterAppointments();
 }
 
-/* service dropdown */
 function toggleServiceDropdown() {
     const container = document.querySelector(".dropdown-check-container");
 
@@ -476,7 +450,6 @@ function toggleServiceDropdown() {
     }
 }
 
-/* close dropdown and modal when clicking outside */
 function setupOutsideClickClose() {
     window.addEventListener("click", function (e) {
         const container = document.querySelector(".dropdown-check-container");
@@ -492,3 +465,59 @@ function setupOutsideClickClose() {
     });
 }
 
+function triggerLogout() {
+    openModal('confirmModal');
+}
+
+function getDisplayStatus(appointment) {
+    console.log("Appointment:", appointment.appointmentId, "RequestStatus:", appointment.requestStatus, "AppStatus:", appointment.appStatus);
+    
+    if (appointment.requestStatus === "Pending") {
+        return {
+            text: "Pending Approval",
+            className: "pending-approval"
+        };
+    }
+
+    if (appointment.requestStatus === "Denied") {
+        return {
+            text: "Rejected",
+            className: "rejected"
+        };
+    }
+
+    if (appointment.requestStatus === "Confirmed") {
+        if (appointment.appStatus === "Pending" || appointment.appStatus === "Checked-In") {
+            return {
+                text: "Upcoming",
+                className: "upcoming"
+            };
+        }
+        
+        if (appointment.appStatus === "In-Progress") {
+            return {
+                text: "Ongoing",
+                className: "ongoing"
+            };
+        }
+        
+        if (appointment.appStatus === "Completed") {
+            return {
+                text: "Completed",
+                className: "completed"
+            };
+        }
+        
+        if (appointment.appStatus === "No-Show") {
+            return {
+                text: "Cancelled",
+                className: "cancelled"
+            };
+        }
+    }
+
+    return {
+        text: appointment.appStatus || "Pending",
+        className: "pending"
+    };
+}
